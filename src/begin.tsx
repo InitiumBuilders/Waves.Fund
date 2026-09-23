@@ -26,7 +26,7 @@ function WaveAnatomy() {
   const [selected, setSelected] = useState(0);
   const uid = useId().replaceAll(":", "");
   return <div className="begin-anatomy">
-    <div className="begin-orbit" aria-label="Explore the three essentials of a Wave">
+    <div className="begin-orbit" aria-label="Explore the three essentials of a Wave" data-mind="ocean">
       <svg className="begin-branches" viewBox="0 0 500 310" aria-hidden="true">
         <defs><linearGradient id={uid} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#77f5ff" /><stop offset="1" stopColor="#4d81ff" /></linearGradient></defs>
         <ellipse cx="250" cy="122" rx="103" ry="80" />
@@ -95,7 +95,7 @@ export default function Begin() {
   }, [hash]);
   return <div className="begin-page">
     <section className="begin-hero" aria-labelledby="begin-title">
-      <div className="begin-hero-copy"><p className="begin-label"><span className="begin-live-dot" />Waves.Fund · The next chapter</p><h1 id="begin-title">Now,<br />Let’s Begin.</h1><p className="begin-hero-mantra">Raise Money In A New Way.</p><p className="begin-lead">Your mission. Your story. Your Wave.<br />A custom building block, built with a real Wave Guide—and made to grow with you.</p><div className="begin-actions"><a href="#wave-one" className="begin-primary">Meet Wave One <ArrowRight size={19} /></a><a href="#praxis" className="begin-text-link">Read the full praxis <ArrowDown size={17} /></a></div></div>
+      <div className="begin-hero-copy"><p className="begin-label"><span className="begin-live-dot" />Waves.Fund · The next chapter</p><h1 id="begin-title">Now,<br />Let’s Begin.</h1><p className="begin-hero-mantra">Raise Money In A New Way.</p><p className="begin-lead">Your mission. Your story. Your Wave.<br />A custom building block, built with a real Wave Guide—and made to grow with you.</p><div className="begin-actions"><a href="#wave-one" className="glow-button">Meet Wave One <ArrowRight size={19} /></a><a href="#praxis" className="begin-text-link">Read the full praxis <ArrowDown size={17} /></a></div></div>
       <WaveAnatomy />
       <div className="begin-hero-foot"><span>A story people can understand.</span><span>A next move people can help.</span><span>An outcome people can see.</span></div>
     </section>
@@ -117,6 +117,6 @@ export default function Begin() {
     <WaveExamples />
     <div className="begin-bridge"><img src="/media/home-nucleus.webp" alt="" loading="lazy" /><p>Trust People.<br />And They Become Trustworthy.</p></div>
     <DocumentReader />
-    <section className="begin-closing"><WaveMark /><h2>What’s Your Vision?</h2><p>Built For All Lifelong Learners And Leaders Building Waves For Humanity</p><div className="begin-actions"><Link to="/apply" className="begin-primary">Build Your Wave <ArrowRight size={18} /></Link><a href={DOWNLOAD} download="WAVE-PRAXIS.md" className="begin-text-link"><Check size={17} />Keep the praxis</a></div></section>
+    <section className="begin-closing"><WaveMark /><h2>What’s Your Vision?</h2><p>Built For All Lifelong Learners And Leaders Building Waves For Humanity</p><div className="begin-actions"><Link to="/apply" className="glow-button">Build Your Wave <ArrowRight size={18} /></Link><a href={DOWNLOAD} download="WAVE-PRAXIS.md" className="begin-text-link"><Check size={17} />Keep the praxis</a></div></section>
   </div>;
 }

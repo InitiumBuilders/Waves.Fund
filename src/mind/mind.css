@@ -1,0 +1,23 @@
+/* The Wave Mind: one canvas under the whole app. Content always sits above it. */
+.mind-canvas,
+.mind-fallback {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+.mind-canvas { display: block; }
+.mind-fallback img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.32;
+}
+/* An anchor only marks where the people gather. It reserves space and holds nothing. */
+.mind-anchor {
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+}

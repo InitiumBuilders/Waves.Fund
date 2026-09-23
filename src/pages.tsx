@@ -67,17 +67,23 @@ export function Learn() {
     <div className="document-page">
       <Intro
         eyebrow="THE WAVES FUND"
+        mind="layers"
         title={
           <>
-            Students Funding
+            Raise Capital
             <br />
-            <span>The Future.</span>
+            In A Whole
+            <br />
+            New Way.
+            <br />
+            <span>Raise Waves.</span>
           </>
         }
       >
-        <p>An Impact Fund. Funding For Futures.</p>
+        <p>Welcome To The Frontier Of Funding</p>
+        <p className="hashtags">#BuildDifferent #BuildAWave</p>
       </Intro>
-      <section className="mantra-panel panel">
+      <section className="mantra-panel panel" data-mind="bond">
         <p className="eyebrow">OUR CORE MANTRA, MISSION & PRACTICE</p>
         <h2>
           Trust People.
@@ -197,7 +203,7 @@ export function Learn() {
           </li>
         </ol>
       </section>
-      <section className="section" id="roadmap">
+      <section className="section" id="roadmap" data-mind="timeline">
         <div className="section-heading">
           <p className="eyebrow">VISION & ROADMAP</p>
           <h2>
@@ -234,6 +240,27 @@ export function Learn() {
               and consent-based project connections with <Semble />.
             </p>
           </article>
+        </div>
+      </section>
+      <section className="section questions" aria-labelledby="questions-title">
+        <div className="section-heading">
+          <p className="eyebrow">QUESTIONS</p>
+          <h2 id="questions-title">Clear Answers.</h2>
+        </div>
+        <div className="question-list">
+          {[
+            ["Is funding guaranteed?", "No. Published projects are in community review. Funding is not guaranteed. Student support signals inform the team’s work; they are not grant awards."],
+            ["Who counts as a student?", "You are a student if you are learning in a school, in a program, or independently. Participation begins with self-identification."],
+            ["What happens after I apply?", "Your application is saved privately for the Waves.Fund team to review. Keep your receipt to check its status. A submission is not an award or acceptance."],
+            ["Is my information public?", "Your name and email are never published. A project appears publicly only with your permission and after team review."],
+            ["What does a Wave Guide cost?", "Scope, fees, timing, and ownership are agreed with your Guide before work begins."],
+            ["Where does a donation go?", "Financial donations go to The Green Reef Foundation through its Benevity donation page. The Foundation and its giving provider handle your donation and receipt."],
+          ].map(([q, a]) => (
+            <details key={q}>
+              <summary>{q}</summary>
+              <p>{a}</p>
+            </details>
+          ))}
         </div>
       </section>
       <section className="section closing">
@@ -365,6 +392,7 @@ export function Team() {
     <div className="document-page">
       <Intro
         eyebrow="GUIDE / TEAM"
+        mind="orbit"
         title={
           <>
             The Waves
@@ -440,6 +468,7 @@ export function Partners() {
     <div className="document-page">
       <Intro
         eyebrow="GUIDE / PARTNERS"
+        mind="hubs"
         title={
           <>
             Moving
@@ -486,11 +515,12 @@ export function GreenReef() {
         />
         <Intro
           eyebrow="WAVES.FUND × THE GREEN REEF FOUNDATION"
+          mind="ocean"
           title={
             <>
-              Funding For
+              Welcome To The
               <br />
-              <span>Futures.</span>
+              <span>Frontier Of Funding</span>
             </>
           }
         >
@@ -668,6 +698,7 @@ export function SemblePartner() {
         />
         <Intro
           eyebrow="A FOUNDING PARTNER"
+          mind="gather"
           title={
             <>
               The App To
@@ -783,6 +814,7 @@ export function OceanPartner() {
         />
         <Intro
           eyebrow="MISSION PARTNER"
+          mind="ocean"
           title={
             <>
               Experience.
@@ -850,6 +882,7 @@ export function Proposal() {
       </Link>
       <Intro
         eyebrow="FOR THE GREEN REEF TEAM · DISCUSSION DRAFT"
+        mind="ocean"
         title={
           <>
             Students Funding
@@ -870,6 +903,16 @@ export function Proposal() {
           funds raised, awarded grants, or an executed agreement.
         </p>
       </div>
+      <section className="section first-decisions" aria-labelledby="decisions-title">
+        <p className="eyebrow">THE FIRST CONVERSATION</p>
+        <h2 id="decisions-title">Five Decisions To Begin.</h2>
+        <ol className="decision-list">
+          {["The budget", "The receiving entity", "The project criteria", "Data responsibilities", "The decision makers"].map((d, i) => (
+            <li key={d}><span>0{i + 1}</span>{d}</li>
+          ))}
+        </ol>
+        <p className="fine-print">These are the first fifteen days of the proposed cadence below. Agreeing them starts the pilot.</p>
+      </section>
       <section className="section two-columns">
         <div>
           <p className="eyebrow">THE PROPOSAL</p>
@@ -1038,7 +1081,7 @@ export function Proposal() {
           </table>
         </div>
       </section>
-      <section className="section">
+      <section className="section" data-mind="timeline">
         <p className="eyebrow">PROPOSED 90-DAY CADENCE</p>
         <ol className="timeline">
           {[

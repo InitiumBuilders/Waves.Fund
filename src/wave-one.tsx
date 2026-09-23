@@ -83,8 +83,8 @@ export function WaveOne() {
         <div className="wave-one-content" id={panelId}>
           {view === "Story" && (
             <div className="wave-one-view" key="story">
-              <p className="wave-one-kicker">AN IMPACT FUND. FUNDING FOR FUTURES.</p>
-              <h4>Students Funding<br />The Future</h4>
+              <p className="wave-one-kicker">WELCOME TO THE FRONTIER OF FUNDING</p>
+              <h4>Raise Capital<br />In A Whole New Way.</h4>
               <p>A student driven home for lifelong learners and leaders building Waves for humanity. Bring your vision. Find the people to help it move.</p>
               <div className="wave-one-guide">
                 <span className="wave-one-guide-mark" aria-hidden="true">AJD</span>
@@ -121,7 +121,7 @@ export function WaveOne() {
         </div>
 
         <div className="wave-one-actions">
-          <button className="wave-one-pass" type="button" onClick={passWave} disabled={sharing}><Share2 size={17} aria-hidden="true" />{sharing ? "Opening Share…" : "Pass This Wave"}<ArrowRight size={17} aria-hidden="true" /></button>
+          <button className="glow-button wave-one-pass" type="button" onClick={passWave} disabled={sharing}><Share2 size={17} aria-hidden="true" />{sharing ? "Opening Share…" : "Pass This Wave"}<ArrowRight size={17} aria-hidden="true" /></button>
           <a className="wave-one-contact" href="mailto:August@Outlier.Systems?subject=Build%20My%20Wave">Work With August <ArrowUpRight size={15} aria-hidden="true" /></a>
         </div>
         <div className="wave-one-share-state" role="status" aria-live="polite">{shareMessage}</div>

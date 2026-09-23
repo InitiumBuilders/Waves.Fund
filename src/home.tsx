@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { WaveMark } from './ui';
 import { useStateStore } from './state';
+import { mindWave } from './mind/WaveMind';
 const INTRO_TEXT='Start Building Your Wave Right Here, Right Now. Set It Into Motion.';
 type IntroPhase='waiting'|'typing'|'flow'|'idle';
 export function Home() {
@@ -18,6 +19,7 @@ export function Home() {
   const introPhaseRef=useRef<IntroPhase>(motion?'waiting':'idle');
   const transferMode=useRef<'intro'|'submit'|null>(null);
   const done=useRef(false);
+  const lastSpark=useRef(0);
   const clearIntroTimer=()=>{if(introTimer.current){clearTimeout(introTimer.current);introTimer.current=null}};
   const finishIntro=()=>{
     clearIntroTimer();
@@ -39,6 +41,7 @@ export function Home() {
       if(!active||introPhaseRef.current!=='typing')return;
       if(document.hidden){introTimer.current=setTimeout(typeNext,180);return;}
       index+=1;setIntroText(INTRO_TEXT.slice(0,index));
+      if(index%7===0&&video.current)mindWave(video.current.parentElement!,0.22);
       if(index<INTRO_TEXT.length){introTimer.current=setTimeout(typeNext,48);return;}
       introTimer.current=setTimeout(()=>{
         if(!active||introPhaseRef.current!=='typing')return;
@@ -76,6 +79,8 @@ export function Home() {
     if(introPhaseRef.current!=='idle'){finishIntro();return;}
     if(!state.vision.trim()||sending)return;
     setSending(true);
+    const gate=event.currentTarget.querySelector('.surge-button');
+    if(gate)mindWave(gate,1.5);
     if(!motion){continueToApplication();return;}
     const v=video.current;
     transferMode.current='submit';
@@ -88,7 +93,7 @@ export function Home() {
       <WaveMark className="identity-mark" />
       <div className="identity-name" aria-label="Waves.Fund">Waves<span>.Fund</span></div>
       <p className="identity-mantra">Trust People.<br/>And They Become Trustworthy.</p>
-      <div className="desktop-invitation"><p>An Impact Fund. Funding For Futures.</p><Link to="/learn">Students Funding The Future <ArrowRight size={17}/></Link></div>
+      <div className="desktop-invitation"><p className="home-tagline">Raise Capital In A Whole New Way.<br/><span>Raise Waves.</span></p><Link to="/learn">Welcome To The Frontier Of Funding <ArrowRight size={17}/></Link><p className="home-tags">#BuildDifferent #BuildAWave</p></div>
     </div>
     <div className="vision-workspace">
       <div className="vision-heading"><h1>What’s Your <span>Vision?</span></h1><p>What Are You Rising Towards?</p></div>
@@ -96,15 +101,15 @@ export function Home() {
         <video className="surge-transfer" ref={video} src="/media/surge-transfer.mp4" preload="auto" muted playsInline aria-hidden="true" onPlaying={()=>{if(transferMode.current)setPlaying(true)}} onEnded={transferEnded} onError={()=>{if(transferMode.current==='intro')finishIntro()}}/>
         <div className="vision-input">
           <label htmlFor="vision" className="sr-only">What’s Your Vision?</label>
-          <textarea id="vision" required maxLength={500} value={introPhase==='idle'?state.vision:introText} placeholder={introPhase==='idle'?'Type your vision here...':''} readOnly={sending||introPhase!=='idle'} onFocus={()=>{if(introPhaseRef.current!=='idle')finishIntro();setFocus(true);if(motion&&video.current?.readyState===0)video.current.load()}} onBlur={()=>setFocus(false)} onChange={e=>{if(introPhaseRef.current==='idle')setState(s=>({...s,vision:e.target.value}))}}/>
+          <textarea id="vision" required maxLength={500} value={introPhase==='idle'?state.vision:introText} placeholder={introPhase==='idle'?'Type your vision here...':''} readOnly={sending||introPhase!=='idle'} onFocus={()=>{if(introPhaseRef.current!=='idle')finishIntro();setFocus(true);if(motion&&video.current?.readyState===0)video.current.load()}} onBlur={()=>setFocus(false)} onChange={e=>{if(introPhaseRef.current==='idle'){setState(s=>({...s,vision:e.target.value}));const now=performance.now();if(now-lastSpark.current>120){lastSpark.current=now;mindWave(e.currentTarget,0.3)}}}}/>
           <span className="character-count">{introPhase==='idle'?state.vision.length:introText.length}/500</span>
         </div>
         <svg className="energy-channel" viewBox="0 0 950 650" aria-hidden="true"><defs><linearGradient id="channel" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#43dfff" stopOpacity="0"/><stop offset=".5" stopColor="#64edff"/><stop offset="1" stopColor="#9981ff" stopOpacity=".2"/></linearGradient></defs><path className="channel-branch" d="M55 338 C55 385 350 380 446 454 C467 469 475 483 475 506 M895 338 C895 385 600 380 504 454 C483 469 475 483 475 506"/><path className="channel-core" d="M475 357 C475 430 475 453 475 506"/><circle className="channel-node" cx="475" cy="450" r="5"/></svg>
         <button className="surge-button" type="submit" disabled={sending}><span>Surge</span><ArrowRight size={24}/></button>
       </form>
       <div className="vision-after"><span role="status">{sending?'Your vision is moving forward.':''}</span>{sending?<button onClick={continueToApplication}>Continue <ArrowRight size={14}/></button>:introPhase!=='idle'&&<button type="button" onClick={finishIntro}>Skip intro <ArrowRight size={14}/></button>}</div>
-      <div className="home-neuron" aria-hidden="true"><video ref={nucleus} src="/media/home-nucleus.mp4" poster="/media/home-nucleus.webp" muted playsInline loop preload="metadata"/></div>
-      <Link className="home-learn-link" to="/learn">Students Funding The Future <ArrowRight size={15}/></Link>
+      <div className="home-neuron" aria-hidden="true" data-mind="vision"><video ref={nucleus} src="/media/home-nucleus.mp4" poster="/media/home-nucleus.webp" muted playsInline loop preload="metadata"/></div>
+      <Link className="home-learn-link" to="/learn">Raise Capital In A Whole New Way. Raise Waves. <ArrowRight size={15}/></Link>
     </div>
     <p className="swipe-hint"><ChevronLeft size={12}/> Swipe To Explore <ChevronRight size={12}/></p>
   </div>;

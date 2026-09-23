@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
@@ -11,6 +11,7 @@ import { api, download, getReceipts, saveReceipt, WAVE_TYPES, waveTypeLabel } fr
 import type { Receipt, WaveType } from "./community";
 import { ActionButton, ButtonLink, CONTACT, Intro } from "./ui";
 import { useStateStore } from "./state";
+import { MindAnchor, mindGrow, mindWave } from "./mind/WaveMind";
 export function Application({
   kind = "project",
 }: {
@@ -47,8 +48,15 @@ export function Application({
     id: crypto.randomUUID(),
     receipt: crypto.randomUUID() + crypto.randomUUID(),
   }));
+  // The Seed grows as each required part of the application is filled in.
+  useEffect(() => {
+    const parts = [name.trim(), /^\S+@\S+\.\S+$/.test(email.trim()), title.trim(), description.trim().length >= 20, kind === "project" ? milestone.trim() : availability.trim(), learner, consent];
+    mindGrow(0.1 + (0.9 * parts.filter(Boolean).length) / parts.length);
+  }, [kind, name, email, title, description, milestone, availability, learner, consent]);
+  useEffect(() => () => mindGrow(1), []);
   async function submit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setBusy(true);
     setError("");
     try {
@@ -67,11 +75,13 @@ export function Application({
         consent,
         publicConsent,
         ...(kind === "project" && waveType ? { waveType } : {}),
-        website: new FormData(e.currentTarget).get("website"),
+        website: new FormData(form).get("website"),
       });
       const r: Receipt = { ...ids, title, kind, ...(kind === "project" && waveType ? { waveType } : {}) };
       saveReceipt(r);
       setReceipt(r);
+      mindGrow(1);
+      mindWave(form, 1.6);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -82,6 +92,7 @@ export function Application({
     return (
       <div className="narrow-page">
         <section className="receipt-panel panel">
+          <MindAnchor name="seed" className="receipt-mind" />
           <Check size={40} />
           <p className="eyebrow">APPLICATION RECEIVED</p>
           <h1>
@@ -117,8 +128,9 @@ export function Application({
       </div>
     );
   return (
-    <div className="narrow-page">
+    <div className="narrow-page application-page">
       <Intro
+        mind="seed"
         eyebrow={
           kind === "guide"
             ? "WAVE GUIDES"
@@ -680,6 +692,7 @@ export function Privacy() {
     <div className="narrow-page legal-page">
       <Intro
         eyebrow="WAVES.FUND"
+        mind="still"
         title={
           <>
             Privacy &<br />

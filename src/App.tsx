@@ -9,10 +9,11 @@ import {
   ArrowRight,
   Search,
   Users,
-  FileText,
-  BookOpen,
   Check,
   Copy,
+  Hourglass,
+  Coins,
+  Megaphone,
 } from "lucide-react";
 import {
   ActionButton,
@@ -30,6 +31,10 @@ import {
   Status,
 } from "./ui";
 import { Home } from "./home";
+import { MindAnchor, mindWave, WaveMind } from "./mind/WaveMind";
+import { Current } from "./mind/Current";
+import { Vessel } from "./vessel";
+import { useStateStore } from "./state";
 import { Trax, TraxCollector } from "./trax";
 import { FlowNavigation } from "./flow";
 import { api, CommunityProvider, useCommunity } from "./community";
@@ -51,16 +56,38 @@ const GuideLesson = lazy(() => import("./guide-library").then(m => ({ default: m
 const Workspace = lazy(() => import("./workspace").then(m => ({ default: m.Workspace })));
 const PublicWave = lazy(() => import("./public-wave").then(m => ({ default: m.PublicWave })));
 const MemberSignIn = lazy(() => import("./member-auth").then(m => ({ default: m.MemberSignIn })));
+const MindLab = import.meta.env.DEV ? lazy(() => import("./mind/MindLab")) : null;
+const TITLES: Record<string, string> = {
+  "/": "Trust People. And They Become Trustworthy.",
+  "/learn": "Raise Capital In A Whole New Way.",
+  "/guide": "Wave Guides",
+  "/guide/library": "The Wave Guide Library",
+  "/give": "Give",
+  "/grow": "Grow",
+  "/waves": "Waves In Motion",
+  "/projects": "Waves In Motion",
+  "/now-lets-begin": "Now, Let’s Begin",
+  "/apply": "What’s Your Vision?",
+  "/guide/apply": "Become A Wave Guide",
+  "/contribute": "Give Your Time & Knowledge",
+  "/guide/team": "The Waves Fund Team",
+  "/guide/partners": "Partners",
+  "/guide/partners/green-reef": "The Green Reef Foundation",
+  "/guide/partners/green-reef/proposal": "Students Funding Aquatic Futures",
+  "/guide/partners/semble": "Semble.CC",
+  "/guide/partners/ocean97": "Ocean97.Com",
+  "/privacy": "Privacy & Participation",
+  "/team/review": "Team Review",
+  "/trax": "Trax",
+  "/workspace": "Your Workspace",
+};
 function ScreenPosition() {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
-    const title =
-      pathname === "/"
-        ? "Trust People"
-        : pathname.split("/").filter(Boolean).pop()?.replaceAll("-", " ") ||
-          "Trust People";
-    document.title = `Waves.Fund — ${title[0].toUpperCase() + title.slice(1)}`;
+    const last = pathname.split("/").filter(Boolean).pop()?.replaceAll("-", " ") || "";
+    const title = TITLES[pathname] || (last ? last[0].toUpperCase() + last.slice(1) : TITLES["/"]);
+    document.title = `Waves.Fund — ${title}`;
   }, [pathname]);
   return null;
 }
@@ -77,6 +104,7 @@ function Projects() {
     <div className="document-page">
       <Intro
         eyebrow="STUDENT DRIVEN PROJECTS"
+        mind="ocean"
         title={
           <>
             Waves
@@ -114,7 +142,7 @@ function Projects() {
         <section className="panel empty-state">
           <Graphic className="empty-wave" page="home" box="327 48 280 154" />
           <h2>
-            {query ? "No Matching Projects" : "Students Funding The Future"}
+            {query ? "No Matching Projects" : "Raise Waves."}
           </h2>
           <p>
             {query
@@ -132,26 +160,35 @@ function Projects() {
       ) : (
         <div className="project-grid">
           {filtered.map((p) => (
-            <button
-              className="panel project-card"
-              key={p.id}
-              onClick={() => setSelected(p)}
-            >
+            // Every Wave is a mass in the field: the grid gathers around it as you reach it.
+            <article className="panel wave-card" key={p.id}>
+              <MindAnchor name="vision" className="wave-card-mass" />
               <p className="eyebrow">{p.category}</p>
               <h2>{p.title}</h2>
-              <p>
-                {p.description.slice(0, 200)}
-                {p.description.length > 200 ? "…" : ""}
-              </p>
-              <div className="project-meta">
-                <span>${p.budget.toLocaleString()} Requested</span>
+              <p className="wave-card-story">{p.description}</p>
+              <div className="wave-card-signals" aria-label={`${p.signals} learner support signals`}>
+                <span className="signal-dots" aria-hidden="true">
+                  {Array.from({ length: 11 }, (_, i) => <i key={i} className={i < p.signals ? "lit" : ""} />)}
+                </span>
                 <span>{p.signals} Learner Signals</span>
               </div>
-              <span className="text-button">
-                Explore Project <ArrowRight size={17} />
-              </span>
-            </button>
+              <div className="wave-card-foot">
+                <span><strong>${p.budget.toLocaleString()}</strong> Requested</span>
+                <button className="glow-button" onClick={(e) => { setSelected(p); mindWave(e.currentTarget, 1); }}>
+                  Explore This Wave <ArrowRight size={17} />
+                </button>
+              </div>
+            </article>
           ))}
+          <article className="panel wave-card wave-card-next">
+            <MindAnchor name="seed" className="wave-card-mass" />
+            <p className="eyebrow">WAVES.FUND</p>
+            <h2>What’s Your <span>Vision?</span></h2>
+            <p className="wave-card-story">Raise Capital In A Whole New Way. Raise Waves.</p>
+            <div className="wave-card-foot">
+              <ButtonLink to="/apply">Bring Your Vision</ButtonLink>
+            </div>
+          </article>
         </div>
       )}
       <p className="fine-print">
@@ -271,8 +308,9 @@ function Give() {
       </Intro>
       <div className="give-layout">
         <div className="give-orbit">
-          <Graphic page="give" box="112 482 720 611" />
-          {["Time", "Mentorship", "Funding", "Signal"].map((k) => (
+          <MindAnchor name="vortex" className="give-mind" />
+          <span className="give-core" aria-hidden="true">Support</span>
+          {([["Time", Hourglass], ["Mentorship", Users], ["Funding", Coins], ["Signal", Megaphone]] as const).map(([k, Icon]) => (
             <button
               key={k}
               className={
@@ -280,13 +318,16 @@ function Give() {
                 k.toLowerCase() +
                 (kind === k ? " selected" : "")
               }
-              aria-label={k}
               aria-pressed={kind === k}
-              onClick={() => {
+              onClick={(event) => {
                 setKind(k);
                 setCopied(false);
+                mindWave(event.currentTarget, 0.8);
               }}
-            />
+            >
+              <Icon size={22} strokeWidth={1.6} aria-hidden="true" />
+              <span>{k}</span>
+            </button>
           ))}
         </div>
         <section className="panel contribution-panel">
@@ -353,7 +394,7 @@ function Give() {
       <section className="section contact-strip">
         <div>
           <p className="eyebrow">PARTNERSHIPS & IMPACT INVESTMENT</p>
-          <h2>Funding For Futures.</h2>
+          <h2>Welcome To The Frontier Of Funding</h2>
         </div>
         <a className="text-button" href={`mailto:${CONTACT}`}>
           {CONTACT}
@@ -365,6 +406,7 @@ function Give() {
 }
 function Grow() {
   const { projects, guides, loading, error, refresh } = useCommunity();
+  const { motion } = useStateStore();
   return (
     <div className="grow-page document-page">
       <Intro
@@ -381,27 +423,11 @@ function Grow() {
       >
         <p>Measure what moves.</p>
       </Intro>
-      <section className="grow-content">
+      <section className="grow-content" data-mind="rise">
         <div className="growth-stats">
-          {[
-            {
-              name: "Projects In Community Review",
-              value: projects.length,
-              Icon: FileText,
-            },
-            { name: "Accepted Wave Guides", value: guides, Icon: BookOpen },
-            {
-              name: "Learner Support Signals",
-              value: projects.reduce((a, p) => a + p.signals, 0),
-              Icon: Users,
-            },
-          ].map(({ name, value, Icon }) => (
-            <article className="panel stat-card" key={name}>
-              <Icon size={23} />
-              <strong>{loading || error ? "—" : value}</strong>
-              <span>{name}</span>
-            </article>
-          ))}
+          <Vessel label="Projects In Community Review" value={loading || error ? null : projects.length} hue="cy" still={!motion} />
+          <Vessel label="Accepted Wave Guides" value={loading || error ? null : guides} hue="bl" still={!motion} />
+          <Vessel label="Learner Support Signals" value={loading || error ? null : projects.reduce((a, p) => a + p.signals, 0)} hue="vi" still={!motion} />
         </div>
         {error && (
           <p className="error-message" role="alert">
@@ -437,7 +463,7 @@ function Grow() {
 function NotFound() {
   return (
     <div className="narrow-page">
-      <Intro eyebrow="WAVES.FUND" title="This Page Has Moved." />
+      <Intro eyebrow="WAVES.FUND" title="This Page Has Moved." mind="noise" />
       <ButtonLink to="/">What’s Your Vision?</ButtonLink>
     </div>
   );
@@ -450,6 +476,7 @@ function AppContent() {
         Skip To Content
       </a>
       <Background />
+      <WaveMind />
       <TraxCollector />
       <div
         className={"app-shell " + (pathname === "/" ? "route-home" : pathname === "/grow" ? "route-grow" : pathname === "/waves" || pathname === "/projects" ? "route-waves route-reading" : "route-reading")}
@@ -504,6 +531,7 @@ function AppContent() {
               path="/network"
               element={<Navigate to="/projects" replace />}
             />
+            {MindLab && <Route path="/mind-lab" element={<MindLab />} />}
             <Route path="*" element={<NotFound />} />
           </Routes></Suspense>
         </main>
@@ -512,6 +540,7 @@ function AppContent() {
         <Status />
         <ScreenPosition />
         <FlowNavigation />
+        <Current />
       </div>
     </>
   );

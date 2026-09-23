@@ -12,6 +12,8 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { useStateStore } from "./state";
+import { MindAnchor, mindWave } from "./mind/WaveMind";
+import type { FieldMode } from "./mind/modes";
 export const CONTACT = "August@Outlier.Systems";
 export const DONATE =
   "https://mygoodness.benevity.org/community/cause/840-208508676/donate";
@@ -96,6 +98,8 @@ export function Background() {
     document.addEventListener("visibilitychange", update);
     return () => document.removeEventListener("visibilitychange", update);
   }, [motion, base]);
+  // The dot field is the whole site's ground. Grow keeps its supplied whale film.
+  if (!grow) return null;
   return (
     <div
       className={`neural-background ${grow ? "whale-background" : ""}`}
@@ -146,12 +150,15 @@ function GrowTab() {
       className={"nav-item nav-grow " + (waves || pathname === "/grow" ? "active " : "") + (holding ? "holding " : "") + (opening ? "waves-opening" : "")}
       onPointerDown={(event) => {
         if (event.button !== 0 || waves) return;
+        const tab = event.currentTarget;
         opened.current = false;
         setHolding(true);
         timer.current = setTimeout(() => {
           opened.current = true;
           setHolding(false);
           setOpening(true);
+          // Holding Grow opens the approved Waves with one pulse through the whole network.
+          mindWave(tab, 1.6);
           navigate("/waves");
           release.current = setTimeout(() => setOpening(false), 1100);
         }, 650);
@@ -225,6 +232,15 @@ export function Header() {
           onClose={() => setOpen(false)}
           className="menu-sheet"
         >
+          <p className="menu-route" aria-label="Learn, Guide, Give, Grow">
+            <Link to="/learn" onClick={() => setOpen(false)}>Learn</Link>
+            <i aria-hidden="true" />
+            <Link to="/guide" onClick={() => setOpen(false)}>Guide</Link>
+            <i aria-hidden="true" />
+            <Link to="/give" onClick={() => setOpen(false)}>Give</Link>
+            <i aria-hidden="true" />
+            <Link to="/grow" onClick={() => setOpen(false)}>Grow</Link>
+          </p>
           <nav className="menu-links" aria-label="More">
             <Link to="/" onClick={() => setOpen(false)}>
               What’s Your Vision? <ArrowRight />
@@ -405,29 +421,46 @@ export function Intro({
   eyebrow,
   title,
   children,
+  actions,
+  mind,
 }: {
   eyebrow: string;
   title: ReactNode;
   children?: ReactNode;
+  actions?: ReactNode;
+  mind?: FieldMode;
 }) {
-  return (
-    <header className="page-intro">
+  const text = (
+    <>
       <p className="eyebrow">{eyebrow}</p>
       <h1>{title}</h1>
       {children && <div className="intro-description">{children}</div>}
+      {actions && <div className="button-row intro-actions">{actions}</div>}
+    </>
+  );
+  if (!mind) return <header className="page-intro">{text}</header>;
+  return (
+    <header className="page-intro has-mind">
+      <div className="intro-text">{text}</div>
+      <MindAnchor name={mind} />
     </header>
   );
 }
 export function Footer() {
   return (
     <footer className="app-footer">
-      <p>Funding The Future Together</p>
+      <p>
+        Trust People.
+        <br />
+        And They Become Trustworthy.
+      </p>
       <div>
         <Link to="/now-lets-begin">The Wave Praxis</Link>
         <Link to="/guide/partners">Partners</Link>
         <a href={`mailto:${CONTACT}`}>{CONTACT}</a>
         <Link to="/privacy">Privacy</Link>
       </div>
+      <p className="colophon">Waves.Fund · Founded by August James Domanchuk · 2026</p>
     </footer>
   );
 }

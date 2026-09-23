@@ -8,6 +8,38 @@
       "destination": "/now-lets-begin.html"
     },
     {
+      "source": "/learn",
+      "destination": "/share/learn.html"
+    },
+    {
+      "source": "/guide",
+      "destination": "/share/guide.html"
+    },
+    {
+      "source": "/guide/library",
+      "destination": "/share/guide-library.html"
+    },
+    {
+      "source": "/give",
+      "destination": "/share/give.html"
+    },
+    {
+      "source": "/grow",
+      "destination": "/share/grow.html"
+    },
+    {
+      "source": "/waves",
+      "destination": "/share/waves.html"
+    },
+    {
+      "source": "/apply",
+      "destination": "/share/apply.html"
+    },
+    {
+      "source": "/guide/partners/green-reef/proposal",
+      "destination": "/share/green-reef-proposal.html"
+    },
+    {
       "source": "/((?!media/|assets/|api/).*)",
       "destination": "/index.html"
     }
@@ -16,8 +48,14 @@
     {
       "source": "/media/wave-praxis.md",
       "headers": [
-        { "key": "Content-Type", "value": "text/markdown; charset=utf-8" },
-        { "key": "Content-Disposition", "value": "attachment; filename=\"WAVE-PRAXIS.md\"" }
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"WAVE-PRAXIS.md\""
+        }
       ]
     },
     {
