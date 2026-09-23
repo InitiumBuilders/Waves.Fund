@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ButtonLink, CONTACT, External, Intro, Semble, DONATE } from "./ui";
 import { download } from "./community";
+import { Stock } from "./mind/WaveMind";
 const reefURL = "https://www.greenreef.org/";
 const briefURL =
   "https://static1.squarespace.com/static/637abcfb5965f80107ee9977/t/63adebde3b35985a05d9d455/1672342495057/Green+Reef+One+Page+Overview+.pdf";
@@ -128,7 +129,8 @@ export function Learn() {
             And Funded Together
           </h2>
         </div>
-        <div className="four-grid">
+        {/* The four steps step down the page; energy drips from each one's stock into the next. */}
+        <ol className="cascade">
           {[
             {
               Icon: BookOpen,
@@ -151,14 +153,17 @@ export function Learn() {
               body: "Project teams share evidence, learning, and progress for the community to see.",
             },
           ].map(({ Icon, title, body }, i) => (
-            <article className="step-panel panel" key={title}>
-              <span className="step-number">0{i + 1}</span>
-              <Icon size={24} />
+            <li className="panel" key={title}>
+              <div className="cascade-step">
+                <Icon size={22} aria-hidden="true" />
+                <span className="step-number">0{i + 1}</span>
+              </div>
               <h3>{title}</h3>
               <p>{body}</p>
-            </article>
+              <Stock level={0.14 + i * 0.1} />
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
       <section className="section panel funding-model">
         <div>
@@ -212,16 +217,18 @@ export function Learn() {
             We Change The World.
           </h2>
         </div>
+        {/* Each stage holds as much as it has built: the further along, the fuller. */}
         <div className="roadmap">
-          <article>
+          <article className="panel">
             <span className="status-chip live">NOW</span>
             <h3>Build The Foundation</h3>
             <p>
               Project submissions, Wave Guide applications, team review, public
               project pages, and direct giving to Green Reef.
             </p>
+            <Stock level={0.66} />
           </article>
-          <article>
+          <article className="panel">
             <span className="status-chip">PROPOSED PILOT</span>
             <h3>Students Funding The Future</h3>
             <p>
@@ -231,14 +238,16 @@ export function Learn() {
             <Link to="/guide/partners/green-reef/proposal">
               Read The Proposal <ArrowRight size={16} />
             </Link>
+            <Stock level={0.34} />
           </article>
-          <article>
+          <article className="panel">
             <span className="status-chip">NEXT</span>
             <h3>Build In Public</h3>
             <p>
               Formal voting rounds, verified participation, partner reporting,
               and consent-based project connections with <Semble />.
             </p>
+            <Stock level={0.1} />
           </article>
         </div>
       </section>

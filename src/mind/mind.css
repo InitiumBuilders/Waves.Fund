@@ -21,3 +21,14 @@
   width: 100%;
   pointer-events: none;
 }
+/* The liquid energy rides above the page, below the header, the tab bar and every sheet. It only ever draws
+   in stocks, in the gaps between cards and along card edges. */
+.mind-liquid {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+  display: block;
+}

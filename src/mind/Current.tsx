@@ -22,22 +22,25 @@ export function Current() {
   useEffect(() => {
     if (!long) return;
     let raf = 0;
+    // Layout is read in the scroll event and on resize only; the frame just writes, so it never forces a style pass.
+    let sy = scrollY, max = document.documentElement.scrollHeight - innerHeight;
+    const ro = new ResizeObserver(() => { max = document.documentElement.scrollHeight - innerHeight; });
+    ro.observe(document.body);
     const update = () => {
       raf = 0;
       const el = ref.current;
       if (!el) return;
-      const max = document.documentElement.scrollHeight - innerHeight;
-      const p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+      const p = max > 0 ? Math.min(1, Math.max(0, sy / max)) : 0;
       const top = innerHeight * 0.18, bottom = innerHeight - (innerWidth < 800 ? 150 : 110);
       const y = top + (bottom - top) * p;
       const sway = motion ? Math.sin(p * Math.PI * 7) * 6 : 0;
       el.style.transform = `translate3d(${sway.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-      const shown = scrollY > innerHeight * 0.45;
+      const shown = sy > innerHeight * 0.45;
       el.style.opacity = shown ? "1" : "0";
       // The mark is a small mass: the lattice bends around it as it travels.
       mindMove(innerWidth - (innerWidth < 800 ? 18 : 48) + sway, y + 22, shown ? 1 : 0);
     };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    const onScroll = () => { sy = scrollY; if (!raf) raf = requestAnimationFrame(update); };
     update();
     addEventListener("scroll", onScroll, { passive: true });
     addEventListener("resize", onScroll);
@@ -47,7 +50,7 @@ export function Current() {
       for (const e of entries) if (e.isIntersecting && ref.current && ref.current.style.opacity === "1") mindWave(ref.current, 0.55);
     }, { rootMargin: "-48% 0px -48% 0px" });
     document.querySelectorAll("main .section, main .guide-section, main .chapter-mind").forEach(el => io.observe(el));
-    return () => { removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); io.disconnect(); if (raf) cancelAnimationFrame(raf); mindMove(0, 0, 0); };
+    return () => { removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); io.disconnect(); ro.disconnect(); if (raf) cancelAnimationFrame(raf); mindMove(0, 0, 0); };
   }, [long, motion, pathname]);
 
   if (!long) return null;

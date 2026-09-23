@@ -31,7 +31,7 @@ import {
   Status,
 } from "./ui";
 import { Home } from "./home";
-import { MindAnchor, mindWave, WaveMind } from "./mind/WaveMind";
+import { MindAnchor, mindWave, WaveMind, Stock, liquidDrip } from "./mind/WaveMind";
 import { Current } from "./mind/Current";
 import { Vessel } from "./vessel";
 import { useStateStore } from "./state";
@@ -178,6 +178,8 @@ function Projects() {
                   Explore This Wave <ArrowRight size={17} />
                 </button>
               </div>
+              {/* The Wave's stock: as full as its learner signals are toward the next milestone of 11. */}
+              <Stock level={Math.min(0.92, 0.06 + (Math.min(p.signals, 11) / 11) * 0.86)} />
             </article>
           ))}
           <article className="panel wave-card wave-card-next">
@@ -188,6 +190,7 @@ function Projects() {
             <div className="wave-card-foot">
               <ButtonLink to="/apply">Bring Your Vision</ButtonLink>
             </div>
+            <Stock level={0.04} />
           </article>
         </div>
       )}
@@ -323,6 +326,7 @@ function Give() {
                 setKind(k);
                 setCopied(false);
                 mindWave(event.currentTarget, 0.8);
+                liquidDrip(document.querySelector(".contribution-panel > .stock"));
               }}
             >
               <Icon size={22} strokeWidth={1.6} aria-hidden="true" />
@@ -389,6 +393,7 @@ function Give() {
               </p>
             </>
           )}
+          <Stock level={0.3} />
         </section>
       </div>
       <section className="section contact-strip">
