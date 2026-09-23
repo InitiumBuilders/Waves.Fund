@@ -1,5 +1,5 @@
-// Copies the public part of this repo into another folder for github.com/InitiumBuilders/Waves.Fund.
-// Usage: node scripts/publish-public.mjs <target-folder>
+// Copies the public part of this repo into the local clone of github.com/InitiumBuilders/Waves.Fund.
+// Usage: node scripts/publish-public.mjs [target-folder]   (default: .open-source, which git ignores)
 // Only git-tracked files are copied, so .env files and .vercel can never be included.
 import { execFileSync } from 'node:child_process';
 import { cp, mkdir, readdir, rm } from 'node:fs/promises';
@@ -18,9 +18,11 @@ const PRIVATE = [
 const OVERLAY = 'public-repo/';
 
 const root = execFileSync('git', ['rev-parse', '--show-toplevel']).toString().trim();
-const target = resolve(process.argv[2] || '');
-if (!process.argv[2] || !relative(root, target).startsWith('..')) {
-  console.error('Usage: node scripts/publish-public.mjs <folder outside this repo>');
+const target = resolve(process.argv[2] || join(root, '.open-source'));
+const inside = !relative(root, target).startsWith('..');
+const ignored = () => { try { execFileSync('git', ['check-ignore', '-q', target], { cwd: root }); return true; } catch { return false; } };
+if (target === resolve(root) || (inside && !ignored())) {
+  console.error('The target must be outside this repo or in a folder git ignores, such as .open-source');
   process.exit(1);
 }
 

@@ -4,6 +4,9 @@ dist
 *.tsbuildinfo
 *.log
 
+# Local clone of the public repo, written by scripts/publish-public.mjs.
+/.open-source
+
 # Real values live in Vercel project settings. Never commit them.
 .env*
 !.env.example
