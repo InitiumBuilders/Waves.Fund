@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.env*
+*.tsbuildinfo
+README.md
+DESIGN-NOTES.md
+VERIFICATION.md
+.vercel

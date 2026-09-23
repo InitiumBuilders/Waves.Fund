@@ -1,0 +1,9 @@
+node_modules
+dist
+.vercel
+*.tsbuildinfo
+*.log
+
+# Real values live in Vercel project settings. Never commit them.
+.env*
+!.env.example

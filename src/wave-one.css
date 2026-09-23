@@ -1,0 +1,104 @@
+.wave-one {
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  width: 100%;
+  border: 1px solid #65d9ff75;
+  border-radius: 28px;
+  background: linear-gradient(148deg, #092b4ea6, #03142da6 50%, #090d2aa6);
+  box-shadow: inset 0 1px 0 #cff8ff30, 0 26px 75px #0000003b, 0 0 38px #127bed14;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  scroll-margin-top: 100px;
+  color: #fff;
+}
+.wave-one-aura { position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 55% 30% at 50% 0,#2eb9ff1c,transparent 80%); }
+.wave-one-identity { padding:28px 22px 25px;text-align:center;border-bottom:1px solid #7bdcff24;position:relative; }
+.wave-one-number { display:flex;align-items:center;justify-content:center;gap:9px;font-size:10px;font-weight:700;letter-spacing:.22em; }
+.wave-one-number > span { width:5px;height:5px;border-radius:100%;background:#83ecff;box-shadow:0 0 10px #23baff; }
+.wave-one-symbol { width:min(250px,100%);height:146px;position:relative;margin:6px auto 0;display:grid;place-items:center; }
+.wave-one-symbol img { width:114px;height:92px;object-fit:contain;filter:drop-shadow(0 0 18px #04aaff75);animation:wave-one-breathe 6s ease-in-out infinite; }
+.wave-one-orbits { position:absolute;inset:0;width:100%;height:100%;overflow:visible; }
+.wave-one-orbits ellipse { fill:none;stroke:#51caff;stroke-width:.65;opacity:.24; }
+.wave-one-orbits circle { fill:#c5f5ff;filter:drop-shadow(0 0 5px #00b7ff); }
+.wave-one h3 { font-size:clamp(33px,8vw,46px);letter-spacing:-.055em;font-weight:550;line-height:1.1; }
+.wave-one-mantra { margin-top:14px;font-size:14px;line-height:1.85;font-weight:520; }
+.wave-one-home { margin-top:22px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;font-weight:600; }
+.wave-one-home a { display:flex;align-items:center;gap:4px;padding-block:10px; }
+.wave-one-caption { font-size:11px;margin-top:3px;letter-spacing:.02em; }
+.wave-one-main { padding:22px 19px 24px;min-width:0; }
+.wave-one-views { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:4px;gap:3px;border-radius:16px;border:1px solid #9ddfff30;background:#010c2238; }
+.wave-one-views button { min-height:44px;padding:9px 4px;border-radius:12px;font-size:12px;font-weight:630;transition:background .25s,border-color .25s;position:relative;white-space:nowrap; }
+.wave-one-views button[aria-pressed="true"] { background:linear-gradient(130deg,#13568c80,#3451a744);box-shadow:inset 0 0 0 1px #78deff60,0 3px 12px #010a2625; }
+.wave-one-views button:hover { background-color:#2377b839; }
+.wave-one-content { padding-top:27px; }
+.wave-one-view { animation:wave-one-reveal .35s ease both; }
+.wave-one .wave-one-kicker { font-size:9px;font-weight:700;letter-spacing:.12em;line-height:1.65; }
+.wave-one h4 { font-size:clamp(25px,6.5vw,32px);font-weight:550;line-height:1.19;letter-spacing:-.035em;margin:12px 0 15px; }
+.wave-one-view > p:not(.wave-one-kicker):not(.wave-one-guide-mantra):not(.wave-one-detail) { font-size:14px;line-height:1.85;font-weight:480; }
+.wave-one-guide { margin-top:24px;display:flex;gap:12px;align-items:center; }
+.wave-one-guide-mark { flex:none;display:grid;place-items:center;height:44px;width:44px;border:1px solid #6bdcff70;border-radius:50%;background:radial-gradient(circle at 30% 20%,#12608c80,#04142a60);font-size:11px;font-weight:650;box-shadow:0 0 20px #239afa1c; }
+.wave-one-guide div { min-width:0; }
+.wave-one-guide div > span { display:block;font-size:9px;line-height:1.6;letter-spacing:.045em; }
+.wave-one-guide strong { display:block;font-size:13px;font-weight:630;line-height:1.6; }
+.wave-one-guide p { font-size:11px;line-height:1.7;margin-top:4px; }
+.wave-one .wave-one-guide-mantra { margin:12px 0 0 56px;font-size:11px;font-weight:600; }
+.wave-one-next-links { display:grid;gap:9px;margin-top:19px; }
+.wave-one-next-links a { display:flex;align-items:center;gap:12px;border:1px solid #7adeff33;border-radius:13px;background:#13508523;min-height:68px;padding:12px; }
+.wave-one-next-links a > svg { flex:none; }
+.wave-one-next-links a > svg:last-child { margin-left:auto; }
+.wave-one-next-links a:hover { border-color:#8aebff85;background:#1350854d; }
+.wave-one-next-links a span { font-size:13px;font-weight:630; }
+.wave-one-next-links small { display:block;font-size:10px;line-height:1.7;margin-top:4px;font-weight:500; }
+.wave-one .wave-one-detail { font-size:11px;line-height:1.8;margin-top:15px; }
+.wave-one-journey { list-style:none;margin:22px 0 0;padding:0;display:grid;gap:18px; }
+.wave-one-journey li { display:flex;gap:14px;position:relative; }
+.wave-one-journey li:not(:last-child)::before { content:"";position:absolute;top:23px;bottom:-18px;left:11px;width:1px;background:linear-gradient(#54d9ff66,#54d9ff25); }
+.wave-one-node { width:23px;height:23px;display:grid;place-items:center;flex:none;position:relative;background:#082d4cc9;border:1px solid #6ddefa70;border-radius:50%;box-shadow:0 0 15px #0eabff16; }
+.wave-one-future .wave-one-node { border-style:dashed;background:transparent; }
+.wave-one-journey strong { font-size:13px;font-weight:620;line-height:1.6; }
+.wave-one-journey p { font-size:11px;line-height:1.75;margin-top:3px; }
+.wave-one-record { display:inline-block;margin-top:7px;font-size:9px;font-weight:620;letter-spacing:.04em;line-height:1.6;border:1px solid #9bdfff30;border-radius:5px;padding:2px 6px; }
+.wave-one-actions { margin-top:25px;display:flex;flex-direction:column;align-items:stretch;gap:10px; }
+.wave-one-pass { display:flex;justify-content:center;align-items:center;gap:11px;min-height:49px;padding:13px 16px;border-radius:100px;border:1px solid #8dedffa1;background:linear-gradient(125deg,#12669799,#25469d6b);font-size:13px;font-weight:650;box-shadow:inset 0 1px 0 #efffff30,0 0 20px #29b9ff20; }
+.wave-one-pass:hover { box-shadow:inset 0 1px 0 #efffff30,0 0 28px #29b9ff40; }
+.wave-one-contact { min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;font-weight:600; }
+.wave-one-share-state { font-size:11px;font-weight:500;line-height:1.75; }
+.wave-one-share-state:not(:empty) { margin-top:12px; }
+.wave-one-copy { display:block;margin-top:14px;font-size:11px; }
+.wave-one-copy > span { display:flex;gap:6px;align-items:center;margin-bottom:8px; }
+.wave-one-copy input { width:100%;min-width:0;font-size:11px;min-height:44px;border-radius:9px;padding:10px;background:#03142aa6;border:1px solid #8edbff55; }
+.wave-one .wave-one-ownership { margin-top:18px;border-top:1px solid #a0dfff20;padding-top:17px;font-size:10px;line-height:1.85;font-weight:450; }
+.wave-one button:focus-visible,.wave-one a:focus-visible,.wave-one input:focus-visible { outline:2px solid #b5f3ff;outline-offset:3px; }
+@keyframes wave-one-breathe { 50% { filter:drop-shadow(0 0 24px #25bfff9c);transform:translateY(-3px); } }
+@keyframes wave-one-reveal { from { opacity:0;transform:translateY(5px); } to { opacity:1;transform:translateY(0); } }
+@media(min-width:720px) {
+  .wave-one { grid-template-columns:minmax(230px,.8fr) minmax(0,1.3fr);border-radius:30px; }
+  .wave-one-identity { padding:45px 25px;border-bottom:0;border-right:1px solid #7bdcff24;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+  .wave-one-number { position:absolute;top:32px; }
+  .wave-one-symbol { margin-top:24px;height:180px; }
+  .wave-one-symbol img { width:134px;height:110px; }
+  .wave-one h3 { font-size:40px; }
+  .wave-one-mantra { font-size:14px; }
+  .wave-one-home { margin-top:25px; }
+  .wave-one-main { padding:29px 30px 27px; }
+  .wave-one-content { min-height:326px; }
+  .wave-one-guide { margin-top:25px; }
+  .wave-one-actions { flex-direction:row;align-items:center;gap:17px;margin-top:23px; }
+  .wave-one-pass { flex:1; }
+  .wave-one-contact { flex:none; }
+}
+@media(min-width:1000px) {
+  .wave-one-main { padding:32px 36px; }
+  .wave-one-content { min-height:320px; }
+  .wave-one-view > p:not(.wave-one-kicker):not(.wave-one-guide-mantra):not(.wave-one-detail) { font-size:15px; }
+  .wave-one-views button { font-size:13px; }
+  .wave-one .wave-one-kicker { font-size:10px; }
+  .wave-one-guide strong { font-size:14px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .wave-one-symbol img,.wave-one-view { animation:none; }
+  .wave-one button,.wave-one a { transition:none; }
+}
+html[data-motion="off"] .wave-one-symbol img,html[data-motion="off"] .wave-one-view { animation:none; }

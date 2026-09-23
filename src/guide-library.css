@@ -1,0 +1,164 @@
+.guide-public { color: #fff; }
+.guide-public p { line-height: 1.85; }
+.guide-public :is(h1,h2,h3,h4,h5) { text-wrap: balance; }
+.guide-public .panel { background: linear-gradient(140deg, #061c37bb, #030b22b0); border: 1px solid #83d8ff3d; backdrop-filter: blur(5px); }
+.guide-public .panel:hover { transform: none; }
+.guide-public .guide-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; margin: 0 0 12px; }
+.guide-pitch-hero { position: relative; display: grid; }
+.guide-pitch-hero .page-intro { margin-bottom: 12px; }
+.guide-pitch-hero .page-intro h1 { font-size: clamp(37px, 6vw, 76px); }
+.guide-human-orbit { position: relative; width: 210px; height: 200px; justify-self: center; display: grid; justify-items: center; align-content: center; gap: 14px; margin: 10px 0 20px; isolation: isolate; }
+.guide-human-orbit::before { content: ''; position: absolute; inset: 12px; border-radius: 50%; background: radial-gradient(ellipse, #15b9ff2e, #175dff12 50%, transparent 73%); z-index: -1; }
+.guide-human-orbit .wave-mark { width: 108px; height: 70px; filter: drop-shadow(0 0 20px #22bbff77); }
+.guide-human-orbit > span { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+.guide-orbit-ring { position: absolute; inset: 9px 4px; border: 1px solid #84dfff40; border-radius: 50%; transform: rotate(-20deg); box-shadow: 0 0 24px #237bff18, inset 0 0 28px #237bff12; }
+.guide-human-orbit > i { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px 3px #3cb5ff; left: 25px; top: 34px; animation: guide-light 4s ease-in-out infinite alternate; }
+.guide-human-orbit > i:last-child { left: auto; top: auto; right: 24px; bottom: 36px; animation-delay: -2s; }
+@keyframes guide-light { from { opacity: .5; } to { opacity: 1; box-shadow: 0 0 16px 5px #3cb5ff; } }
+.guide-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; }
+.guide-actions .glow-button { font-size: 14px; }
+.guide-actions .text-button { font-size: 13px; }
+.guide-service { margin-top: 40px; display: grid; gap: 22px; }
+.guide-service h2, .guide-section h2, .guide-learning-callout h2, .guide-workspace-link h2, .guide-library-end h2 { font-size: clamp(27px, 3.4vw, 42px); line-height: 1.17; letter-spacing: -.035em; }
+.guide-service p:first-child { margin-top: 0; }
+.guide-section { margin-top: 65px; scroll-margin-top: 100px; }
+.guide-section-heading { max-width: 680px; margin-bottom: 28px; }
+.guide-section-heading > p:last-child { margin-top: 18px; font-size: 15px; }
+.guide-service-steps { padding: 0; list-style: none; display: grid; gap: 26px; }
+.guide-service-steps li { position: relative; padding: 0 0 0 70px; }
+.guide-service-steps li:not(:last-child)::after { content: ''; position: absolute; top: 56px; bottom: -18px; left: 25px; width: 1px; background: linear-gradient(#48b4ff70, #48b4ff08); }
+.guide-service-steps h3 { font-size: 20px; }
+.guide-service-steps p { font-size: 14px; margin-top: 8px; }
+.guide-step-node { position: absolute; left: 0; top: 0; border: 1px solid #91dfff59; border-radius: 50%; width: 50px; height: 50px; display: grid; place-items: center; background: #071b36a6; box-shadow: inset 0 0 20px #137fff1c; }
+.guide-step-node span { position: absolute; right: -6px; bottom: -6px; font-size: 9px; padding: 2px 4px; background: #07112f; border-radius: 50%; }
+.guide-practices { padding: 0 !important; overflow: hidden; }
+.guide-practice-options { padding: 12px; display: grid; gap: 3px; }
+.guide-practice-options button { min-height: 56px; display: flex; text-align: left; align-items: center; gap: 12px; padding: 12px; background: transparent; border: 1px solid transparent; border-radius: 12px; font-size: 14px; cursor: pointer; }
+.guide-practice-options button > span { font-size: 10px; letter-spacing: .08em; }
+.guide-practice-options button > svg { margin-left: auto; flex-shrink: 0; }
+.guide-practice-options button[aria-pressed="true"] { border-color: #75d9ff6a; background: linear-gradient(110deg, #1676b538, #244ee71f); }
+.guide-practice-detail { padding: 26px; border-top: 1px solid #8cd5ff30; }
+.guide-practice-detail > svg { margin-bottom: 17px; filter: drop-shadow(0 0 6px #26baff); }
+.guide-practice-detail h3 { font-size: 25px; }
+.guide-practice-detail p { font-size: 15px; }
+.guide-example-note { margin-top: 25px; padding-left: 17px; border-left: 1px solid #7ce2ff70; }
+.guide-example-note .eyebrow { font-size: 9px; }
+.guide-example-note p { font-size: 13px; }
+.guide-learning-callout { margin-top: 64px; }
+.guide-learning-callout .guide-actions { margin-top: 25px; }
+.guide-team-partners { display: grid; gap: 42px; }
+.guide-team-card p { margin-top: 18px; font-size: 14px; }
+.guide-team-card blockquote { margin: 22px 0; font-size: 22px; font-weight: 500; }
+.guide-team-card .text-button { font-size: 13px; }
+.guide-partner-list { display: grid; margin-top: 22px; }
+.guide-partner-list a { display: flex; align-items: center; gap: 15px; padding: 17px 0; border-bottom: 1px solid #88caff2b; font-size: 14px; font-weight: 550; }
+.guide-partner-list img { width: 57px; height: 42px; object-fit: contain; }
+.guide-partner-list a > svg { margin-left: auto; flex-shrink: 0; }
+.guide-workspace-link { display: grid; gap: 23px; margin-top: 64px; }
+.guide-workspace-link .glow-button { justify-self: start; }
+.guide-closing-mantra { margin: 65px 0 15px; text-align: center; font-size: clamp(20px, 3vw, 31px); font-weight: 500; text-shadow: 0 0 20px #4caeff66; }
+.guide-library-tools { display: flex; flex-wrap: wrap; gap: 16px 27px; align-items: center; }
+.guide-download { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 16px; border-radius: 11px; border: 1px solid #77d8ff61; background: #0b2e524d; min-height: 46px; font: inherit; font-size: 12px; font-weight: 550; cursor: pointer; }
+.guide-download:hover { background: #18568859; border-color: #b0efffa6; }
+.guide-inline-link { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; }
+.guide-lesson-grid { display: grid; gap: 15px; }
+.guide-lesson-card { display: flex; flex-direction: column; padding: 24px !important; min-height: 246px; }
+.guide-lesson-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 14px; }
+.guide-lesson-card-top > span:last-child { font-size: 11px; }
+.guide-lesson-number { font-size: 27px; font-weight: 350; text-shadow: 0 0 18px #19caff; }
+.guide-lesson-card h3 { font-size: 23px; }
+.guide-lesson-card p { margin-top: 12px; margin-bottom: 24px; font-size: 14px; }
+.guide-lesson-open { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; margin-top: auto; }
+.guide-lesson-card:hover { border-color: #9aefff8f !important; background: linear-gradient(140deg, #0b2e4dc7, #030b22b0); }
+.guide-case-strip { display: grid; grid-template-columns: 80px 1fr; gap: 18px; align-items: start; margin-top: 55px; padding: 22px !important; }
+.guide-case-strip img { width: 80px; height: auto; max-height: 180px; object-fit: cover; object-position: top; border-radius: 10px; border: 1px solid #75cfff3b; }
+.guide-case-strip h2 { font-size: 24px; line-height: 1.2; }
+.guide-case-strip .eyebrow { font-size: 9px; }
+.guide-case-strip p { font-size: 13px; }
+.guide-case-strip .text-button { font-size: 12px; margin-top: 12px; }
+.guide-worksheet-grid { display: grid; gap: 16px; }
+.guide-worksheet { align-self: start; padding: 24px !important; }
+.guide-worksheet > svg { margin-bottom: 17px; }
+.guide-worksheet > h3 { font-size: 23px; }
+.guide-worksheet > p { font-size: 14px; margin-bottom: 22px; }
+.guide-worksheet details { margin-top: 14px; padding-top: 14px; border-top: 1px solid #88d9ff2b; }
+.guide-worksheet summary { cursor: pointer; padding: 8px 0; font-size: 13px; }
+.guide-worksheet .guide-markdown { margin-top: 22px; }
+.guide-worksheet .guide-markdown h4 { font-size: 20px; margin-bottom: 20px; }
+.guide-worksheet .guide-markdown h5 { font-size: 16px; margin-top: 25px; }
+.guide-worksheet .guide-markdown :is(p,li) { font-size: 13px; }
+.guide-library-end { margin-top: 55px; }
+.guide-library-end .guide-actions { margin-top: 25px; }
+.guide-lesson-layout { display: grid; gap: 34px; }
+.guide-lesson-aside { min-width: 0; }
+.guide-lesson-aside nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px; scrollbar-width: thin; }
+.guide-lesson-aside nav a { display: flex; align-items: center; gap: 8px; white-space: nowrap; min-height: 45px; padding: 9px 14px; background: #05132999; border: 1px solid #80d8ff31; border-radius: 10px; font-size: 12px; }
+.guide-lesson-aside nav a[aria-current="page"] { border-color: #8aedffa8; background: #15618c66; }
+.guide-lesson-aside nav a > span { font-size: 10px; }
+.guide-lesson-aside figure { display: flex; align-items: center; gap: 17px; margin: 22px 0 0; }
+.guide-lesson-aside figure a { flex-shrink: 0; }
+.guide-lesson-aside figure img { width: 72px; height: 108px; object-fit: cover; border: 1px solid #75cfff36; border-radius: 9px; }
+.guide-lesson-aside figcaption { font-size: 12px; line-height: 1.8; }
+.guide-lesson-main { min-width: 0; }
+.guide-markdown { overflow-wrap: anywhere; }
+.guide-lesson-text { padding: 24px; border: 1px solid #87d9ff28; border-radius: 22px; background: linear-gradient(150deg, #031126c4, #020a1e99); }
+.guide-markdown h2 { font-size: 25px; line-height: 1.25; margin: 38px 0 16px; letter-spacing: -.025em; }
+.guide-markdown h2:first-child { margin-top: 0; }
+.guide-markdown :is(p,li) { font-size: 15px; line-height: 1.9; }
+.guide-markdown p { margin: 16px 0; }
+.guide-markdown :is(ol,ul) { padding-left: 23px; margin: 18px 0; }
+.guide-markdown li { padding-left: 4px; margin-bottom: 14px; }
+.guide-markdown strong { font-weight: 650; }
+.guide-readiness { margin-top: 30px; }
+.guide-readiness h2 { font-size: 25px; }
+.guide-readiness > p { font-size: 13px; }
+.guide-checklist { display: grid; gap: 16px; margin: 25px 0; }
+.guide-checklist label { display: flex; align-items: flex-start; gap: 13px; font-size: 14px; line-height: 1.65; cursor: pointer; }
+.guide-checklist input { appearance: auto; width: 20px; height: 20px; min-width: 20px; margin: 2px 0 0; accent-color: #20b6f4; }
+.guide-readiness-count { display: flex; align-items: center; gap: 9px; font-size: 12px; line-height: 1.6; border-top: 1px solid #8cdaff30; padding-top: 17px; }
+.guide-readiness-count svg { flex-shrink: 0; }
+.guide-lesson-worksheets { margin-top: 40px; }
+.guide-lesson-worksheets > h2 { font-size: 27px; margin-bottom: 22px; }
+.guide-lesson-next { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 22px; margin-top: 34px; }
+.guide-lesson-next > a { display: inline-flex; gap: 9px; align-items: center; font-size: 13px; min-height: 44px; }
+.guide-public :is(a,button,summary,input):focus-visible { outline: 2px solid #adf4ff; outline-offset: 5px; }
+[data-motion="off"] .guide-human-orbit > i { animation: none; }
+@media (min-width: 600px) {
+  .guide-pitch-hero { grid-template-columns: minmax(0, 1fr) 220px; align-items: center; }
+  .guide-human-orbit { margin: 0; }
+  .guide-lesson-grid, .guide-worksheet-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .guide-case-strip { grid-template-columns: 150px minmax(0,1fr); align-items: center; gap: 30px; padding: 30px !important; }
+  .guide-case-strip img { width: 150px; max-height: 205px; }
+  .guide-case-strip h2 { font-size: 30px; }
+}
+@media (min-width: 900px) {
+  .guide-pitch-hero { grid-template-columns: minmax(0,1fr) 350px; }
+  .guide-human-orbit { width: 310px; height: 300px; }
+  .guide-human-orbit .wave-mark { width: 150px; height: 100px; }
+  .guide-human-orbit > i { top: 50px; left: 30px; }
+  .guide-human-orbit > i:last-child { right: 30px; bottom: 50px; }
+  .guide-service, .guide-team-partners { grid-template-columns: .85fr 1.15fr; gap: 60px; }
+  .guide-service { margin-top: 55px; }
+  .guide-section { margin-top: 90px; }
+  .guide-service-steps { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 25px; }
+  .guide-service-steps li { padding: 0; }
+  .guide-step-node { position: relative; margin-bottom: 25px; }
+  .guide-service-steps li:not(:last-child)::after { top: 25px; bottom: auto; left: 66px; width: calc(100% - 56px); height: 1px; background: linear-gradient(90deg,#48b4ff70,#48b4ff08); }
+  .guide-practices { display: grid; grid-template-columns: .85fr 1.15fr; }
+  .guide-practice-detail { border-top: 0; border-left: 1px solid #8cd5ff30; padding: 32px; }
+  .guide-learning-callout { display: grid; grid-template-columns: 1fr 240px; gap: 42px; align-items: center; }
+  .guide-learning-callout .guide-actions { flex-direction: column; align-items: flex-start; }
+  .guide-workspace-link { grid-template-columns: 1fr auto; align-items: center; }
+  .guide-lesson-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .guide-lesson-layout { grid-template-columns: 220px minmax(0,1fr); gap: 46px; align-items: start; }
+  .guide-lesson-aside { position: sticky; top: 115px; }
+  .guide-lesson-aside nav { display: grid; padding-bottom: 20px; }
+  .guide-lesson-aside figure { display: block; margin: 25px 0 0; }
+  .guide-lesson-aside figure img { width: 155px; height: 220px; object-fit: cover; object-position: top; border: 1px solid #75cfff36; border-radius: 11px; }
+  .guide-lesson-aside figcaption { margin-top: 11px; font-size: 11px; line-height: 1.8; }
+  .guide-lesson-text { padding: 35px 40px; }
+  .guide-markdown :is(p,li) { font-size: 16px; }
+  .guide-markdown h2 { font-size: 29px; }
+}
+@media (prefers-reduced-motion: reduce) { .guide-human-orbit > i { animation: none; } }
+@media print { .guide-public .panel, .guide-lesson-text { background: white; color: black !important; } .guide-human-orbit, .guide-actions, .guide-download, .guide-lesson-aside, .guide-lesson-next { display: none; } .guide-lesson-layout { display: block; } }
