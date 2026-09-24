@@ -4,6 +4,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Intro } from './ui';
 const key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
 const workspaceKey = import.meta.env.VITE_WORKSPACE_ENABLED === 'true' ? key : '';
+// Vercel named the Clerk application "waves-fund-members", and Clerk puts that name into some of its own lines.
+// These are Clerk's default English lines with the name set to Waves.Fund. (Clerk's emails use the name set in
+// its dashboard.)
+const NAME = 'Waves.Fund';
+const toContinue = { subtitle: `to continue to ${NAME}` };
+const localization = {
+  signIn: {
+    start: { title: `Sign in to ${NAME}`, titleCombined: `Continue to ${NAME}` },
+    emailCode: toContinue, emailCodeMfa: toContinue, emailLink: toContinue, emailLinkMfa: toContinue,
+    phoneCode: toContinue, alternativePhoneCodeProvider: toContinue, ssoFallback: { code: toContinue },
+  },
+  signUp: { emailLink: toContinue },
+  organizationList: toContinue,
+};
 const appearance = { variables: { colorPrimary: '#56dfff', colorBackground: '#06172b', colorForeground: '#ffffff', colorMutedForeground: '#ffffff', colorInput: '#031020', colorInputForeground: '#ffffff', colorNeutral: '#ffffff', borderRadius: '1rem', fontFamily: 'Inter Variable, sans-serif' } };
 export function MemberProvider({ area, children }: { area: 'give' | 'workspace'; children: ReactNode }) {
   const navigate = useNavigate();
@@ -18,6 +32,7 @@ export function MemberProvider({ area, children }: { area: 'give' | 'workspace';
       routerPush={(to: string) => navigate(to)}
       routerReplace={(to: string) => navigate(to, { replace: true })}
       appearance={appearance}
+      localization={localization}
     >
       {children}
     </ClerkProvider>
