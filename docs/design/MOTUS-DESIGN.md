@@ -44,28 +44,57 @@ crossfade as you scroll from one anchor to the next. Source: `src/mind/field.ts`
 | still | Privacy | Private things stay calm. |
 | noise | Not found | Unformed. |
 
-## Liquid energy
+## Networks that organise themselves
 
-Where energy gathers, the dots flow together into a bead of neon liquid. It follows the
-two supplied films (the Surge film and the Energy film): a ribbon pours into a glass
-vessel, the surface sways and carries bubbles, a bead necks from the bottom and lets go,
-and where it lands a ring spreads and a few droplets leap and fall back. Source:
-`src/mind/liquid.ts`, drawn on its own canvas above the page and below the header, tab
-bar and sheets. It only draws in stocks, in the gaps between cards and along card edges.
+As you reach a chapter, and now and then while you read, some dots of the lattice become
+nodes: they light, grow and rise, their neighbours lean in, and connections grow between them
+with signals travelling along them. After a few seconds the network lets go. Nothing flies in:
+the network is made of dots that were already there. Each mode has its shape: layers for
+Learn, hubs for Guide and Partners, a star around a vision or seed, a chain for paths and
+timelines. Networks only form in open space, and every connection is masked per pixel so it
+never crosses a line of text.
+
+| Element | Statement |
+| --- | --- |
+| A network forming | People who meet around an idea become a network. |
+| A signal arriving | A node lights when something reaches it. |
+
+## Clearings
+
+Every line of text, control and card is drawn as a soft rounded box into a small mask on the
+GPU each frame (measured on layout changes only). Dots fade out over about 40px around the
+words, so clearings follow a ragged right edge and never open up empty space.
+
+## Energy: vessels and guides
+
+`src/mind/energy.ts`, on its own canvas above the page and below the header, tab bar and sheets.
 
 | Element | What happens | Statement |
 | --- | --- | --- |
-| Stocks | A glass vessel at the foot of a card holds a pool; its level is what the card holds | Every step holds the energy people put into it. |
-| Condense | Dots in open space over a card flow into a bead, which falls onto the card | Support comes out of the network. |
-| Drip | A charged stock necks and drips onto the card below; a runner slides down the card's edge into its stock | Energy flows on from one step to the next. |
-| Cascade | Learn's four steps and the Guide's four steps step down the page | The path is a waterfall of stocks. |
-| Wave stocks | A Wave card's stock is as full as its learner signals are toward 11 | A Wave holds the support it has gathered. |
-| Roadmap stocks | NOW is fullest, the pilot half full, NEXT nearly empty | The further along, the fuller. |
-| Home | The ribbon pours into the vision box as the page opens; the pool drips onto Surge; Surge erupts | Your vision is energy; Surge sets it moving. |
+| Stocks | A glass vessel at the foot of a card holds liquid energy; its level is what the card holds | Every step holds the energy people put into it. |
+| Guides | Glass channels between vessels, routed through gutters and the empty foot of cards; light weaves inside them the way it stays inside an optical fibre | Guided energy keeps its strength. |
+| Flow | When the next card comes into view, a slug of liquid runs down the guide and pours in: the surface takes the impact, droplets leap and fall back, bubbles rise | Energy flows on from one step to the next. |
+| Welling up | A vessel with no guide into it fills from below as it comes into view | A card fills as it is reached. |
+| Beams | On Give, four guides of light run from the Support core to Time, Mentorship, Funding and Signal; the chosen one burns brightest and energy flows along a guide into the panel | Direct energy with intention. |
 
-The home pool drains to a thin line while someone types, so the words are never under
-it. Without WebGL2 the supplied Surge film plays instead, and each stock shows its level
-as a still fill.
+## The waveguide
+
+`src/mind/WaveguideScene.tsx`. The Guide page opens on a waveguide drawn from its physics: a
+glass core inside a cladding, light launched from a source, total internal reflection keeping
+it inside, the guided mode with its travelling phase, the evanescent glow just past the core,
+and the light leaving as a spreading wave. The section "Why we call it a Wave Guide" cites the
+definition from Wikipedia and has a study version: move the pointer (or use the arrow keys)
+to change the launch angle, and past the critical angle the light escapes.
+
+## Volunteer near you
+
+`src/give.tsx` and `api/volunteer.js`. Live listings from Volunteer Connector (Canada by
+postal area, and remote roles), sorted by distance from the visitor's approximate location, or
+an exact one they choose to share (rounded to about 10km, never stored). A constellation shows
+the visitor at the centre and each opportunity at its real bearing. Idealist switches on when
+`IDEALIST_API_KEY` is set: `api/volunteer-sync.js` (daily cron, needs `CRON_SECRET`) and
+`scripts/idealist-sync.mjs` (the first full sync, by hand) file its listings into location
+tiles in Blob storage, since its API has no location search.
 
 ## Buttons
 
@@ -77,8 +106,8 @@ gradient rim, a dark plate, and liquid rising inside on hover. No cut corners (A
 
 - August's words, every one, and his new lines: "Raise Capital In A Whole New Way.",
   "Raise Waves.", "Welcome To The Frontier Of Funding", "#BuildDifferent #BuildAWave".
-- The supplied films: the home nucleus and the Grow whale (now dimmer, so the words lead).
-  The Surge transfer film is the fallback when the liquid cannot run.
+- The supplied films: the home nucleus, the Surge transfer (the home input's auto-played
+  intro, restored exactly at August's request) and the Grow whale (dimmer, so the words lead).
 - The four nav marks and the Grow hold (it now opens Waves with a pulse through the field).
 - Every route, form and API.
 

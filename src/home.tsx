@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { WaveMark } from './ui';
 import { useStateStore } from './state';
-import { mindWave, liquidReady, liquidPour, liquidDrip, liquidBurst } from './mind/WaveMind';
+import { mindWave } from './mind/WaveMind';
 const INTRO_TEXT='Start Building Your Wave Right Here, Right Now. Set It Into Motion.';
 type IntroPhase='waiting'|'typing'|'flow'|'idle';
 export function Home() {
@@ -12,8 +12,6 @@ export function Home() {
   const [focus,setFocus]=useState(false),[sending,setSending]=useState(false),[playing,setPlaying]=useState(false);
   const [introPhase,setIntroPhase]=useState<IntroPhase>(motion?'waiting':'idle');
   const [introText,setIntroText]=useState('');
-  const [pouring,setPouring]=useState(false);
-  const stage=useRef<HTMLFormElement>(null);
   const video=useRef<HTMLVideoElement>(null);
   const nucleus=useRef<HTMLVideoElement>(null);
   const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -47,10 +45,7 @@ export function Home() {
       if(index<INTRO_TEXT.length){introTimer.current=setTimeout(typeNext,48);return;}
       introTimer.current=setTimeout(()=>{
         if(!active||introPhaseRef.current!=='typing')return;
-        introPhaseRef.current='flow';setIntroPhase('flow');
-        // The vision drips from the glass onto Surge. Without WebGL the supplied film plays instead.
-        if(liquidReady()&&liquidDrip(stage.current?.querySelector('.surge-button')??null)){introTimer.current=setTimeout(finishIntro,2300);return;}
-        transferMode.current='intro';
+        introPhaseRef.current='flow';setIntroPhase('flow');transferMode.current='intro';
         const v=video.current;
         if(!v){finishIntro();return;}
         v.currentTime=0;v.playbackRate=.58;
@@ -58,22 +53,17 @@ export function Home() {
         introTimer.current=setTimeout(finishIntro,12500);
       },550);
     };
-    // A ribbon of liquid comes down into the glass as the page opens, as in the Surge film; the question rises after it.
-    let pourTimer:ReturnType<typeof setTimeout>|null=setTimeout(()=>{
-      pourTimer=null;
-      if(active&&liquidPour(stage.current?.querySelector('.vision-stock')??null,0.62)){setPouring(true);pourTimer=setTimeout(()=>setPouring(false),1800);}
-    },260);
     introTimer.current=setTimeout(()=>{
       if(!active||introPhaseRef.current!=='waiting')return;
       introPhaseRef.current='typing';setIntroPhase('typing');typeNext();
-    },1250);
+    },650);
     const visibility=()=>{
       if(transferMode.current!=='intro')return;
       if(document.hidden){video.current?.pause();clearIntroTimer()}
       else{video.current?.play().catch(()=>{if(transferMode.current==='intro')finishIntro()});introTimer.current=setTimeout(finishIntro,12500)}
     };
     document.addEventListener('visibilitychange',visibility);
-    return()=>{active=false;clearIntroTimer();if(pourTimer)clearTimeout(pourTimer);setPouring(false);document.removeEventListener('visibilitychange',visibility);if(transferMode.current==='intro'){video.current?.pause();transferMode.current=null}};
+    return()=>{active=false;clearIntroTimer();document.removeEventListener('visibilitychange',visibility);if(transferMode.current==='intro'){video.current?.pause();transferMode.current=null}};
   },[motion]);
   useEffect(()=>{
     const element=nucleus.current;
@@ -92,14 +82,13 @@ export function Home() {
     const gate=event.currentTarget.querySelector('.surge-button');
     if(gate)mindWave(gate,1.5);
     if(!motion){continueToApplication();return;}
-    if(liquidReady()){liquidBurst(gate);timer.current=setTimeout(continueToApplication,1250);return;}
     const v=video.current;
     transferMode.current='submit';
     if(v){v.currentTime=0;v.playbackRate=.58;v.play().catch(continueToApplication)}
     else continueToApplication();
     timer.current=setTimeout(continueToApplication,15000);
   }
-  return <div className={'home-page immersive-home '+(sending?'is-sending ':'')+(pouring?'is-pouring':'')}>
+  return <div className={'home-page immersive-home '+(sending?'is-sending':'')}>
     <div className="home-identity">
       <WaveMark className="identity-mark" />
       <div className="identity-name" aria-label="Waves.Fund">Waves<span>.Fund</span></div>
@@ -108,16 +97,15 @@ export function Home() {
     </div>
     <div className="vision-workspace">
       <div className="vision-heading"><h1>What’s Your <span>Vision?</span></h1><p>What Are You Rising Towards?</p></div>
-      <form ref={stage} className={'energy-stage '+(focus||introPhase==='typing'?'engaged ':'')+(introPhase==='typing'?'intro-typing ':'')+(playing?'transferring':'')} onSubmit={surge}>
+      <form className={'energy-stage '+(focus||introPhase==='typing'?'engaged ':'')+(introPhase==='typing'?'intro-typing ':'')+(playing?'transferring':'')} onSubmit={surge}>
         <video className="surge-transfer" ref={video} src="/media/surge-transfer.mp4" preload="auto" muted playsInline aria-hidden="true" onPlaying={()=>{if(transferMode.current)setPlaying(true)}} onEnded={transferEnded} onError={()=>{if(transferMode.current==='intro')finishIntro()}}/>
         <div className="vision-input">
           <label htmlFor="vision" className="sr-only">What’s Your Vision?</label>
           <textarea id="vision" required maxLength={500} value={introPhase==='idle'?state.vision:introText} placeholder={introPhase==='idle'?'Type your vision here...':''} readOnly={sending||introPhase!=='idle'} onFocus={()=>{if(introPhaseRef.current!=='idle')finishIntro();setFocus(true);if(motion&&video.current?.readyState===0)video.current.load()}} onBlur={()=>setFocus(false)} onChange={e=>{if(introPhaseRef.current==='idle'){setState(s=>({...s,vision:e.target.value}));const now=performance.now();if(now-lastSpark.current>120){lastSpark.current=now;mindWave(e.currentTarget,0.3)}}}}/>
-          <div className="stock vision-stock" data-stock="pool" data-level={focus||state.vision?'0.05':'0.46'} aria-hidden="true"/>
           <span className="character-count">{introPhase==='idle'?state.vision.length:introText.length}/500</span>
         </div>
         <svg className="energy-channel" viewBox="0 0 950 650" aria-hidden="true"><defs><linearGradient id="channel" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#43dfff" stopOpacity="0"/><stop offset=".5" stopColor="#64edff"/><stop offset="1" stopColor="#9981ff" stopOpacity=".2"/></linearGradient></defs><path className="channel-branch" d="M55 338 C55 385 350 380 446 454 C467 469 475 483 475 506 M895 338 C895 385 600 380 504 454 C483 469 475 483 475 506"/><path className="channel-core" d="M475 357 C475 430 475 453 475 506"/><circle className="channel-node" cx="475" cy="450" r="5"/></svg>
-        <button className="surge-button" type="submit" disabled={sending} data-stock="land"><span>Surge</span><ArrowRight size={24}/></button>
+        <button className="surge-button" type="submit" disabled={sending}><span>Surge</span><ArrowRight size={24}/></button>
       </form>
       <div className="vision-after"><span role="status">{sending?'Your vision is moving forward.':''}</span>{sending?<button onClick={continueToApplication}>Continue <ArrowRight size={14}/></button>:introPhase!=='idle'&&<button type="button" onClick={finishIntro}>Skip intro <ArrowRight size={14}/></button>}</div>
       <div className="home-neuron" aria-hidden="true" data-mind="vision"><video ref={nucleus} src="/media/home-nucleus.mp4" poster="/media/home-nucleus.webp" muted playsInline loop preload="metadata"/></div>

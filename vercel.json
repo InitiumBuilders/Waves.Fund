@@ -75,5 +75,16 @@
         }
       ]
     }
-  ]
+  ],
+  "crons": [
+    {
+      "path": "/api/volunteer-sync",
+      "schedule": "17 7 * * *"
+    }
+  ],
+  "functions": {
+    "api/volunteer-sync.js": {
+      "maxDuration": 60
+    }
+  }
 }

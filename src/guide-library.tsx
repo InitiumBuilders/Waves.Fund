@@ -3,11 +3,12 @@ import { Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ArrowDownToLine, ArrowLeft, ArrowRight, BookOpen, Check, Compass, FileText, Users, Waves } from "lucide-react";
-import { ButtonLink, Intro, WaveMark } from "./ui";
+import { ButtonLink, Intro } from "./ui";
 import { guideHandbook, guideLessons, guidePractices, guideWorksheets, downloadGuideMarkdown } from "./guide-library-data";
 import type { GuideLessonData } from "./guide-library-data";
 import "./guide-library.css";
-import { MindAnchor, Stock } from "./mind/WaveMind";
+import { Stock } from "./mind/WaveMind";
+import { WaveguideScene } from "./mind/WaveguideScene";
 
 function Download({ content, filename, children }: { content: string; filename: string; children: React.ReactNode }) {
   return <button type="button" className="guide-download" onClick={() => downloadGuideMarkdown(content, filename)}><ArrowDownToLine size={17} aria-hidden="true" />{children}</button>;
@@ -26,8 +27,24 @@ function Practices() {
 
 export function GuidePitch() {
   return <div className="document-page guide-public">
-    <div className="guide-pitch-hero"><Intro eyebrow="THE HUMAN IN THE LOOP" title={<>Your vision.<br />Your Wave.<br /><span>A Guide beside you.</span></>} actions={<><ButtonLink to="/apply">Build Your Wave</ButtonLink><ButtonLink to="/guide/library" secondary>Explore The Guide Library</ButtonLink></>}><p>A Wave Guide works with you to design, build, and evolve a custom home for your mission—its story, its people, and its next move.</p></Intro><div className="guide-human-orbit" aria-hidden="true"><div className="guide-orbit-ring" /><MindAnchor name="orbit" className="guide-orbit-mind" /><WaveMark className="guide-orbit-fallback" /><span>Wave Guides</span><i /><i /></div></div>
+    <div className="guide-pitch-hero"><Intro eyebrow="THE HUMAN IN THE LOOP" title={<>Your vision.<br />Your Wave.<br /><span>A Guide beside you.</span></>} actions={<><ButtonLink to="/apply">Build Your Wave</ButtonLink><ButtonLink to="/guide/library" secondary>Explore The Guide Library</ButtonLink></>}><p>A Wave Guide works with you to design, build, and evolve a custom home for your mission—its story, its people, and its next move.</p></Intro><div className="guide-hero-scene"><WaveguideScene /></div></div>
     <section className="guide-service panel" aria-labelledby="guide-service-title"><div><p className="eyebrow">CUSTOM. ADAPTIVE. BUILT TOGETHER.</p><h2 id="guide-service-title">A real person.<br />A working relationship.</h2></div><div><p>You hire a Wave Guide to understand your mission and build a Wave around what you need. A campaign, a team, a story, a funding need, or an idea taking its first form.</p><p>Agree on a <strong>defined build, weekly engagement, or monthly support</strong>. Scope, fees, ownership, and ongoing care are agreed together before work begins. Your Wave adapts as the work changes.</p><p>You own the direction. Your Guide helps you make the next move.</p></div></section>
+    <section className="guide-section guide-physics" aria-labelledby="guide-physics-title">
+      <div className="guide-physics-text">
+        <p className="eyebrow">WHY WE CALL IT A WAVE GUIDE</p>
+        <h2 id="guide-physics-title">A waveguide keeps a wave on course.</h2>
+        <p>In physics, a waveguide is <q>a structure that guides waves by restricting the direction of transmission of energy</q> (<a className="guide-cite" href="https://en.wikipedia.org/wiki/Waveguide" target="_blank" rel="noreferrer noopener">Wikipedia</a>).</p>
+        <p>Without one, a wave spreads out in every direction and fades. Inside one, it keeps its strength over a long distance. Optical fibre carries light this way. Metal waveguides carry radar and microwaves. A channel deep in the ocean carries whale song over great distances.</p>
+        <p>Light stays inside a fibre because it meets the wall at a shallow angle and reflects back into the core, again and again. This is called total internal reflection.</p>
+        <p>A Wave Guide does this work for a builder. You bring the energy: the vision and the people behind it. Your Guide keeps it pointed at the outcome so it arrives with its strength.</p>
+      </div>
+      <div className="guide-physics-figure"><WaveguideScene variant="study" /></div>
+      <ol className="guide-physics-facts">
+        <li><span>01</span><h3>Total internal reflection</h3><p>Light that meets the wall at a shallow angle reflects back into the core. A Guide brings the work back to the core when it starts to drift.</p></li>
+        <li><span>02</span><h3>The acceptance angle</h3><p>A fibre only carries light that enters within a certain angle. A Guide helps you start in a direction the work can hold.</p></li>
+        <li><span>03</span><h3>Low loss</h3><p>Guided light crosses oceans through undersea cables. A guided Wave keeps its energy from the first conversation to the outcome.</p></li>
+      </ol>
+    </section>
     <section className="guide-section" aria-labelledby="guide-circle-title" data-mind="path"><div className="guide-section-heading"><p className="eyebrow">FROM INTENTION TO OUTCOME</p><h2 id="guide-circle-title">Build it. Move it.<br />See what changes.</h2></div><ol className="cascade guide-cascade">{[{ title: "Tell your story", text: "Your Guide listens, shapes the brief with you, and agrees the first useful move.", Icon: BookOpen }, { title: "Build your Wave", text: "A custom experience brings your story, tools, and ways to participate together.", Icon: Waves }, { title: "Bring people together", text: "Acknowledge offers, agree the work, and let people carry the Wave with permission.", Icon: Users }, { title: "Show what changed", text: "Report the outcome, recognize the help, and adapt to what is needed next.", Icon: Compass }].map(({ title, text, Icon }, index) => <li className="panel" key={title}><div className="cascade-step"><Icon size={22} strokeWidth={1.6} aria-hidden="true" /><span className="step-number">0{index + 1}</span></div><h3>{title}</h3><p>{text}</p><Stock level={0.12 + index * 0.12} /></li>)}</ol></section>
     <Practices />
     <section className="guide-learning-callout panel"><div><p className="eyebrow">LIFELONG LEARNERS. LIFELONG LEADERS.</p><h2>Learn the practice.<br />Become a Wave Guide.</h2><p>Six practical lessons. Seven working templates. A shared foundation you can adapt with every builder.</p><p>Designers, makers, teachers, researchers, artists, operators, and community builders can apply. Share what you can do, what you are learning, and the work you want to help move forward.</p></div><div className="guide-actions"><ButtonLink to="/guide/library">Open The Library</ButtonLink><ButtonLink to="/guide/apply" secondary>Apply To Be A Wave Guide</ButtonLink></div></section>

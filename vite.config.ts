@@ -13,7 +13,7 @@ export default defineConfig(({ command, mode }) => ({
                 process.env,
                 loadEnv("development", process.cwd(), ""),
               );
-              const handlers = { community: (await import("./api/community.js")).default, trax: (await import("./api/trax.js")).default, workspace: (await import("./api/workspace.js")).default, waves: (await import("./api/waves.js")).default };
+              const handlers = { community: (await import("./api/community.js")).default, trax: (await import("./api/trax.js")).default, workspace: (await import("./api/workspace.js")).default, waves: (await import("./api/waves.js")).default, volunteer: (await import("./api/volunteer.js")).default };
               for (const [name, handler] of Object.entries(handlers)) {
               server.middlewares.use(
                 `/api/${name}`,

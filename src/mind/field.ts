@@ -1,19 +1,27 @@
 import { FIELD_MODES, type FieldMode } from "./modes";
-import { Liquid, type Stock } from "./liquid";
+import { Energy } from "./energy";
 
 /** An anchor rectangle in document pixels, where a mode of the field takes place. */
 export type Anchor = { name: FieldMode; left: number; top: number; width: number; height: number };
-/** A clear zone in document pixels (or viewport pixels when fixed): content the field must frame, never cover. */
-export type Clear = { left: number; top: number; width: number; height: number; fixed: boolean };
+/** Content the field frames and never covers: document pixels, or viewport pixels when fixed. */
+export type Clear = { left: number; top: number; width: number; height: number; fixed: boolean; radius?: number };
+/** A rectangle in viewport pixels. */
+export type Region = { x: number; y: number; w: number; h: number };
+export type Topology = "layers" | "star" | "hubs" | "chain" | "web";
 
 /* The Field: one steady lattice of dots in 3D under the whole site. The dots never leave their places.
    Energy moves through them: waves lift them toward you, masses sink gravity funnels into the grid, pulses
-   ring out from a touch, and links light between neighbours only where both are active. Content is never
-   covered: every card and block of text carves a feathered clearing, so the dots frame the page.
-   Where energy gathers, the dots flow into a bead of liquid (see liquid.ts). */
+   ring out from a touch, and links light between neighbours only where both are active.
+   Now and then, and as you reach a chapter, a neural network organises itself out of the lattice: some
+   dots become nodes, their neighbours lean in, connections grow between them and signals travel along
+   them. Then it lets go and the ground is even again. Nothing flies in; the network is made of the dots
+   that were already there.
+   Content is never covered. Every line of text, control and card is drawn into a small mask each frame,
+   and the dots fade out around them, so the words sit on quiet ground. */
 
-const MAX_CLEAR = 48;
 const FOCAL = 1100;
+const MAX_NODES = 28, MAX_EDGES = 56;
+const MASK_SCALE = 0.25;
 
 const FIELD = `
 uniform vec2 uRes;
@@ -22,7 +30,10 @@ uniform int uModeA, uModeB;
 uniform vec4 uRectA, uRectB;
 uniform vec3 uPointer, uMover;
 uniform vec4 uPulses[4];
-uniform vec4 uCondense[3];
+uniform vec4 uNodes[${MAX_NODES}];
+uniform int uNodeN;
+uniform vec4 uNetBox;
+uniform float uNodeR;
 struct F { float a; vec2 d; float z; };
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 // Gravity: the grid leans toward a mass and sinks into a funnel around it, the way spacetime diagrams draw it.
@@ -163,31 +174,28 @@ F field(vec2 p, float t) {
       f.a += band * 1.6; f.d += d / r * band * 8.0; f.z += band * 60.0;
     }
   }
-  return f;
-}
-// Where energy gathers into a bead, nearby dots flow into it and give up their light.
-float condense(inout vec2 pos, vec2 base) {
-  float fade = 1.0;
-  for (int k = 0; k < 3; k++) {
-    vec4 c = uCondense[k];
-    float age = uTime - c.z;
-    if (c.w <= 0.0 || age < 0.0 || age > 2.6) continue;
-    float gather = smoothstep(0.0, 1.1, age) * (1.0 - smoothstep(1.4, 2.6, age));
-    vec2 d = c.xy - base; float r = length(d);
-    float pull = exp(-r * r / (2.0 * 70.0 * 70.0)) * gather;
-    pos += d * pull * 0.85;
-    fade *= 1.0 - pull * 0.9;
+  // An emerging network: each node is a lattice dot that lights, grows and rises; its neighbours lean in.
+  if (uNodeN > 0 && p.x > uNetBox.x && p.x < uNetBox.z && p.y > uNetBox.y && p.y < uNetBox.w) {
+    for (int k = 0; k < ${MAX_NODES}; k++) {
+      if (k >= uNodeN) break;
+      vec4 n = uNodes[k];
+      vec2 d = n.xy - p; float r2 = dot(d, d);
+      float g = exp(-r2 / (2.0 * uNodeR * uNodeR));
+      if (g < 0.003) continue;
+      f.a += n.z * g * (1.5 + n.w * 1.6);
+      f.d += d * g * n.z * 0.8;
+      f.z += n.z * g * (44.0 + n.w * 30.0);
+    }
   }
-  return fade;
+  return f;
 }
 `;
 
 const PROJECT = `
 uniform vec2 uTilt;
 uniform float uFocal;
-uniform vec4 uClear[${MAX_CLEAR}];
-uniform int uClearN;
 uniform float uOpacity;
+uniform sampler2D uMask;
 // Project a point on the lattice (viewport px, with height z toward the viewer) through a tilted camera.
 vec3 project(vec2 p, float z) {
   vec3 w = vec3(p.x - uRes.x * 0.5, uRes.y * 0.5 - p.y, z);
@@ -197,19 +205,8 @@ vec3 project(vec2 p, float z) {
   float k = uFocal / max(60.0, uFocal - w.z);
   return vec3(uRes.x * 0.5 + w.x * k, uRes.y * 0.5 - w.y * k, k);
 }
-// Content is never covered: every clear zone carves a feathered clearing, so the dots frame the page.
-float clearMask(vec2 s) {
-  float m = 1.0;
-  for (int i = 0; i < ${MAX_CLEAR}; i++) {
-    if (i >= uClearN) break;
-    vec4 r = uClear[i];
-    vec2 q = abs(s - r.xy) - r.zw + vec2(26.0);
-    float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - 26.0;
-    m = min(m, smoothstep(8.0, 52.0, d));
-    if (m <= 0.0) break;
-  }
-  return m;
-}
+// How clear of content a screen point is: 0 on words and cards, 1 in open space.
+float maskAt(vec2 s) { return texture(uMask, vec2(s.x / uRes.x, 1.0 - s.y / uRes.y)).r; }
 vec4 toClip(vec2 s) { return vec4(s / uRes * 2.0 - 1.0, 0.0, 1.0) * vec4(1.0, -1.0, 1.0, 1.0); }
 `;
 
@@ -227,11 +224,11 @@ void main() {
   int i = gl_VertexID;
   vec2 base = uOrigin + vec2(float(i % uCols), float(i / uCols)) * uSpacing;
   F f = field(base, uTime);
-  float act = clamp(f.a * uActK, 0.0, 2.6);
+  float act = clamp(f.a * uActK, 0.0, 2.8);
   vec2 pos = base + f.d * uDispK;
-  float fade = condense(pos, base);
   vec3 s = project(pos, f.z * uDispK + uDepth);
-  float r = (uBase + act * uGrowR) * (1.0 + uScrollP * 0.35) * s.z;
+  float m = maskAt(s.xy);
+  float r = (uBase + act * uGrowR) * (1.0 + uScrollP * 0.35) * s.z * (0.55 + 0.45 * m);
   gl_PointSize = max(1.0, r * 2.0 * 1.5 * uDpr);
   vEdge = 1.0 / 1.5;
   gl_Position = toClip(s.xy);
@@ -242,7 +239,7 @@ void main() {
   vColor = mix(vColor, vec3(0.93, 0.99, 1.0), clamp((act - 1.15) * 0.7, 0.0, 0.8));
   // Nearer dots are brighter; far ones sink into the dark.
   float depthLight = clamp(0.8 + (s.z - 1.0) * 1.5, 0.5, 1.3);
-  vA = uLayerA * uOpacity * fade * depthLight * clamp(0.3 + act * 0.9 + uTrust * 0.08, 0.0, 1.0) * clearMask(s.xy);
+  vA = uLayerA * uOpacity * depthLight * clamp(0.42 + act * 0.85 + uTrust * 0.08, 0.0, 1.0) * m;
 }`;
 const DOT_FS = `#version 300 es
 precision highp float;
@@ -284,7 +281,7 @@ void main() {
     lit = max(lit, step(0.955, k) * inside * uMix * uVisB * (0.7 + uTrust * 0.3));
   }
   gl_Position = toClip(end == 0 ? sa.xy : sb.xy);
-  vA = lit * 0.62 * uOpacity * clearMask((sa.xy + sb.xy) * 0.5);
+  vA = lit * 0.62 * uOpacity * maskAt((sa.xy + sb.xy) * 0.5);
   vColor = mix(uHue, vec3(0.9, 0.98, 1.0), clamp(both - 1.2, 0.0, 0.6));
 }`;
 const LINK_FS = `#version 300 es
@@ -292,6 +289,83 @@ precision highp float;
 in float vA; in vec3 vColor;
 out vec4 o;
 void main() { if (vA < 0.004) discard; o = vec4(vColor * vA, vA); }`;
+
+/* A connection in an emerging network: a thin line between two node dots, drawn where those dots really
+   are (the same field and camera), growing from its source and carrying a signal toward its target. */
+const EDGE_VS = `#version 300 es
+precision highp float;
+${FIELD}
+${PROJECT}
+uniform vec4 uEdgeAB[${MAX_EDGES}];
+uniform vec4 uEdgeK[${MAX_EDGES}];
+uniform float uEdgeW;
+out float vT; out float vS; out float vMask; out vec4 vK;
+void main() {
+  int e = gl_VertexID / 6, c = gl_VertexID % 6;
+  float t = (c == 1 || c == 4 || c == 5) ? 1.0 : 0.0;
+  float side = (c == 2 || c == 3 || c == 5) ? 1.0 : -1.0;
+  vec4 ab = uEdgeAB[e];
+  F fa = field(ab.xy, uTime), fb = field(ab.zw, uTime);
+  vec3 sa = project(ab.xy + fa.d, fa.z), sb = project(ab.zw + fb.d, fb.z);
+  vec2 dir = sb.xy - sa.xy; float len = max(length(dir), 0.001);
+  vec2 nrm = vec2(-dir.y, dir.x) / len;
+  vec2 pos = mix(sa.xy, sb.xy, t) + nrm * side * uEdgeW;
+  gl_Position = toClip(pos);
+  vT = t; vS = side; vK = uEdgeK[e];
+  vMask = maskAt(pos);
+}`;
+const EDGE_FS = `#version 300 es
+precision highp float;
+uniform float uTime;
+uniform vec3 uHue;
+uniform float uOpacity;
+uniform sampler2D uMask;
+uniform vec2 uCanvas;
+in float vT; in float vS; in float vMask; in vec4 vK;
+out vec4 o;
+void main() {
+  float grow = smoothstep(vK.x + 0.001, vK.x - 0.04, vT);
+  float sig = exp(-pow((vT - fract(uTime * vK.w + vK.z)) * 7.0, 2.0));
+  float across = exp(-vS * vS * 2.6);
+  // Masked per pixel: a long connection never crosses a line of text.
+  float m = texture(uMask, gl_FragCoord.xy / uCanvas).r;
+  float a = across * (0.2 + 1.35 * sig) * vK.y * grow * m * uOpacity;
+  if (a < 0.003) discard;
+  vec3 col = mix(uHue, vec3(0.95, 1.0, 1.0), clamp(sig * 0.8, 0.0, 0.8));
+  o = vec4(col * a, a);
+}`;
+
+/* The clearing mask: every block of content is drawn as a soft rounded box into a small texture, the
+   smallest value wins, and the dots read it. Tight to the words, feathered out over about 40px. */
+const MASK_VS = `#version 300 es
+precision highp float;
+layout(location = 0) in vec4 aRect;   // centre x, y and half width, height
+layout(location = 1) in vec2 aMeta;   // fixed to the viewport, corner radius
+uniform vec2 uRes;
+uniform float uScroll, uOuter;
+out vec2 vLocal; out vec3 vBox;
+void main() {
+  vec2 c = vec2(float(gl_VertexID & 1), float((gl_VertexID >> 1) & 1)) * 2.0 - 1.0;
+  vec2 centre = aRect.xy - vec2(0.0, aMeta.x > 0.5 ? 0.0 : uScroll);
+  vec2 half_ = aRect.zw + uOuter;
+  vLocal = c * half_;
+  vBox = vec3(aRect.zw, aMeta.y);
+  vec2 p = centre + vLocal;
+  gl_Position = vec4(p / uRes * 2.0 - 1.0, 0.0, 1.0) * vec4(1.0, -1.0, 1.0, 1.0);
+}`;
+const MASK_FS = `#version 300 es
+precision highp float;
+uniform float uInner, uOuter;
+in vec2 vLocal; in vec3 vBox;
+out vec4 o;
+void main() {
+  float r = min(vBox.z, min(vBox.x, vBox.y));
+  vec2 q = abs(vLocal) - vBox.xy + r;
+  float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+  float m = smoothstep(uInner, uOuter, d);
+  m = m * m * (3.0 - 2.0 * m);
+  o = vec4(m, m, m, 1.0);
+}`;
 
 function compile(gl: WebGL2RenderingContext, vs: string, fs: string) {
   const make = (type: number, src: string) => {
@@ -314,15 +388,22 @@ type Prog = ReturnType<typeof compile>;
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const approach = (v: number, target: number, k: number, dt: number) => v + (target - v) * (1 - Math.exp(-k * dt));
 const mix3 = (a: number[], b: number[], k: number) => a.map((v, i) => v + (b[i] - v) * k);
+const smooth = (a: number, b: number, x: number) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 type Layer = { spacing: number; parallax: number; base: number; grow: number; alpha: number; disp: number; act: number; depth: number; cols: number; rows: number };
+type NetNode = { lx: number; ly: number; delay: number; flash: number };
+type NetEdge = { a: number; b: number; delay: number; phase: number; speed: number; last: number };
+type Net = { nodes: NetNode[]; edges: NetEdge[]; t0: number; life: number };
 
 export class Field {
   private gl: WebGL2RenderingContext;
-  private dot: Prog; private link: Prog;
+  private dot: Prog; private link: Prog; private edge: Prog; private maskProg: Prog;
   private vao: WebGLVertexArrayObject;
+  private maskVao: WebGLVertexArrayObject; private maskBuf: WebGLBuffer;
+  private maskTex: WebGLTexture; private maskFbo: WebGLFramebuffer;
+  private maskW = 1; private maskH = 1; private clearCount = 0;
   private layers: Layer[];
-  readonly liquid: Liquid;
+  readonly energy: Energy;
   private a: Anchor | null = null;
   private b: Anchor | null = null;
   private morphStart = -1; private mix = 1; private raf = 0; private running = false;
@@ -333,12 +414,14 @@ export class Field {
   private tilt = [0.2, 0];
   private mover = { x: 0, y: 0, s: 0 };
   private pulses = new Float32Array(16); private slot = 0;
-  private condenseData = new Float32Array(12); private condenseView = new Float32Array(12); private cslot = 0;
-  private clears: Clear[] = [];
-  private clearData = new Float32Array(MAX_CLEAR * 4);
+  private nets: Net[] = [];
+  private nodeData = new Float32Array(MAX_NODES * 4);
+  private edgeAB = new Float32Array(MAX_EDGES * 4);
+  private edgeK = new Float32Array(MAX_EDGES * 4);
   private visA = 0; private visB = 0;
   private hue = [0.36, 0.86, 1.0]; private hueTarget = [0.36, 0.86, 1.0];
   private tint = { x: 0, y: 0, r: 160, s: 0, target: 0, hue: [0.36, 0.86, 1.0] };
+  private clears: Clear[] = [];
   motion = true;
   trust = 0;
   grow = 1;
@@ -347,15 +430,26 @@ export class Field {
   /** The scroll position, kept by the scroll listener: reading it inside a frame would force a style pass every frame. */
   sy = window.scrollY;
 
-  constructor(private canvas: HTMLCanvasElement, liquidCanvas: HTMLCanvasElement, private mobile: boolean) {
+  constructor(private canvas: HTMLCanvasElement, energyCanvas: HTMLCanvasElement, private mobile: boolean) {
     const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: true, powerPreference: "high-performance" });
     if (!gl) throw Error("webgl2 unavailable");
     this.gl = gl;
     this.dot = compile(gl, DOT_VS, DOT_FS);
     this.link = compile(gl, LINK_VS, LINK_FS);
+    this.edge = compile(gl, EDGE_VS, EDGE_FS);
+    this.maskProg = compile(gl, MASK_VS, MASK_FS);
     this.vao = gl.createVertexArray()!;
-    this.liquid = new Liquid(liquidCanvas);
-    this.liquid.onCondense = (x, y) => this.condense(x, y);
+    // The mask: instanced rounded boxes into a quarter-resolution single-channel texture.
+    this.maskVao = gl.createVertexArray()!;
+    this.maskBuf = gl.createBuffer()!;
+    gl.bindVertexArray(this.maskVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.maskBuf);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 24, 0); gl.vertexAttribDivisor(0, 1);
+    gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 24, 16); gl.vertexAttribDivisor(1, 1);
+    gl.bindVertexArray(null);
+    this.maskTex = gl.createTexture()!;
+    this.maskFbo = gl.createFramebuffer()!;
+    this.energy = new Energy(energyCanvas);
     const s = mobile ? 26 : 30;
     // Back to front: a deep, dense matrix far behind, an offset middle, and the front dots that carry the field.
     this.layers = [
@@ -367,13 +461,26 @@ export class Field {
   }
 
   resize() {
+    const gl = this.gl;
     this.dpr = Math.min(window.devicePixelRatio || 1, this.mobile ? 2 : 1.75);
     this.w = window.innerWidth; this.h = window.innerHeight;
     this.canvas.width = Math.round(this.w * this.dpr);
     this.canvas.height = Math.round(this.h * this.dpr);
+    this.energy.resize(this.w, this.h, this.dpr);
     // Deeper layers must span more of the plane to fill the screen once perspective shrinks them.
-    this.liquid.resize(this.w, this.h, this.dpr);
     for (const l of this.layers) { const k = 1 - l.depth / FOCAL; l.cols = Math.ceil((this.w * k * 1.18) / l.spacing) + 3; l.rows = Math.ceil((this.h * k * 1.3) / l.spacing) + 3; }
+    this.maskW = Math.max(1, Math.ceil(this.w * MASK_SCALE)); this.maskH = Math.max(1, Math.ceil(this.h * MASK_SCALE));
+    gl.deleteTexture(this.maskTex);
+    this.maskTex = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, this.maskTex);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.R8, this.maskW, this.maskH);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.maskFbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.maskTex, 0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     this.wake();
   }
 
@@ -386,21 +493,21 @@ export class Field {
     this.wake();
   }
   track(anchor: Anchor) { if (this.b && this.b.name === anchor.name) { this.b = anchor; this.wake(); } }
-  setClears(list: Clear[]) { this.clears = list; this.wake(); }
-  setStocks(list: Stock[]) { this.liquid.setStocks(list); this.wake(); }
-  feed(stock: Stock) { if (!this.motion) return false; const ok = this.liquid.feed(stock, this.now()); if (ok) this.wake(); return ok; }
-  pour(stock: Stock, from: { x: number; y: number }, fill?: number) { if (this.motion) { this.liquid.pour(stock, from, this.now(), fill); this.wake(); } }
-  burst(x: number, y: number) { if (this.motion) { this.liquid.burst(x, y, this.now()); this.wake(); } }
+  /** Content to frame: measured on layout changes only, uploaded once, moved by the scroll in the shader. */
+  setClears(list: Clear[]) {
+    const gl = this.gl;
+    this.clears = list;
+    const data = new Float32Array(list.length * 6);
+    list.forEach((c, i) => data.set([c.left + c.width / 2, c.top + c.height / 2, c.width / 2, c.height / 2, c.fixed ? 1 : 0, c.radius ?? Math.min(14, c.height / 2)], i * 6));
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.maskBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+    this.clearCount = list.length;
+    this.wake();
+  }
   wave(x: number, y: number, strength = 1) {
     if (!this.motion) return;
     this.pulses.set([x, y, this.now(), strength], this.slot * 4);
     this.slot = (this.slot + 1) % 4;
-    this.wake();
-  }
-  /** Dots flow together into a bead at this point (document pixels). */
-  condense(x: number, y: number) {
-    this.condenseData.set([x, y, this.now(), 1], this.cslot * 4);
-    this.cslot = (this.cslot + 1) % 3;
     this.wake();
   }
   point(x: number, y: number, active = true) {
@@ -413,12 +520,130 @@ export class Field {
     if (rgb) { this.tint.x = x; this.tint.y = y; this.tint.hue = rgb; this.tint.target = 1; } else this.tint.target = 0;
     this.wake();
   }
-  setMotion(on: boolean) { this.motion = on; if (!on) { this.a = this.b; this.mix = 1; this.morphStart = -1; } this.wake(); }
+  setMotion(on: boolean) { this.motion = on; if (!on) { this.a = this.b; this.mix = 1; this.morphStart = -1; this.nets = []; } this.wake(); }
   invalidate() { this.wake(); }
   wake() { this.stirred = this.now(); if (this.running) return; this.running = true; this.raf = requestAnimationFrame(this.frame); }
   stop() { cancelAnimationFrame(this.raf); this.running = false; }
   destroy() { this.stop(); }
   now() { return (performance.now() - this.t0) / 1000; }
+  get networks() { return this.nets.length; }
+
+  /** The largest open space in view: no words, no cards, no controls near it. Viewport pixels. */
+  openRegion(within?: Region): Region | null {
+    const cell = 20, W = this.w, H = this.h;
+    const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
+    const free = new Uint8Array(cols * rows).fill(1);
+    const pad = 28;
+    for (const c of this.clears) {
+      const top = c.fixed ? c.top : c.top - this.sy;
+      if (top > H + pad || top + c.height < -pad) continue;
+      const x0 = Math.max(0, Math.floor((c.left - pad) / cell)), x1 = Math.min(cols - 1, Math.floor((c.left + c.width + pad) / cell));
+      const y0 = Math.max(0, Math.floor((top - pad) / cell)), y1 = Math.min(rows - 1, Math.floor((top + c.height + pad) / cell));
+      for (let y = y0; y <= y1; y++) free.fill(0, y * cols + x0, y * cols + x1 + 1);
+    }
+    if (within) {
+      const x0 = Math.floor(within.x / cell), x1 = Math.ceil((within.x + within.w) / cell), y0 = Math.floor(within.y / cell), y1 = Math.ceil((within.y + within.h) / cell);
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) if (x < x0 || x >= x1 || y < y0 || y >= y1) free[y * cols + x] = 0;
+    }
+    // Keep clear of the very edges of the screen.
+    for (let y = 0; y < rows; y++) { free[y * cols] = 0; free[y * cols + cols - 1] = 0; }
+    // Largest rectangle of free cells (histogram method).
+    const hgt = new Int32Array(cols);
+    let best = { area: 0, x: 0, y: 0, w: 0, h: 0 };
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) hgt[x] = free[y * cols + x] ? hgt[x] + 1 : 0;
+      const stack: number[] = [];
+      for (let x = 0; x <= cols; x++) {
+        const hh = x < cols ? hgt[x] : 0;
+        while (stack.length && hgt[stack[stack.length - 1]] >= hh) {
+          const top = stack.pop()!, height = hgt[top];
+          const left = stack.length ? stack[stack.length - 1] + 1 : 0, width = x - left;
+          const aspectOk = width * cell >= 150 && height * cell >= 110;
+          if (aspectOk && width * height > best.area) best = { area: width * height, x: left, y: y - height + 1, w: width, h: height };
+        }
+        stack.push(x);
+      }
+    }
+    if (!best.area) return null;
+    return { x: best.x * cell, y: best.y * cell, w: best.w * cell, h: best.h * cell };
+  }
+
+  /** A network organises itself out of the lattice inside a region of the screen. */
+  emerge(region: Region, topology: Topology) {
+    if (!this.motion || this.nets.length >= 2) return false;
+    const used = this.nets.reduce((n, x) => n + x.nodes.length, 0);
+    const edgesUsed = this.nets.reduce((n, x) => n + x.edges.length, 0);
+    const front = this.layers[2], s = front.spacing;
+    const spanW = (front.cols - 1) * s, spanH = (front.rows - 1) * s;
+    const x0 = (this.w - spanW) / 2, y0 = (this.h - spanH) / 2, par = this.sy * front.parallax;
+    // Snap to real lattice dots: nodes are dots that were already there.
+    const snap = (x: number, y: number) => [x0 + Math.round((x - x0) / s) * s, y0 + Math.round((y + par - y0) / s) * s];
+    const R = { x: region.x + 14, y: region.y + 14, w: Math.max(0, region.w - 28), h: Math.max(0, region.h - 28) };
+    if (topology === "chain" ? R.w < 240 || R.h < 70 : R.w < 200 || R.h < 150) return false;
+    const pts: { x: number; y: number; layer: number }[] = [];
+    const edges: [number, number][] = [];
+    const rnd = mulberry(Math.floor(this.now() * 1000) ^ 0x9e3779b1);
+    const at = (fx: number, fy: number, layer: number) => { pts.push({ x: R.x + R.w * fx, y: R.y + R.h * fy, layer }); return pts.length - 1; };
+    if (topology === "layers") {
+      const cols = R.w > 480 ? 4 : 3, counts = cols === 4 ? [3, 4, 4, 2] : [3, 4, 2];
+      const colIdx: number[][] = [];
+      counts.forEach((n, c) => { colIdx.push([]); for (let j = 0; j < n; j++) colIdx[c].push(at(0.06 + (0.88 * c) / (cols - 1), (j + 0.5) / n, c)); });
+      for (let c = 0; c < cols - 1; c++) for (const a of colIdx[c]) {
+        const next = [...colIdx[c + 1]].sort((p, q) => Math.abs(pts[p].y - pts[a].y) - Math.abs(pts[q].y - pts[a].y)).slice(0, 2 + (rnd() < 0.35 ? 1 : 0));
+        for (const b of next) edges.push([a, b]);
+      }
+    } else if (topology === "star") {
+      const c = at(0.5, 0.5, 0), n = 7;
+      const rx = 0.42, ry = 0.4;
+      const ring: number[] = [];
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2 + rnd() * 0.3; ring.push(at(0.5 + Math.cos(a) * rx, 0.5 + Math.sin(a) * ry, 1)); }
+      ring.forEach((r, i) => { edges.push([c, r]); if (rnd() < 0.55) edges.push([r, ring[(i + 1) % n]]); });
+    } else if (topology === "hubs") {
+      const hubs = [at(0.22, 0.34, 0), at(0.78, 0.36, 0), at(0.5, 0.78, 0)];
+      edges.push([hubs[0], hubs[1]], [hubs[1], hubs[2]], [hubs[2], hubs[0]]);
+      hubs.forEach((hb, k) => {
+        const hx = [0.22, 0.78, 0.5][k], hy = [0.34, 0.36, 0.78][k];
+        for (let j = 0; j < 3; j++) { const a = rnd() * Math.PI * 2; const sat = at(Math.min(0.97, Math.max(0.03, hx + Math.cos(a) * 0.18)), Math.min(0.97, Math.max(0.03, hy + Math.sin(a) * 0.2)), 1); edges.push([hb, sat]); }
+      });
+    } else if (topology === "chain") {
+      const n = R.w > 600 ? 9 : 7;
+      const ids: number[] = [];
+      for (let i = 0; i < n; i++) ids.push(at(i / (n - 1), 0.5 + 0.34 * Math.sin(i * 1.1 + rnd() * 0.6), i));
+      for (let i = 0; i < n - 1; i++) edges.push([ids[i], ids[i + 1]]);
+      for (let i = 0; i < n - 2; i += 3) edges.push([ids[i], ids[i + 2]]);
+    } else {
+      const n = 11;
+      for (let i = 0; i < n * 6 && pts.length < n; i++) {
+        const fx = rnd(), fy = rnd();
+        const x = R.x + R.w * fx, y = R.y + R.h * fy;
+        if (pts.every(p => Math.hypot(p.x - x, p.y - y) > s * 2.6)) pts.push({ x, y, layer: Math.floor(fx * 4) });
+      }
+      pts.forEach((p, i) => {
+        const near = pts.map((q, j) => [j, Math.hypot(q.x - p.x, q.y - p.y)] as [number, number]).filter(([j]) => j !== i).sort((u, v) => u[1] - v[1]).slice(0, 2);
+        for (const [j] of near) if (!edges.some(([a, b]) => (a === j && b === i) || (a === i && b === j))) edges.push([i, j]);
+      });
+    }
+    // Snap, merge nodes that land on the same dot, and keep within budget.
+    const key = new Map<string, number>();
+    const nodes: NetNode[] = [];
+    const remap = pts.map(p => {
+      const [lx, ly] = snap(p.x, p.y);
+      const k = lx + ":" + ly;
+      if (!key.has(k)) { key.set(k, nodes.length); nodes.push({ lx, ly, delay: p.layer * 0.34 + rnd() * 0.18, flash: 0 }); }
+      return key.get(k)!;
+    });
+    if (nodes.length < 4 || used + nodes.length > MAX_NODES) return false;
+    const netEdges: NetEdge[] = [];
+    for (const [pa, pb] of edges) {
+      const a = remap[pa], b = remap[pb];
+      if (a === b || netEdges.some(e => (e.a === a && e.b === b) || (e.a === b && e.b === a))) continue;
+      if (edgesUsed + netEdges.length >= MAX_EDGES) break;
+      netEdges.push({ a, b, delay: nodes[a].delay + 0.18, phase: rnd(), speed: 0.32 + rnd() * 0.22, last: 0 });
+    }
+    this.nets.push({ nodes, edges: netEdges, t0: this.now(), life: 7.5 + rnd() * 3 });
+    this.wake();
+    return true;
+  }
 
   private rect(a: Anchor | null): [number, number, number, number] {
     if (!a) return [0, 0, 1, 1];
@@ -432,10 +657,47 @@ export class Field {
     return Math.max(0, Math.min(1, overlap / Math.min(a.height, this.h * 0.5)));
   }
 
+  /** Node strengths, positions and edge states for this frame. */
+  private packNetworks(t: number, dt: number) {
+    const front = this.layers[2];
+    const par = this.sy * front.parallax;
+    let n = 0, e = 0;
+    let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+    this.nets = this.nets.filter(net => t - net.t0 < net.life);
+    for (const net of this.nets) {
+      const age = t - net.t0;
+      const fade = 1 - smooth(net.life - 1.6, net.life, age);
+      const base = n;
+      for (const nd of net.nodes) {
+        const s = smooth(nd.delay, nd.delay + 0.55, age) * fade;
+        nd.flash = Math.max(0, nd.flash - dt * 2.2);
+        const x = nd.lx, y = nd.ly - par;
+        this.nodeData.set([x, y, s, nd.flash], n * 4);
+        bx0 = Math.min(bx0, x); by0 = Math.min(by0, y); bx1 = Math.max(bx1, x); by1 = Math.max(by1, y);
+        n++;
+      }
+      for (const ed of net.edges) {
+        const A = net.nodes[ed.a], B = net.nodes[ed.b];
+        const growT = smooth(ed.delay, ed.delay + 0.7, age);
+        const str = fade * smooth(ed.delay, ed.delay + 0.3, age);
+        // A signal reaching its target makes that node flash.
+        const pos = (t * ed.speed + ed.phase) % 1;
+        if (growT >= 1 && pos < ed.last) B.flash = 1;
+        ed.last = pos;
+        this.edgeAB.set([A.lx, A.ly - par, B.lx, B.ly - par], e * 4);
+        this.edgeK.set([growT, str * 0.9, ed.phase, ed.speed], e * 4);
+        e++;
+      }
+      void base;
+    }
+    const m = front.spacing * 3;
+    return { n, e, box: [bx0 - m, by0 - m, bx1 + m, by1 + m] };
+  }
+
   private frame = () => {
     const t0 = this.now();
     // At rest the field breathes at half rate; anything that stirs it brings it back to full rate.
-    const resting = this.motion && this.morphStart < 0 && t0 - this.stirred > 1.5 && this.pointer.s < 0.01 && !this.liquid.busy;
+    const resting = this.motion && this.morphStart < 0 && t0 - this.stirred > 1.5 && this.pointer.s < 0.01 && !this.energy.busy && !this.nets.length;
     this.odd = !this.odd;
     if (resting && this.odd && !document.hidden) { this.raf = requestAnimationFrame(this.frame); return; }
     const gl = this.gl, t = t0, dt = Math.min(0.05, Math.max(0.001, t - (this.last || t)));
@@ -454,36 +716,49 @@ export class Field {
     this.pointer.s = this.motion ? approach(this.pointer.s, this.pointer.target, 4, dt) : 0;
     this.tint.s = approach(this.tint.s, this.tint.target, 4, dt);
     this.hue = mix3(this.hue, this.hueTarget, this.motion ? 1 - Math.exp(-2 * dt) : 1);
+    const sy = this.sy;
     // The pointer tilts the whole 3D frame a little; scrolling leans it back as you go down.
-    const scrollMax = Math.max(1, (this.docHeight || document.documentElement.scrollHeight) - this.h);
-    const scrollP = Math.min(1, this.sy / scrollMax);
+    const scrollMax = Math.max(1, (this.docHeight || this.h) - this.h);
+    const scrollP = Math.min(1, sy / scrollMax);
     const px = this.pointer.target ? this.pointer.x / this.w - 0.5 : 0, py = this.pointer.target ? this.pointer.y / this.h - 0.5 : 0;
     const tiltTarget = [0.2 + scrollP * 0.12 + py * 0.1, px * 0.14];
     this.tilt[0] = this.motion ? approach(this.tilt[0], tiltTarget[0], 2.2, dt) : tiltTarget[0];
     this.tilt[1] = this.motion ? approach(this.tilt[1], tiltTarget[1], 2.2, dt) : tiltTarget[1];
     if (Math.abs(this.visB - vb) > 0.002 || this.pointer.s > 0.002 || this.tint.s > 0.002 || Math.abs(this.tilt[0] - tiltTarget[0]) > 0.001) animating = true;
     const time = this.motion ? t : 12;
-    if (this.motion) this.liquid.step(dt, t); else this.liquid.settle();
+    if (this.motion) this.energy.step(dt, t); else this.energy.settle();
+    const net = this.packNetworks(t, dt);
 
-    // Clear zones in view, in viewport pixels.
-    const sy = this.sy;
-    let cn = 0;
-    for (const c of this.clears) {
-      if (cn >= MAX_CLEAR) break;
-      const top = c.fixed ? c.top : c.top - sy;
-      if (top > this.h + 60 || top + c.height < -60) continue;
-      this.clearData.set([c.left + c.width / 2, top + c.height / 2, c.width / 2, c.height / 2], cn++ * 4);
+    // 1. The clearing mask.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.maskFbo);
+    gl.viewport(0, 0, this.maskW, this.maskH);
+    gl.clearColor(1, 1, 1, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    if (this.clearCount) {
+      gl.enable(gl.BLEND);
+      gl.blendEquation(gl.MIN);
+      gl.blendFunc(gl.ONE, gl.ONE);
+      gl.useProgram(this.maskProg.p);
+      gl.uniform2f(this.maskProg.u("uRes"), this.w, this.h);
+      gl.uniform1f(this.maskProg.u("uScroll"), sy);
+      gl.uniform1f(this.maskProg.u("uInner"), 3);
+      gl.uniform1f(this.maskProg.u("uOuter"), this.mobile ? 30 : 40);
+      gl.bindVertexArray(this.maskVao);
+      gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.clearCount);
+      gl.blendEquation(gl.FUNC_ADD);
     }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
+    // 2. The lattice, the network and the dots.
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.maskTex);
     gl.bindVertexArray(this.vao);
     const ra = this.rect(this.a), rb = this.rect(this.b);
-    const condense = this.condenseView;
-    for (let k = 0; k < 3; k++) { condense.set(this.condenseData.subarray(k * 4, k * 4 + 4), k * 4); condense[k * 4 + 1] -= sy; }
     const modeIndex = (x: Anchor | null) => (x ? FIELD_MODES.indexOf(x.name) : 12);
     const shared = (p: Prog) => {
       gl.useProgram(p.p);
@@ -503,12 +778,14 @@ export class Field {
       gl.uniform3f(p.u("uPointer"), this.pointer.x, this.pointer.y, this.pointer.s);
       gl.uniform3f(p.u("uMover"), this.mover.x, this.mover.y, this.motion ? this.mover.s : 0);
       gl.uniform4fv(p.u("uPulses[0]"), this.pulses);
-      gl.uniform4fv(p.u("uCondense[0]"), condense);
+      gl.uniform4fv(p.u("uNodes[0]"), this.nodeData);
+      gl.uniform1i(p.u("uNodeN"), net.n);
+      gl.uniform4f(p.u("uNetBox"), net.box[0], net.box[1], net.box[2], net.box[3]);
+      gl.uniform1f(p.u("uNodeR"), this.layers[2].spacing * 0.62);
       gl.uniform3f(p.u("uHue"), this.hue[0], this.hue[1], this.hue[2]);
       gl.uniform2f(p.u("uTilt"), this.tilt[0], this.tilt[1]);
       gl.uniform1f(p.u("uFocal"), FOCAL);
-      gl.uniform4fv(p.u("uClear[0]"), this.clearData);
-      gl.uniform1i(p.u("uClearN"), cn);
+      gl.uniform1i(p.u("uMask"), 0);
       gl.uniform1f(p.u("uOpacity"), this.opacity);
     };
     const origin = (l: Layer) => {
@@ -526,11 +803,18 @@ export class Field {
     gl.uniform1f(this.link.u("uDispK"), front.disp);
     gl.uniform1f(this.link.u("uActK"), front.act);
     gl.drawArrays(gl.LINES, 0, front.cols * front.rows * 4);
+    if (net.e) {
+      shared(this.edge);
+      gl.uniform4fv(this.edge.u("uEdgeAB[0]"), this.edgeAB);
+      gl.uniform4fv(this.edge.u("uEdgeK[0]"), this.edgeK);
+      gl.uniform1f(this.edge.u("uEdgeW"), this.mobile ? 1.5 : 1.8);
+      gl.uniform2f(this.edge.u("uCanvas"), this.canvas.width, this.canvas.height);
+      gl.drawArrays(gl.TRIANGLES, 0, net.e * 6);
+    }
     shared(this.dot);
     gl.uniform1f(this.dot.u("uDpr"), this.dpr);
     gl.uniform3f(this.dot.u("uTintHue"), this.tint.hue[0], this.tint.hue[1], this.tint.hue[2]);
     gl.uniform4f(this.dot.u("uTint"), this.tint.x, this.tint.y, this.tint.r, this.tint.s);
-    this.liquid.resize(this.w, this.h, this.dpr);
     for (const l of this.layers) {
       const o = origin(l);
       gl.uniform1i(this.dot.u("uCols"), l.cols);
@@ -545,9 +829,9 @@ export class Field {
       gl.drawArrays(gl.POINTS, 0, l.cols * l.rows);
     }
     gl.bindVertexArray(null);
-    // The liquid energy, drawn over the dots, only where it can be.
-    this.liquid.render(time, t, this.hue, sy);
-    if (this.liquid.active) animating = this.motion || animating;
+    // 3. The energy layer, above the page.
+    this.energy.render(time, t, this.hue, sy);
+    if (this.energy.active || net.n) animating = this.motion || animating;
     for (let k = 0; k < 4; k++) if (this.pulses[k * 4 + 3] > 0 && t - this.pulses[k * 4 + 2] < 3.2) animating = true;
     if (animating && !document.hidden) this.raf = requestAnimationFrame(this.frame);
     else this.running = false;
@@ -557,4 +841,8 @@ export class Field {
 function sameRect(a: Anchor | null, b: Anchor | null) {
   if (!a || !b) return a === b;
   return a.name === b.name && Math.abs(a.top - b.top) < 1 && Math.abs(a.left - b.left) < 1 && Math.abs(a.width - b.width) < 1 && Math.abs(a.height - b.height) < 1;
+}
+function mulberry(seed: number) {
+  let a = seed >>> 0;
+  return () => { a += 0x6d2b79f5; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }

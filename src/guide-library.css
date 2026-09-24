@@ -124,7 +124,7 @@
 .guide-public :is(a,button,summary,input):focus-visible { outline: 2px solid #adf4ff; outline-offset: 5px; }
 [data-motion="off"] .guide-human-orbit > i { animation: none; }
 @media (min-width: 600px) {
-  .guide-pitch-hero { grid-template-columns: minmax(0, 1fr) 220px; align-items: center; }
+  .guide-pitch-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); align-items: center; gap: 24px; }
   .guide-human-orbit { margin: 0; }
   .guide-lesson-grid, .guide-worksheet-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .guide-case-strip { grid-template-columns: 150px minmax(0,1fr); align-items: center; gap: 30px; padding: 30px !important; }
@@ -132,7 +132,7 @@
   .guide-case-strip h2 { font-size: 30px; }
 }
 @media (min-width: 900px) {
-  .guide-pitch-hero { grid-template-columns: minmax(0,1fr) 350px; }
+  .guide-pitch-hero { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 60px); }
   .guide-human-orbit { width: 310px; height: 300px; }
   .guide-human-orbit .wave-mark { width: 150px; height: 100px; }
   .guide-human-orbit > i { top: 50px; left: 30px; }

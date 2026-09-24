@@ -84,6 +84,28 @@ export function Learn() {
         <p>Welcome To The Frontier Of Funding</p>
         <p className="hashtags">#BuildDifferent #BuildAWave</p>
       </Intro>
+      {/* The pitch: what Waves.Fund does, in two paragraphs, and the match drawn as three nodes on one guide. */}
+      <section className="learn-pitch" aria-labelledby="learn-pitch-title">
+        <div>
+          <p className="eyebrow">WHAT WAVES.FUND DOES</p>
+          <h2 id="learn-pitch-title">We match builders with Wave Guides.</h2>
+        </div>
+        <div className="learn-pitch-text">
+          <p>
+            Waves.Fund pairs a project founder with a Wave Guide: a vibe coder who works with you to build your
+            own custom Wave. You bring the vision. Your Guide builds it with you.
+          </p>
+          <p>
+            A Wave is a portable digital object. It holds your story, your people and your next move. You can
+            move it, pass it along, and grow it as the work grows.
+          </p>
+        </div>
+        <ol className="learn-match" aria-label="How a Wave is made">
+          <li><span className="learn-match-node" aria-hidden="true" /><strong>You</strong><span>Project founder</span></li>
+          <li><span className="learn-match-node" aria-hidden="true" /><strong>Wave Guide</strong><span>Vibe coder</span></li>
+          <li><span className="learn-match-node is-wave" aria-hidden="true" /><strong>Your Wave</strong><span>Move it, pass it along, grow it</span></li>
+        </ol>
+      </section>
       <section className="mantra-panel panel" data-mind="bond">
         <p className="eyebrow">OUR CORE MANTRA, MISSION & PRACTICE</p>
         <h2>

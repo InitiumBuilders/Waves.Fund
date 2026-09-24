@@ -8,21 +8,12 @@ import {
 import {
   ArrowRight,
   Search,
-  Users,
-  Check,
-  Copy,
-  Hourglass,
-  Coins,
-  Megaphone,
 } from "lucide-react";
 import {
   ActionButton,
   Background,
   BottomNav,
   ButtonLink,
-  CONTACT,
-  DONATE,
-  External,
   Footer,
   Graphic,
   Header,
@@ -31,7 +22,8 @@ import {
   Status,
 } from "./ui";
 import { Home } from "./home";
-import { MindAnchor, mindWave, WaveMind, Stock, liquidDrip } from "./mind/WaveMind";
+import { MindAnchor, mindWave, WaveMind, Stock } from "./mind/WaveMind";
+import { Give } from "./give";
 import { Current } from "./mind/Current";
 import { Vessel } from "./vessel";
 import { useStateStore } from "./state";
@@ -282,131 +274,6 @@ function ProjectDetail({
         Give Time Or Funding
       </ButtonLink>
     </Sheet>
-  );
-}
-function Give() {
-  const [kind, setKind] = useState("Funding"),
-    [copied, setCopied] = useState(false);
-  async function share() {
-    try {
-      await navigator.clipboard.writeText("https://waves.fund");
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  }
-  return (
-    <div className="give-page document-page">
-      <Intro
-        eyebrow="GIVE"
-        title={
-          <>
-            Funding The
-            <br />
-            <span>Future Together</span>
-          </>
-        }
-      >
-        <p>Direct energy with intention.</p>
-      </Intro>
-      <div className="give-layout">
-        <div className="give-orbit">
-          <MindAnchor name="vortex" className="give-mind" />
-          <span className="give-core" aria-hidden="true">Support</span>
-          {([["Time", Hourglass], ["Mentorship", Users], ["Funding", Coins], ["Signal", Megaphone]] as const).map(([k, Icon]) => (
-            <button
-              key={k}
-              className={
-                "orbit-choice choice-" +
-                k.toLowerCase() +
-                (kind === k ? " selected" : "")
-              }
-              aria-pressed={kind === k}
-              onClick={(event) => {
-                setKind(k);
-                setCopied(false);
-                mindWave(event.currentTarget, 0.8);
-                liquidDrip(document.querySelector(".contribution-panel > .stock"));
-              }}
-            >
-              <Icon size={22} strokeWidth={1.6} aria-hidden="true" />
-              <span>{k}</span>
-            </button>
-          ))}
-        </div>
-        <section className="panel contribution-panel">
-          <p className="eyebrow">{kind}</p>
-          <h2>Support This Vision</h2>
-          {kind === "Funding" ? (
-            <>
-              <p>
-                Give directly to The Green Reef Foundation through its Benevity
-                donation page.
-              </p>
-              <img
-                className="giving-logo"
-                src="/media/green-reef-logo.webp"
-                alt="The Green Reef Foundation"
-              />
-              <External href={DONATE} className="glow-button">
-                Give To Green Reef
-              </External>
-              <p className="fine-print">
-                You will continue to Benevity. The Foundation and its giving
-                provider handle your donation and receipt. This supports the
-                Foundation’s mission; project-specific awards require a separate
-                agreement.
-              </p>
-            </>
-          ) : kind === "Signal" ? (
-            <>
-              <p>When Humanity Builds Together, We Change The World.</p>
-              <button className="glow-button" onClick={share}>
-                {copied ? "Link Copied" : "Copy Waves.Fund Link"}
-                {copied ? <Check size={18} /> : <Copy size={18} />}
-              </button>
-              <a className="share-address" href="https://waves.fund">
-                waves.fund
-              </a>
-            </>
-          ) : (
-            <>
-              <p>
-                {kind === "Time"
-                  ? "Bring your time, attention, and practical support to work that matters."
-                  : "Share what you know. Learn alongside builders. Help a project move forward."}
-              </p>
-              <ButtonLink
-                to={
-                  kind === "Mentorship"
-                    ? "/guide/apply"
-                    : "/contribute?type=Time"
-                }
-              >
-                {kind === "Mentorship"
-                  ? "Become A Wave Guide"
-                  : "Offer Your Time"}
-              </ButtonLink>
-              <p className="fine-print">
-                Tell the team what you can offer and when. They will review your
-                submission and contact you about a match.
-              </p>
-            </>
-          )}
-          <Stock level={0.3} />
-        </section>
-      </div>
-      <section className="section contact-strip">
-        <div>
-          <p className="eyebrow">PARTNERSHIPS & IMPACT INVESTMENT</p>
-          <h2>Welcome To The Frontier Of Funding</h2>
-        </div>
-        <a className="text-button" href={`mailto:${CONTACT}`}>
-          {CONTACT}
-          <ArrowRight size={17} />
-        </a>
-      </section>
-    </div>
   );
 }
 function Grow() {
