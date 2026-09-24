@@ -205,5 +205,5 @@ function TeachbackScene() {
     resize(); start();
     return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); document.removeEventListener("visibilitychange", onVis); };
   }, [motion]);
-  return <div ref={box} className="tb-scene" aria-hidden="true"><canvas ref={canvas} /></div>;
+  return <div ref={box} className="tb-scene" aria-hidden="true" data-quiet><canvas ref={canvas} /></div>;
 }

@@ -41,7 +41,7 @@ export default function GuidePage() {
 
   const nodes = useMemo<SceneNode[]>(() => {
     const out: SceneNode[] = [];
-    for (const c of guides) out.push({ key: c.person.ref, state: "guide", weight: 1 });
+    for (const c of guides) out.push({ key: c.person.ref, state: "guide", weight: 0.55 });
     for (const c of incoming) out.push({ key: c.person.ref, state: "incoming", weight: 0.85 });
     for (const c of waiting) out.push({ key: c.person.ref, state: "invited", weight: 0.75 });
     const top = list.length ? Math.max(...list.map((m) => m.score)) || 1 : 1;
@@ -256,10 +256,12 @@ function Moment({ c, onClose }: { c: Connection; onClose: () => void }) {
   const lines = commonLines(c.common, c.person.name);
   useEffect(() => {
     const d = ref.current;
+    const previous = document.activeElement as HTMLElement | null;
     d?.showModal();
     const old = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = old; };
+    // Focus goes back where it was when the moment closes.
+    return () => { document.body.style.overflow = old; previous?.focus?.(); };
   }, []);
   const go = (to: string) => { onClose(); navigate(to); };
   return (

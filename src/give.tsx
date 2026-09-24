@@ -45,7 +45,7 @@ export function Give() {
             <Link className="text-button" to="/give/guide">Find Your Give Guide<ArrowRight size={17} /></Link>
           </div>
         </div>
-        <Suspense fallback={<div className="gt-scene gt-hero-scene" aria-hidden="true" />}>
+        <Suspense fallback={<div className="gt-scene gt-hero-scene" aria-hidden="true" data-quiet />}>
           <GiveScene variant="hero" className="gt-hero-scene" />
         </Suspense>
       </header>

@@ -292,7 +292,7 @@ export function GiveScene({ variant, nodes = [], selected = null, onSelect, clas
   };
 
   return (
-    <div ref={box} className={`gt-scene gt-scene-${variant} ${className}`} onPointerDown={onSelect ? pick : undefined} aria-hidden="true">
+    <div ref={box} className={`gt-scene gt-scene-${variant} ${className}`} onPointerDown={onSelect ? pick : undefined} aria-hidden="true" data-quiet>
       <canvas ref={canvas} />
     </div>
   );

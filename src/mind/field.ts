@@ -422,6 +422,8 @@ export class Field {
   private hue = [0.36, 0.86, 1.0]; private hueTarget = [0.36, 0.86, 1.0];
   private tint = { x: 0, y: 0, r: 160, s: 0, target: 0, hue: [0.36, 0.86, 1.0] };
   private clears: Clear[] = [];
+  // Places where the dots stay but no network may form, such as a scene drawn on its own canvas.
+  private quiet: Clear[] = [];
   motion = true;
   trust = 0;
   grow = 1;
@@ -493,6 +495,7 @@ export class Field {
     this.wake();
   }
   track(anchor: Anchor) { if (this.b && this.b.name === anchor.name) { this.b = anchor; this.wake(); } }
+  setQuiet(list: Clear[]) { this.quiet = list; }
   /** Content to frame: measured on layout changes only, uploaded once, moved by the scroll in the shader. */
   setClears(list: Clear[]) {
     const gl = this.gl;
@@ -534,7 +537,7 @@ export class Field {
     const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
     const free = new Uint8Array(cols * rows).fill(1);
     const pad = 28;
-    for (const c of this.clears) {
+    for (const c of [...this.clears, ...this.quiet]) {
       const top = c.fixed ? c.top : c.top - this.sy;
       if (top > H + pad || top + c.height < -pad) continue;
       const x0 = Math.max(0, Math.floor((c.left - pad) / cell)), x1 = Math.min(cols - 1, Math.floor((c.left + c.width + pad) / cell));

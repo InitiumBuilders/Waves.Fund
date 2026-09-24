@@ -142,6 +142,7 @@ function measure() {
     if (r && r.height > 0 && r.width > 0) clears.push({ left: r.left, top: r.top, width: r.width, height: r.height, fixed: true, radius: 0 });
   }
   engine.setClears(clears);
+  engine.setQuiet([...document.querySelectorAll("main [data-quiet]")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top + sy, width: r.width, height: r.height, fixed: false, radius: 0 }; }));
 
   // Vessels.
   const vessels: Vessel[] = [];
