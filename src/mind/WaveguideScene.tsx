@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useStateStore } from "../state";
 
 /* A waveguide, drawn from its physics. A glass core sits inside a cladding with a slightly lower refractive
@@ -8,9 +8,10 @@ import { useStateStore } from "../state";
    phase, and a faint evanescent glow reaches just into the cladding. At the far end the light leaves as a
    spreading wave.
 
-   "hero" runs on its own with the light always guided. "study" lets you steer the launch angle with the
-   pointer (or the arrow keys): past the critical angle the rays stop reflecting and escape through the
-   cladding, which is the whole point of a guide. */
+   "hero" runs on its own with the light always guided. "study" follows the scroll: as it comes into view the
+   light is launched too steeply and escapes through the cladding, and by the time it reaches the middle of
+   the screen the angle has come inside the critical angle and the light is guided. Scrolling back reverses
+   it. No controls or labels. */
 
 const VS = `#version 300 es
 in vec2 aPos; void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
@@ -111,9 +112,7 @@ export function WaveguideScene({ variant = "hero", className = "" }: { variant?:
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const { motion } = useStateStore();
-  const [angle, setAngle] = useState(0.62);
-  const angleRef = useRef(angle);
-  angleRef.current = angle;
+  const angleRef = useRef(0.62);
 
   useEffect(() => {
     const c = canvas.current, b = box.current;
@@ -170,33 +169,31 @@ export function WaveguideScene({ variant = "hero", className = "" }: { variant?:
     return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); document.removeEventListener("visibilitychange", onVis); };
   }, [motion, variant]);
 
-  // In the study, the angle follows the pointer or the arrow keys, and a still frame redraws when motion is off.
-  useEffect(() => { (box.current as (HTMLDivElement & { redraw?: () => void }) | null)?.redraw?.(); }, [angle]);
-  const guided = angle < 1;
+  // In the study, the angle follows the scroll; a still frame redraws when motion is off.
+  useEffect(() => {
+    if (variant !== "study") return;
+    const onScroll = () => {
+      const el = box.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (innerHeight - r.top) / (innerHeight * 0.5 + r.height * 0.5)));
+      const k = Math.min(1, Math.max(0, (p - 0.15) / 0.6));
+      angleRef.current = motion ? 1.25 + (0.6 - 1.25) * (1 - Math.pow(1 - k, 3)) : 0.6;
+      if (!motion) (el as HTMLDivElement & { redraw?: () => void }).redraw?.();
+    };
+    onScroll();
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onScroll);
+    return () => { removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); };
+  }, [variant, motion]);
   // Only the fibre's own band is kept clear of dots; the rest of the frame stays open to the field.
   if (variant === "hero") return <div ref={box} className={"waveguide-scene " + className}><canvas ref={canvas} aria-hidden="true" /><div className="waveguide-band" data-clear aria-hidden="true" /></div>;
   return (
     <div className={"waveguide-study " + className}>
-      <div
-        ref={box}
-        className="waveguide-scene"
-        role="slider"
-        tabIndex={0}
-        aria-label="Launch angle of the light"
-        aria-valuemin={20}
-        aria-valuemax={150}
-        aria-valuenow={Math.round(angle * 100)}
-        aria-valuetext={guided ? "Inside the critical angle: the light is guided" : "Past the critical angle: the light escapes"}
-        onPointerMove={e => { const r = e.currentTarget.getBoundingClientRect(); setAngle(0.2 + ((e.clientY - r.top) / r.height) * 1.3); }}
-        onKeyDown={e => { if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); setAngle(a => Math.max(0.2, a - 0.05)); } if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); setAngle(a => Math.min(1.5, a + 0.05)); } }}
-      >
-        <canvas ref={canvas} aria-hidden="true" />
-        <div className="waveguide-band is-study" data-clear aria-hidden="true" />
+      <div ref={box} className="waveguide-scene" aria-hidden="true">
+        <canvas ref={canvas} />
+        <div className="waveguide-band is-study" data-clear />
       </div>
-      <p className={"waveguide-readout" + (guided ? "" : " is-lost")} aria-hidden="true" data-clear>
-        <span>{guided ? "Guided" : "Escaping"}</span>
-        {guided ? "Inside the critical angle, the light reflects back into the core." : "Past the critical angle, the light leaves the core and is lost."}
-      </p>
     </div>
   );
 }

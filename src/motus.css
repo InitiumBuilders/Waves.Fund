@@ -592,11 +592,7 @@ html:not([data-mind="on"]) .stock::before {
 .guide-physics-text q { color: var(--ink); }
 .guide-cite { color: #bff4ff; text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.45); text-underline-offset: 3px; }
 .guide-physics-figure { position: relative; }
-.waveguide-study .waveguide-scene { height: clamp(220px, 44vw, 340px); cursor: ns-resize; border-radius: 28px; corner-shape: superellipse(2.15); outline-offset: 4px; }
-.waveguide-study .waveguide-scene:focus-visible { outline: 2px solid #b8f6ff; }
-.waveguide-readout { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-top: 12px; font-size: 14px; color: var(--ink-2); }
-.waveguide-readout span { font-size: 11px; font-weight: 640; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan); }
-.waveguide-readout.is-lost span { color: #c7b8ff; }
+.waveguide-study .waveguide-scene { height: clamp(220px, 44vw, 340px); border-radius: 28px; corner-shape: superellipse(2.15); outline-offset: 4px; }
 .guide-physics-facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; grid-column: 1 / -1; }
 .guide-physics-facts li { position: relative; padding: 22px 0 0; }
 .guide-physics-facts li::before { content: ""; position: absolute; top: 0; left: 0; right: 30%; height: 1px; background: var(--edge); }

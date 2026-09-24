@@ -82,8 +82,9 @@ words, so clearings follow a ragged right edge and never open up empty space.
 glass core inside a cladding, light launched from a source, total internal reflection keeping
 it inside, the guided mode with its travelling phase, the evanescent glow just past the core,
 and the light leaving as a spreading wave. The section "Why we call it a Wave Guide" cites the
-definition from Wikipedia and has a study version: move the pointer (or use the arrow keys)
-to change the launch angle, and past the critical angle the light escapes.
+definition from Wikipedia and has a second version that follows the scroll: as it comes into
+view the light is launched too steeply and escapes, and by the middle of the screen it is inside the
+critical angle and guided. No controls or labels.
 
 ## Cadence: one beat
 
@@ -152,12 +153,10 @@ Its physics is interference.
 | Place | What it shows | Statement |
 | --- | --- | --- |
 | Landing, first scene (`together/tank.tsx`) | A sticky scene over three scroll chapters, August's lines "Find Your People." "Give Together." "Build a Wave.": you, one light, with faint lights around you not yet in step; one comes near and falls into step, and the bands between you rise twice as high; then everyone lines up in step and the rings join into one straight wavefront (Huygens) | Two in step add up; many in step make one wave. |
-| Landing, A Give Guide (`PairStudy`) | Two sources; drag, use the slider or the arrow keys to change how far in step they are. In step the pattern doubles, out of step it goes still | Giving in step adds up. |
+| Landing, A Give Guide (`PairScene`) | Two sources; as the section scrolls into view the second one arrives and falls into step with the first, and the bands between them brighten. Scrolling back reverses it | Meeting someone to give with. |
 | /give/guide (`together/scene.tsx`, field) | You at the centre. Give Guides ripple in step with you; people who share something are faint lights whose rings stay close; choose one and their rings reach toward yours and fall into step | A preview of giving together. |
 | The moment | Two lights fall into step over two seconds, then a ring spreads from where they meet, and "Your Give Guide" appears | You both said yes. |
 | Shared Wave (`together/wave.tsx`) | Two lights out of step while proposed, in step once active | The Wave is underway. |
-| Give Profile | Seven rings, one per question, lit as you answer | You are building your profile. |
-| Record | One ring per day given together | Each day adds a ring. |
 | Opportunities | Each kind has its wave symbol (Teachback: standing wave; volunteering: a pair in step; event: a travelling wave) | Kind at a glance. |
 
 ## The Teachback
@@ -169,12 +168,10 @@ Its physics is interference.
   a steady standing-wave swing. Then each learner teaches two more, for five generations. 2D
   canvas, stamped glow sprites; motion off shows the finished tree. It opens partway through its
   cycle, so the first screen already shows learners taught back.
-- The string lab (`src/teachback-lab.tsx`): a string between Teacher and Learner, simulated with
-  the damped 1D wave equation. Hold "Hold To Teach" and the teacher's end moves at the string's
-  third harmonic; each push meets the returning echo in step and a standing wave builds (about
-  two seconds). Let go and it fades slowly. Touch the string to send one pulse and watch it
-  reflect. The words under it follow the height of the swing, not the instant. While no one is using
-  it, the teacher's end sends one small pulse every four beats.
+- The string (`src/teachback-string.tsx`): a string held at both ends, simulated with the damped
+  1D wave equation. It starts by itself when scrolled into view: one end moves at the string's third
+  harmonic, each push meets the returning echo, and a standing wave builds. Scrolled away, it settles.
+  A touch sends one pulse. No labels, buttons or captions.
 
 ## Wave symbols
 
@@ -189,8 +186,10 @@ together: Pair, Teach it back: Echo, Pass it on: Resonance), the four practices 
 story: Echo, Build your Wave: Growing, Bring people together: Pair, Show what changed: Resonance). The
 moving parts are HTML layers, so the compositor animates them; each symbol clears its patch of dots.
 
-A clearing can be round: `data-clear="round"` clears a circle instead of a rounded box (the
-profile rings and the record rings use it).
+A clearing can be round: `data-clear="round"` clears a circle instead of a rounded box.
+
+Rule (August, 2026-09-24): no sliders, dials, meters, readouts or captions that explain a visual, and
+no physics words in visible copy. Animations run by themselves, on the beat, or follow the scroll.
 
 ## Buttons
 
