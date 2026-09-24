@@ -175,7 +175,7 @@ p, li, td, th, dd, label {
     border-color 0.35s ease,
     box-shadow 0.35s ease;
 }
-input:not([type="checkbox"]):not([type="range"]),
+input:not([type="checkbox"]):not([type="range"]):not([type="file"]),
 textarea,
 select {
   color: #fff;

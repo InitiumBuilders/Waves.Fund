@@ -702,3 +702,9 @@ html.mind-measuring .arrive { animation: none !important; }
 @keyframes answer-in { from { opacity: 0; transform: translate3d(0, -6px, 0); } }
 html[data-motion="off"] .question-list details[open] > :not(summary) { animation: none; }
 @media (prefers-reduced-motion: reduce) { .question-list details[open] > :not(summary) { animation: none; } }
+
+/* The dot under the page you are on breathes on the beat (src/cadence.ts): the page keeps time with the rest. */
+.nav-item.active::after { animation: beat-dot 1.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
+@keyframes beat-dot { from { opacity: 0.5; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+html[data-motion="off"] .nav-item.active::after { animation: none; }
+@media (prefers-reduced-motion: reduce) { .nav-item.active::after { animation: none; } }

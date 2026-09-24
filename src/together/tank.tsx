@@ -73,7 +73,8 @@ function tankModel(progress: MutableRefObject<number>): RippleModel {
     });
     // Quieter while the line forms; once it has formed, the wave moves forward (right on a wide screen, up on a phone).
     const moving = c3 > 0 && c3 < 1 ? Math.sin(Math.PI * c3) : 0;
-    for (const s of out) { s.a *= 1 - 0.55 * moving; s.reach = (s.reach ?? 0.62) * (1 - 0.35 * moving); }
+    // Each moving light keeps its ripples close, so the move reads as people walking into place.
+    for (const s of out) { s.a *= 1 - 0.5 * moving; s.reach = (s.reach ?? 0.62) * (1 - 0.8 * moving); }
     const line = slot(LINE.you);
     const front: [number, number, number, number] = [line.x, line.y, wide ? 0 : -Math.PI / 2, ease((c3 - 0.55) / 0.45)];
     return { sources: out, lambda, speed: lambda / BEAT, gain: 1.15, dots: wide ? 15 : 13, ground: 0.94, front };

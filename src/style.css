@@ -1259,7 +1259,7 @@ label {
   color: #c3d8ef;
   line-height: 1.7;
 }
-input:not([type="checkbox"]):not([type="range"]),
+input:not([type="checkbox"]):not([type="range"]):not([type="file"]),
 textarea,
 select {
   width: 100%;
