@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { NavigateFunction } from "react-router-dom";
-import { arriveOnScroll, startCadence, still } from "./cadence";
+import { arriveOnScroll, startCadence, still, waveOnArrival } from "./cadence";
 import { mindWave } from "./mind/WaveMind";
 
 type Transitioning = Document & { startViewTransition?: (update: () => Promise<void>) => unknown };
@@ -53,7 +53,8 @@ export function Seamless() {
   useEffect(() => {
     const first = setTimeout(arriveOnScroll, 60);
     const later = setTimeout(arriveOnScroll, 1400);
-    return () => { clearTimeout(first); clearTimeout(later); };
+    const waves = waveOnArrival((x, y) => mindWave({ x, y }, 0.6));
+    return () => { clearTimeout(first); clearTimeout(later); waves(); };
   }, [pathname]);
 
   useEffect(() => {

@@ -81,3 +81,31 @@ export function arriveOnScroll() {
     el.classList.add("arrive");
   }
 }
+
+/* Each chapter arrives with a wave. When a section's heading reaches the middle of the screen for the first
+   time, one soft ring goes out through the dot field from where the heading starts, on the next beat. */
+export function waveOnArrival(send: (x: number, y: number) => void) {
+  if (still() || typeof IntersectionObserver === "undefined") return () => {};
+  const timers = new Set<number>();
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      io.unobserve(e.target);
+      const wait = (BEAT - (clock() % BEAT)) * 1000;
+      const id = window.setTimeout(() => {
+        timers.delete(id);
+        const r = e.target.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < innerHeight) send(r.left + Math.min(40, r.width / 2), r.top + r.height / 2);
+      }, wait);
+      timers.add(id);
+    }
+  }, { rootMargin: "-38% 0px -38% 0px" });
+  const watch = () => {
+    for (const h of document.querySelectorAll("main section h2")) {
+      if (!h.closest(".page-intro, .gt-tank, dialog")) io.observe(h);
+    }
+  };
+  watch();
+  const later = window.setTimeout(watch, 1400);
+  return () => { io.disconnect(); clearTimeout(later); timers.forEach((t) => clearTimeout(t)); };
+}
