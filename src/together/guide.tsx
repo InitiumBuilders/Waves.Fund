@@ -71,7 +71,7 @@ export default function GuidePage() {
 
       <div className="gt-guide-stage">
         <GiveScene variant="field" nodes={nodes} selected={selected} onSelect={pick} paused={Boolean(moment)} className="gt-guide-scene" />
-        <p className="gt-scene-key" aria-hidden="true">
+        <p className="gt-scene-key" aria-hidden="true" data-clear>
           <span><i className="k-you" />You</span>
           {guides.length > 0 && <span><i className="k-guide" />Give Guide</span>}
           {incoming.length > 0 && <span><i className="k-incoming" />Invited you</span>}

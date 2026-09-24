@@ -1,21 +1,38 @@
-/* The Teachback page (/guide/teachback). */
+/* The Teachback page (/guide/teachback). Its symbol is the standing wave. */
 
-.teachback-page .guide-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; color: var(--ink-2); }
-.tb-hero .tb-scene { position: relative; height: clamp(320px, 92vw, 440px); margin-top: 6px; }
-@media (min-width: 900px) { .tb-hero .tb-scene { height: min(68vh, 640px); margin: 0; } }
-.tb-scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.tb-hero .intro-description p { font-size: clamp(19px, 2vw, 25px); color: var(--ink); letter-spacing: -0.015em; line-height: 1.4; }
-
+.teachback-page .guide-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; }
+.tb-hero .tb-scene { position: relative; height: clamp(330px, 94vw, 460px); margin-top: 6px; }
+@media (min-width: 900px) { .tb-hero .tb-scene { height: min(70vh, 660px); margin: 0; } }
+.tb-scene canvas, .tb-lab-string canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tb-hero .intro-description p { font-size: clamp(19px, 2vw, 25px); letter-spacing: -0.015em; line-height: 1.4; }
 .tb-lede { max-width: 58ch; margin: 22px 0 0; font-size: clamp(17px, 1.5vw, 20px) !important; line-height: 1.6 !important; }
-.tb-steps { list-style: none; padding: 0; margin: 40px 0 0; display: grid; gap: 34px; }
-.tb-steps li { position: relative; padding-top: 22px; }
-.tb-steps li::before { content: ""; position: absolute; top: 0; left: 0; right: 18%; height: 1px; background: var(--edge); }
-.tb-steps li::after { content: ""; position: absolute; top: -4px; left: 0; width: 9px; height: 9px; border-radius: 50%; background: #dffbff; box-shadow: 0 0 0 3px rgba(94, 233, 255, 0.14), 0 0 14px 2px rgba(94, 233, 255, 0.7); }
-.tb-steps li:nth-child(3)::after { background: #e6e0ff; box-shadow: 0 0 0 3px rgba(154, 134, 255, 0.18), 0 0 14px 2px rgba(154, 134, 255, 0.75); }
+
+/* Four steps, each with the wave that says it. */
+.tb-steps { list-style: none; padding: 0; margin: 44px 0 0; display: grid; gap: 46px; }
+@media (min-width: 820px) { .tb-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px 48px; } }
+.tb-steps li { display: grid; gap: 8px; align-content: start; }
+.tb-step-symbol { width: min(100%, 300px); height: auto; margin: 0 0 14px -4px; }
 .tb-steps .step-number { position: static; display: block; }
-.tb-steps h3 { margin: 10px 0 8px; }
-.tb-steps p { margin: 0; }
-@media (min-width: 900px) { .tb-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px; } }
+.tb-steps h3 { margin: 0; font-size: clamp(22px, 2.2vw, 28px); }
+.tb-steps p { margin: 0; max-width: 42ch; }
+
+/* The string between a teacher and a learner. */
+.tb-lab { margin: 40px 0 0; display: grid; gap: 10px; max-width: 900px; }
+.tb-lab-string { position: relative; height: clamp(170px, 42vw, 260px); cursor: pointer; touch-action: pan-y; }
+.tb-lab-ends { display: flex; justify-content: space-between; padding-inline: clamp(8px, 5%, 40px); font-size: 12px; font-weight: 620; letter-spacing: 0.16em; text-transform: uppercase; }
+.tb-lab-caption { display: grid; gap: 16px; justify-items: start; margin-top: 14px; }
+.tb-lab-hold { user-select: none; -webkit-user-select: none; touch-action: none; min-width: 200px; }
+.tb-lab-hold.is-held { filter: drop-shadow(0 0 26px rgba(94, 233, 255, 0.75)); transform: scale(0.985); }
+.tb-lab-hold.is-held::after { background-position: 0 100%, 0 0; }
+.tb-lab-hold:disabled { opacity: 1; cursor: default; }
+.tb-lab-words { font-size: 17px; line-height: 1.55; min-height: 3.2em; max-width: 52ch; }
+@media (min-width: 820px) { .tb-lab-caption { grid-template-columns: auto 1fr; align-items: center; gap: 28px; } .tb-lab-words { min-height: 0; } }
+
+.tb-why-grid { display: grid; gap: 18px; margin: 40px 0 0; max-width: 980px; }
+@media (min-width: 820px) { .tb-why-grid { grid-template-columns: 1fr 1fr; gap: 40px; } }
+.tb-why-grid p { margin: 0; }
+.tb-sources { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 10px; max-width: 860px; }
+.tb-sources a { font-size: 13.5px; line-height: 1.55; text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.35); text-underline-offset: 3px; }
 
 .tb-mind-list { list-style: none; padding: 0; margin: 36px 0 0; display: grid; gap: 28px; }
 @media (min-width: 800px) { .tb-mind-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 48px; } }
@@ -24,14 +41,12 @@
 .tb-mind-list h3 { margin: 0 0 8px; }
 .tb-mind-list p { margin: 0; }
 
-.tb-why-card, .tb-vision-card { max-width: 860px; display: grid; gap: 16px; }
-.tb-why-card > *, .tb-vision-card > * { margin: 0; }
-.tb-sources { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 10px; }
-.tb-sources a { font-size: 13.5px; line-height: 1.55; color: var(--ink-3); text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.3); text-underline-offset: 3px; }
-.tb-sources a:hover { color: var(--ink); }
-
-.tb-commit h2 { margin-bottom: 8px; }
-.tb-commit-list { list-style: none; counter-reset: tb; padding: 0; margin: 30px 0 32px; display: grid; gap: 16px; max-width: 720px; }
-.tb-commit-list li { counter-increment: tb; display: grid; grid-template-columns: 44px 1fr; align-items: baseline; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.5; color: var(--ink); }
+.tb-commit-card { max-width: 860px; display: grid; gap: 14px; justify-items: start; }
+.tb-commit-card > * { margin: 0; }
+.tb-commit-list { list-style: none; counter-reset: tb; padding: 0; margin: 12px 0 18px !important; display: grid; gap: 16px; max-width: 720px; }
+.tb-commit-list li { counter-increment: tb; display: grid; grid-template-columns: 44px 1fr; align-items: baseline; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.5; }
 .tb-commit-list li::before { content: counter(tb, decimal-leading-zero); font-size: 12px; font-weight: 620; letter-spacing: 0.16em; color: var(--cyan); }
-.tb-vision-card .button-row { display: flex; flex-wrap: wrap; }
+
+.tb-vision-text { display: grid; gap: 16px; max-width: 62ch; margin: 22px 0 28px; }
+.tb-vision-text p { margin: 0; }
+.tb-vision .button-row { display: flex; flex-wrap: wrap; }

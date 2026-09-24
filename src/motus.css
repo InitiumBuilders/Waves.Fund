@@ -56,6 +56,8 @@ h3, .panel h3 { font-size: clamp(19px, 1.65vw, 24px); font-weight: 540; letter-s
 p, .prose p, .panel p { font-size: clamp(16px, 1.2vw, 17.5px); line-height: 1.72; color: var(--ink-2); }
 .intro-description, .intro-description p { font-size: clamp(17px, 1.5vw, 21px); line-height: 1.6; color: var(--ink-2); max-width: 36ch; }
 .fine-print { font-size: 13px; line-height: 1.65; color: var(--ink-3); }
+/* Gradient words carry no shadow: a dark shadow shows through the transparent fill and dulls them. */
+.section h2 span, .panel h2 span, .vision-heading h1 span, .desktop-invitation .home-tagline span { text-shadow: none; }
 
 /* A label is a node: a point of light, then the words. */
 .eyebrow {
@@ -552,6 +554,8 @@ html:not([data-mind="on"]) .stock::before {
 .cascade-step .step-number { font-size: 13px; }
 .cascade-step svg { width: 44px; height: 44px; padding: 11px; border-radius: 15px; corner-shape: superellipse(2.15); background: radial-gradient(circle at 50% 35%, rgba(47, 141, 255, 0.34), rgba(4, 16, 40, 0.9) 75%); box-shadow: inset 0 0 0 1px rgba(120, 220, 255, 0.26); color: #dffbff; }
 .cascade h3 { font-size: clamp(22px, 2vw, 28px); margin-bottom: 10px; }
+/* The four practices on Learn each carry their wave (src/symbols.tsx), not a boxed icon. */
+.cascade-step svg.practice-symbol { width: min(56%, 200px); height: auto; padding: 0; border-radius: 0; background: none; box-shadow: none; }
 
 /* ---------- Grow: the whale film steps back so the words lead ---------- */
 .whale-background video { opacity: 0.4; }

@@ -173,14 +173,14 @@ function ProfileForm({ me }: { me: Me }) {
   const next = () => { setError(""); setStep((s) => Math.min(STEPS.length - 1, s + 1)); window.scrollTo({ top: 0 }); };
   return (
     <form className="gt-profile gt-steps" onSubmit={(e) => { e.preventDefault(); if (last) save(); else next(); }}>
-      <header className="gt-head">
-        <p className="eyebrow">GIVE PROFILE</p>
-        <h1>Give <span>Together</span></h1>
-        <p className="gt-lede">A few short questions. Skip any you like; you can change them later.</p>
+      <header className="gt-head gt-head-rings">
+        <div>
+          <p className="eyebrow">GIVE PROFILE</p>
+          <h1>Give <span>Together</span></h1>
+          <p className="gt-lede">A few short questions. Skip any you like; you can change them later.</p>
+        </div>
       </header>
-      <ol className="gt-progress" aria-label={`Question ${step + 1} of ${STEPS.length}`}>
-        {STEPS.map((k, i) => <li key={k} className={i < step ? "done" : i === step ? "now" : ""} aria-current={i === step ? "step" : undefined} />)}
-      </ol>
+      <WaveRings step={step} total={STEPS.length} />
       <section className="panel gt-card gt-section" key={current}>{sections[current]}</section>
       <Problem>{error}</Problem>
       <div className="gt-step-actions">
@@ -189,5 +189,21 @@ function ProfileForm({ me }: { me: Me }) {
         <button type="submit" className="glow-button gt-save" disabled={busy}>{last ? (busy ? "Saving…" : "Save My Give Profile") : "Continue"}<ArrowRight size={18} /></button>
       </div>
     </form>
+  );
+}
+
+/* Your wave, forming: a light with one ring for each question. Answered rings glow; the one you are on
+   breathes. Skipped questions still count; you can come back to them. */
+function WaveRings({ step, total }: { step: number; total: number }) {
+  return (
+    <div className="gt-rings" role="img" aria-label={`Question ${step + 1} of ${total}`}>
+      <svg viewBox="0 0 200 200" aria-hidden="true" data-clear="round">
+        {Array.from({ length: total }, (_, i) => (
+          <circle key={i} cx="100" cy="100" r={22 + i * 11} className={i < step ? "done" : i === step ? "now" : ""} />
+        ))}
+        <circle cx="100" cy="100" r="7" className="core" />
+      </svg>
+      <span>{step + 1} of {total}</span>
+    </div>
   );
 }

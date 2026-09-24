@@ -107,6 +107,16 @@
 .gt-page .checkbox a { color: #cff6ff; }
 
 /* ---------- The Give Profile, one question at a time ---------- */
+.gt-rings { display: grid; justify-items: center; gap: 4px; margin: -6px auto 14px; width: 150px; }
+.gt-rings svg { width: 150px; height: 150px; overflow: visible; }
+.gt-rings circle { fill: none; stroke: rgba(130, 170, 240, 0.2); stroke-width: 1.2; transform-box: fill-box; transform-origin: center; transition: stroke 0.6s var(--ease), stroke-width 0.6s; }
+.gt-rings circle.done { stroke: rgba(110, 232, 255, 0.72); stroke-width: 1.6; filter: drop-shadow(0 0 4px rgba(94, 233, 255, 0.6)); }
+.gt-rings circle.now { stroke: #e2fcff; stroke-width: 2; filter: drop-shadow(0 0 7px rgba(94, 233, 255, 0.95)); animation: gt-ring-breathe 2.4s ease-in-out infinite; }
+.gt-rings circle.core { fill: #effdff; stroke: none; filter: drop-shadow(0 0 10px rgba(94, 233, 255, 0.95)); }
+.gt-rings span { font-size: 12px; font-weight: 620; letter-spacing: 0.16em; text-transform: uppercase; }
+@keyframes gt-ring-breathe { 50% { transform: scale(1.035); opacity: 0.75; } }
+html[data-motion="off"] .gt-rings circle.now { animation: none; }
+@media (prefers-reduced-motion: reduce) { .gt-rings circle.now { animation: none; } }
 .gt-progress { list-style: none; display: flex; gap: 6px; padding: 0; margin: 0 0 18px; }
 .gt-progress li { flex: 1; height: 3px; border-radius: 2px; background: rgba(120, 160, 220, 0.22); transition: background 0.4s var(--ease); }
 .gt-progress li.done { background: rgba(94, 233, 255, 0.55); }
@@ -292,3 +302,16 @@ a.gt-row:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 3px; }
 .gt-clerk { width: 100%; display: grid; justify-items: center; min-height: 360px; }
 .gt-unavailable { max-width: 720px; }
 .gt-unavailable .gt-head h1 { font-size: clamp(34px, 6vw, 56px); }
+
+/* ---------- Wave symbols inside the app ---------- */
+.gt-opp-symbol { width: 150px; height: auto; margin: 2px 0 -2px; }
+.gt-pair-scene { position: relative; height: clamp(170px, 46vw, 240px); margin: -6px calc(var(--gutter) * -1) 10px; }
+.gt-day-rings { display: grid; justify-items: center; gap: 8px; margin: 0 0 22px; }
+.gt-day-rings svg { width: 200px; height: 200px; overflow: visible; }
+.gt-day-rings circle { fill: none; stroke: rgba(110, 232, 255, 0.62); stroke-width: 1.4; filter: drop-shadow(0 0 4px rgba(94, 233, 255, 0.55)); transform-box: fill-box; transform-origin: center; animation: gt-ring-in 0.9s var(--ease-out) both; }
+.gt-day-rings circle:nth-child(even) { stroke: rgba(170, 150, 255, 0.6); }
+.gt-day-rings circle.core { fill: #effdff; stroke: none; filter: drop-shadow(0 0 10px rgba(94, 233, 255, 0.95)); animation: none; }
+.gt-day-rings figcaption { font-size: 14.5px; text-align: center; }
+@keyframes gt-ring-in { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+html[data-motion="off"] .gt-day-rings circle { animation: none; }
+@media (prefers-reduced-motion: reduce) { .gt-day-rings circle { animation: none; } }

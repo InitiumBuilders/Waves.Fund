@@ -25,6 +25,7 @@ export function RecordPage() {
       <PageHead eyebrow="ONLY YOU CAN SEE THIS" title={<>Your <span>Record</span></>}>
         <p>What you and your Give Guides have done together. Nothing here is public or ranked.</p>
       </PageHead>
+      <DayRings days={r.peerSessions} />
       <div className="gt-stats gt-stats-wide">
         <div><strong>{r.peerHours}</strong><span>Peer-confirmed {r.peerHours === 1 ? "hour" : "hours"}</span></div>
         <div><strong>{r.peerSessions}</strong><span>Days given together</span></div>
@@ -119,5 +120,19 @@ export function PrivacyPage() {
         </Confirm>
       )}
     </div>
+  );
+}
+
+/* A light with one ring for every day given together, the newest outermost. Nothing to compare with anyone. */
+function DayRings({ days }: { days: number }) {
+  const shown = Math.min(days, 14);
+  return (
+    <figure className="gt-day-rings">
+      <svg viewBox="0 0 240 240" aria-hidden="true" data-clear="round">
+        {Array.from({ length: shown }, (_, i) => <circle key={i} cx="120" cy="120" r={20 + i * 7} style={{ animationDelay: `${i * 0.12}s` }} />)}
+        <circle cx="120" cy="120" r="8" className="core" />
+      </svg>
+      <figcaption>{days === 0 ? "Each day you give together adds a ring here." : `${days} ${days === 1 ? "day" : "days"} given together, one ring each.`}</figcaption>
+    </figure>
   );
 }

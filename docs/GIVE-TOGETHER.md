@@ -10,9 +10,9 @@ Give Profile → Find Your Give Guide → Mutual Connection → Shared Opportuni
 
 | Route | Page |
 | --- | --- |
-| /give | Landing: the flow, what a Give Guide is, the Teachback, Wave Partner of the month (The Green Reef Foundation), safety, the principle. No sign-in needed. |
+| /give | Landing: a scroll scene in three chapters (his lines), the flow, what a Give Guide is with a study of two waves in and out of step, the Teachback, Wave Partner of the month (The Green Reef Foundation), safety, the principle. No sign-in needed. |
 | /give/profile | Give Profile. New profiles go one question at a time and every question can be skipped; an existing profile opens as one editable page. |
-| /give/guide | Find Your Give Guide: the ocean scene, invitations, people who share something with you, your Give Guides. |
+| /give/guide | Find Your Give Guide: the ripple scene, invitations, people who share something with you, your Give Guides. |
 | /give/with/:id | The private space with one Give Guide: what you share, messages, Shared Waves, report, block, end. |
 | /give/opportunities | Opportunities, with search and filters (kind, cause, time, remote, skill, near me, saved). `?with=<connection>` adds an "Invite" button for that Give Guide. |
 | /give/opportunities/new | Post an opportunity. `?kind=teachback` opens it as a Teachback. |
@@ -20,7 +20,10 @@ Give Profile → Find Your Give Guide → Mutual Connection → Shared Opportuni
 | /give/record | Your private record. |
 | /give/privacy | What others see, pause matching, safety guidance, sign out, delete. |
 | /give/sign-in, /give/join | Clerk sign-in and sign-up. |
-| /guide/teachback | The Teachback page. |
+| /guide/teachback | The Teachback page, with the string lab. |
+
+The scenes are drawn with real wave physics; how each one works is in docs/design/MOTUS-DESIGN.md
+("Ripples", "Give Together", "The Teachback").
 
 ## Rules the server holds
 

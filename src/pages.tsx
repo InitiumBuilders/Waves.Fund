@@ -13,7 +13,10 @@ import {
 import { ButtonLink, CONTACT, External, Intro, Semble, DONATE } from "./ui";
 import { download } from "./community";
 import { Stock } from "./mind/WaveMind";
+import { Growing, Guided, Pair, Travel } from "./symbols";
 const reefURL = "https://www.greenreef.org/";
+// The Give practice on Learn: two in step, set to the left edge like the other practice waves.
+const GivePair = ({ className }: { className?: string }) => <Pair className={className} at={[30, 130]} />;
 const briefURL =
   "https://static1.squarespace.com/static/637abcfb5965f80107ee9977/t/63adebde3b35985a05d9d455/1672342495057/Green+Reef+One+Page+Overview+.pdf";
 export const partners = [
@@ -155,29 +158,29 @@ export function Learn() {
         <ol className="cascade">
           {[
             {
-              Icon: BookOpen,
+              Icon: Travel,
               title: "Learn",
               body: "Understand the mission, the need, the budget, and who a project serves.",
             },
             {
-              Icon: Users,
+              Icon: Guided,
               title: "Guide",
               body: "Builders and Wave Guides shape a practical project with clear milestones.",
             },
             {
-              Icon: Waves,
+              Icon: GivePair,
               title: "Give",
               body: "Learners signal support. Donors, partners, and guides contribute funding, time, and knowledge.",
             },
             {
-              Icon: Leaf,
+              Icon: Growing,
               title: "Grow",
               body: "Project teams share evidence, learning, and progress for the community to see.",
             },
           ].map(({ Icon, title, body }, i) => (
             <li className="panel" key={title}>
               <div className="cascade-step">
-                <Icon size={22} aria-hidden="true" />
+                <Icon className="practice-symbol" />
                 <span className="step-number">0{i + 1}</span>
               </div>
               <h3>{title}</h3>

@@ -7,6 +7,10 @@ import type { Connection, Opportunity } from "./core";
 import { Report } from "./safety";
 import { Sheet } from "../ui";
 import { mindWave } from "../mind/WaveMind";
+import { Pair, StandingString, Travel } from "../symbols";
+
+// Each kind has its wave: a Teachback holds (standing wave), volunteering is two in step, an event travels.
+const KIND_SYMBOL: Record<string, typeof Pair> = { teachback: StandingString, volunteer: Pair, event: Travel };
 
 type Filters = { q: string; kind: string; cause: string; time: string; remote: string; skill: string; near: boolean; saved: boolean };
 const EMPTY: Filters = { q: "", kind: "", cause: "", time: "", remote: "", skill: "", near: false, saved: false };
@@ -113,6 +117,7 @@ function Card({ o, guides, chosen, onChange }: { o: Opportunity; guides: Connect
         <p className="gt-kind">{label(KINDS, o.kind)}{o.cause ? ` · ${label(CAUSES, o.cause)}` : ""}</p>
         <Verified verified={o.verified} />
       </div>
+      {(() => { const Symbol = KIND_SYMBOL[o.kind] || Pair; return <Symbol className="gt-opp-symbol" />; })()}
       <h3>{o.title}</h3>
       <p>{o.need}</p>
       <dl className="gt-facts">

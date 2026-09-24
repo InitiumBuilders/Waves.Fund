@@ -1,53 +1,119 @@
-/* The Give landing page (/give). Loaded with the page itself, so it stays small. */
+/* The Give landing page (/give). Mobile first. */
 
-.gt-hero .gt-hero-scene { height: clamp(300px, 86vw, 420px); margin-top: 6px; }
-@media (min-width: 900px) { .gt-hero .gt-hero-scene { height: min(66vh, 620px); margin: 0; } }
-.give-together .gt-scene { position: relative; width: 100%; }
-.give-together .gt-scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.give-together .gt-scene[data-still]::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: #e8fdff; box-shadow: 0 0 0 6px rgba(94, 233, 255, 0.12), 0 0 40px 10px rgba(94, 233, 255, 0.4); }
-.gt-hero .intro-description p { font-size: clamp(19px, 2vw, 25px); color: var(--ink); letter-spacing: -0.015em; line-height: 1.4; }
+/* ---------- The ripple chapters: a stage that holds still while three chapters pass ---------- */
+.gt-tank { position: relative; height: 330svh; }
+.gt-tank-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.ripple { position: relative; }
+.ripple canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ripple[data-still]::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: #e8fdff; box-shadow: 0 0 0 6px rgba(94, 233, 255, 0.12), 0 0 40px 10px rgba(94, 233, 255, 0.4); }
+.gt-tank-scene { position: absolute; inset: 0; cursor: crosshair; touch-action: pan-y; }
 
-/* The seven steps: points of light on one line. Down the page on a phone, across on a wide screen. */
-.gt-flow { list-style: none; padding: 0; margin: 34px 0 0; display: grid; gap: 0; position: relative; }
-.gt-flow li { position: relative; padding: 0 0 30px 34px; }
-.gt-flow li::before { content: ""; position: absolute; left: 2px; top: 5px; width: 9px; height: 9px; border-radius: 50%; background: #dffbff; box-shadow: 0 0 0 3px rgba(94, 233, 255, 0.14), 0 0 14px 2px rgba(94, 233, 255, 0.7); }
-.gt-flow li::after { content: ""; position: absolute; left: 6px; top: 22px; bottom: 2px; width: 1px; background: linear-gradient(180deg, rgba(94, 233, 255, 0.6), rgba(94, 128, 255, 0.15)); }
-.gt-flow li:last-child::after { display: none; }
-.gt-flow .step-number { position: static; display: block; margin: 0; }
-.gt-flow h3 { margin: 6px 0 6px; }
-.gt-flow p { margin: 0; max-width: 40ch; }
-@media (min-width: 1000px) {
-  .gt-flow { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 28px; }
-  .gt-flow li { padding: 26px 0 0; }
-  .gt-flow li::before { left: 0; top: -4px; }
-  .gt-flow li::after { left: 16px; right: -14px; top: 0; bottom: auto; width: auto; height: 1px; background: linear-gradient(90deg, rgba(94, 233, 255, 0.6), rgba(94, 128, 255, 0.12)); }
-  .gt-flow li:nth-child(4)::after { display: none; }
+/* The words sit on a dark floor so the water never runs under them. */
+.gt-tank-copy {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  display: flex; flex-direction: column; justify-content: space-between;
+  /* The tab bar's fade reaches 72px above it; the button stays clear of it. */
+  padding: 84px var(--gutter) calc(172px + env(safe-area-inset-bottom));
+}
+.gt-tank-copy > * { pointer-events: auto; }
+.gt-tank-copy::before, .gt-tank-copy::after { content: ""; position: absolute; left: 0; right: 0; z-index: -1; pointer-events: none; }
+.gt-tank-copy::before { top: 0; height: 230px; background: linear-gradient(rgba(1, 5, 19, 0.9) 45%, rgba(1, 5, 19, 0)); }
+.gt-tank-copy::after { bottom: 0; height: 58%; background: linear-gradient(rgba(1, 5, 19, 0), rgba(1, 5, 19, 0.88) 38%, rgba(1, 5, 19, 0.96)); }
+.gt-tank-copy .eyebrow { margin: 0 0 14px; }
+.gt-tank-copy h1 { margin: 0; font-size: clamp(44px, 11vw, 112px); font-weight: 460; letter-spacing: -0.055em; line-height: 0.96; text-shadow: none; }
+.gt-tank-copy > .eyebrow, .gt-tank-copy > h1 { animation: motus-rise 1s var(--ease-out) both; }
+.gt-tank-copy > h1 { animation-delay: 0.08s; }
+.gt-chapters { list-style: none; margin: auto 0 0; padding: 0; display: grid; }
+.gt-chapters li { grid-area: 1 / 1; display: grid; gap: 12px; align-content: end; opacity: 0; transform: translate3d(0, 26px, 0); transition: opacity 0.7s var(--ease), transform 0.9s var(--ease-out); }
+.gt-chapters li.is-past { transform: translate3d(0, -22px, 0); }
+.gt-chapters li.is-now { opacity: 1; transform: none; }
+.gt-chapter-line { display: block; font-size: clamp(38px, 9.4vw, 92px); font-weight: 460; letter-spacing: -0.05em; line-height: 1; background: linear-gradient(100deg, #e4fcff 0%, #6fe3ff 42%, #8da2ff 76%, #b69cff 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gt-chapter-note { display: block; max-width: 34ch; font-size: clamp(15.5px, 1.35vw, 19px); line-height: 1.55; }
+.gt-tank-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 22px; }
+/* On a phone the first screen keeps one press; the Give Guide link is the next thing on the page. */
+@media (max-width: 899px) { .gt-tank-actions .text-button { display: none; } }
+.gt-chapter-dots { position: absolute; right: 14px; top: 50%; z-index: 2; display: grid; gap: 12px; transform: translateY(-50%); }
+.gt-chapter-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(150, 190, 255, 0.35); transition: transform 0.5s var(--ease-out), background 0.5s; }
+.gt-chapter-dots i.past { background: rgba(94, 233, 255, 0.55); }
+.gt-chapter-dots i.on { background: #e6fdff; transform: scale(1.6); box-shadow: 0 0 12px rgba(94, 233, 255, 0.9); }
+.gt-tank-hint { display: none; }
+@media (min-width: 900px) {
+  .gt-tank-copy { justify-content: center; max-width: 720px; padding: 120px 0 80px var(--gutter); gap: 0; }
+  .gt-tank-copy h1 { font-size: clamp(64px, 6.4vw, 96px); }
+  .gt-chapter-line { font-size: clamp(52px, 5.4vw, 80px); }
+  .gt-tank-copy::before { top: 0; bottom: 0; left: 0; right: auto; width: 780px; height: auto; background: linear-gradient(90deg, rgba(1, 5, 19, 0.92) 0%, rgba(1, 5, 19, 0.82) 58%, rgba(1, 5, 19, 0)); }
+  .gt-tank-copy::after { display: none; }
+  .gt-chapters { margin: 34px 0 0; }
+  .gt-chapter-dots { right: 28px; }
+  .gt-tank-hint { display: block; position: absolute; right: var(--gutter); bottom: 34px; z-index: 2; margin: 0; font-size: 13px; letter-spacing: 0.02em; }
+}
+html[data-motion="off"] .gt-tank-copy > * { animation: none; }
+@media (prefers-reduced-motion: reduce) { .gt-chapters li { transition: none; } }
+
+/* ---------- After the chapters ---------- */
+.gt-after { padding-top: 0; }
+.gt-after > .section:first-child { margin-top: clamp(40px, 8vw, 90px); }
+
+.gt-flow-section h2 { margin-bottom: 10px; }
+
+/* ---------- A Give Guide, and the physics of two in step ---------- */
+.gt-pair { display: grid; gap: 30px; align-items: center; }
+.gt-pair-text { display: grid; gap: 16px; justify-items: start; }
+.gt-pair-text > * { margin: 0; }
+.gt-pair-text a:not(.glow-button), .gt-safe a, .gt-sources a { text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.45); text-underline-offset: 3px; }
+.gt-physics { padding-left: 18px; position: relative; }
+.gt-physics::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; border-radius: 1px; background: linear-gradient(180deg, #5ee9ff, rgba(154, 134, 255, 0.35)); }
+.gt-study { margin: 0; display: grid; gap: 16px; }
+.gt-study-scene { position: relative; height: clamp(320px, 92vw, 540px); cursor: ew-resize; touch-action: pan-y; }
+.gt-study-scene:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 6px; border-radius: 28px; }
+.gt-study-readout { display: grid; gap: 8px; }
+.gt-study-readout b { font-size: clamp(20px, 2vw, 26px); font-weight: 520; letter-spacing: -0.02em; }
+.gt-study-readout span { font-size: 16px; line-height: 1.55; min-height: 3.1em; }
+.gt-study-range { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; margin: 4px 0 0; background: none; cursor: pointer; }
+.gt-study-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, #5ee9ff, #8da2ff 55%, rgba(154, 134, 255, 0.35)); }
+.gt-study-range::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, #5ee9ff, #8da2ff 55%, rgba(154, 134, 255, 0.35)); }
+.gt-study-range::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -11px; border-radius: 50%; background: #effdff; box-shadow: 0 0 0 5px rgba(94, 233, 255, 0.2), 0 0 18px rgba(94, 233, 255, 0.8); }
+.gt-study-range::-moz-range-thumb { width: 26px; height: 26px; border: 0; border-radius: 50%; background: #effdff; box-shadow: 0 0 0 5px rgba(94, 233, 255, 0.2), 0 0 18px rgba(94, 233, 255, 0.8); }
+.gt-study-range:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 4px; border-radius: 12px; }
+.gt-sources { font-size: 13px !important; line-height: 1.6; margin: 0; }
+@media (min-width: 960px) {
+  .gt-pair { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 20px 56px; }
+  .gt-sources { grid-column: 1 / -1; }
 }
 
-.gt-explain, .gt-partner-card { max-width: 780px; display: grid; gap: 16px; justify-items: start; }
-.gt-explain > *, .gt-partner-card > * { margin: 0; }
-.gt-explain a:not(.glow-button), .gt-safe a, .gt-teachback-callout a:not(.glow-button):not(.text-button) { color: #cff6ff; text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.4); text-underline-offset: 3px; }
-
+/* ---------- The Teachback, with its standing wave ---------- */
 .gt-teachback-callout { max-width: 880px; }
+.gt-tb-string { width: min(100%, 460px); margin: 0 0 30px; }
 .gt-teachback-callout h2 { margin-bottom: 18px; }
 .gt-teachback-callout > p { max-width: 50ch; margin-bottom: 26px; }
 
+/* ---------- Wave Partner ---------- */
+.gt-partner-card { max-width: 780px; display: grid; gap: 16px; justify-items: start; }
+.gt-partner-card > * { margin: 0; }
 .gt-partner-label { text-transform: uppercase; }
 .gt-partner-card .giving-logo { margin: 4px 0; }
 .gt-partner-card .button-row { display: flex; flex-wrap: wrap; }
 
+/* ---------- Safety ---------- */
 .gt-safe h2 { margin-bottom: 26px; }
 .gt-safe-list { list-style: none; padding: 0; margin: 0 0 22px; display: grid; gap: 14px; }
 @media (min-width: 700px) { .gt-safe-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 30px; } }
 @media (min-width: 1100px) { .gt-safe-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.gt-safe-list li { display: flex; align-items: flex-start; gap: 14px; font-size: 16.5px; line-height: 1.5; color: var(--ink); }
-.gt-safe-list svg { flex: none; color: #9ff3ff; margin-top: 1px; }
+.gt-safe-list li { display: flex; align-items: center; gap: 16px; font-size: 16.5px; line-height: 1.45; }
+.gt-safe-icon { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 16px; corner-shape: superellipse(2); background: radial-gradient(circle at 50% 30%, rgba(40, 120, 200, 0.45), rgba(6, 20, 46, 0.9)); box-shadow: inset 0 0 0 1px rgba(120, 232, 255, 0.28); color: #bff6ff; }
 .gt-safe .fine-print { max-width: 70ch; }
+.gt-safe .fine-print svg { display: inline; vertical-align: -1px; margin-left: 2px; }
 
-/* The principle, said once, large. */
-.gt-principle { display: grid; justify-items: center; gap: 24px; text-align: center; }
-.gt-principle > svg { color: #9ff3ff; }
-.gt-principle p { margin: 0; font-size: clamp(32px, 5.4vw, 64px); font-weight: 460; letter-spacing: -0.045em; line-height: 1.05; max-width: 16ch; background: linear-gradient(100deg, #e4fcff 0%, #6fe3ff 40%, #8da2ff 75%, #b69cff 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #7fe4ff; }
+/* ---------- The principle, with a wavefront passing under it ---------- */
+.gt-principle { position: relative; display: grid; justify-items: center; gap: 28px; text-align: center; padding-block: 60px; }
+.gt-principle p { position: relative; margin: 0; font-size: clamp(34px, 5.8vw, 70px); font-weight: 460; letter-spacing: -0.045em; line-height: 1.04; max-width: 16ch; background: linear-gradient(100deg, #e4fcff 0%, #6fe3ff 40%, #8da2ff 75%, #b69cff 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #7fe4ff; text-shadow: none; }
+.gt-front { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.gt-front i { position: absolute; left: 8%; right: 8%; top: 50%; height: 1px; background: linear-gradient(90deg, transparent, rgba(120, 236, 255, 0.75) 30%, rgba(160, 150, 255, 0.7) 70%, transparent); opacity: 0; animation: gt-front 7.5s linear infinite; }
+.gt-front i:nth-child(2) { animation-delay: 2.5s; }
+.gt-front i:nth-child(3) { animation-delay: 5s; }
+@keyframes gt-front { 0% { transform: translate3d(0, 180px, 0) scaleX(0.6); opacity: 0; } 15% { opacity: 0.8; } 85% { opacity: 0.6; } 100% { transform: translate3d(0, -180px, 0) scaleX(1); opacity: 0; } }
+html[data-motion="off"] .gt-front i { animation: none; }
+@media (prefers-reduced-motion: reduce) { .gt-front i { animation: none; } }
 
 /* Gradient words: the site's dark text-shadow would show through the transparent fill and dull them. */
-.give-together h2 span, .teachback-page h2 span, .gt-principle p { text-shadow: none; }
+.give-together h2 span, .teachback-page h2 span { text-shadow: none; }

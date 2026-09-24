@@ -205,9 +205,9 @@ textarea::placeholder {
   .identity-mantra { font-size: 13px; font-weight: 550; }
   .immersive-home .vision-heading p { font-size: 11px; font-weight: 600; }
 }
-html,
-body {
-  overflow-x: hidden;
+/* clip on the root keeps sideways overflow out without making body a scroll container, so sticky scenes work */
+html {
+  overflow-x: clip;
 }
 body * {
   color: #fff !important;

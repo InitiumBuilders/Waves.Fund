@@ -87,7 +87,7 @@ function collectContent(root: Element, sy: number, out: Box[]) {
     for (const child of el.children) {
       if (child.matches("[data-clear]")) {
         const r = child.getBoundingClientRect();
-        if (r.width > 2 && r.height > 2) out.push({ left: r.left, top: r.top + sy, width: r.width, height: r.height, radius: 24, el: child, card: false });
+        if (r.width > 2 && r.height > 2) out.push({ left: r.left, top: r.top + sy, width: r.width, height: r.height, radius: child.getAttribute("data-clear") === "round" ? Math.min(r.width, r.height) / 2 : 24, el: child, card: false });
         continue;
       }
       if (child.matches(OPEN)) continue;

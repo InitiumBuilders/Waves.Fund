@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowRight, Check, Heart, Minus, Plus } from "lucide-react";
@@ -7,6 +7,8 @@ import type { Wave } from "./core";
 import { Confirm } from "./safety";
 import { Sheet } from "../ui";
 import { mindWave } from "../mind/WaveMind";
+import { Ripple, ease } from "./ripple";
+import type { RippleHandle, RippleModel } from "./ripple";
 
 /* A Shared Wave: one opportunity, two Give Guides. Each person logs their own time. A day both people log as
    together becomes peer-confirmed, at the smaller of the two numbers. Peer-confirmed is not host-verified. */
@@ -30,6 +32,8 @@ export default function WavePage() {
       <PageHead eyebrow="SHARED WAVE" title={o?.title || "Shared Wave"}>
         <p>With <Link to={`/give/with/${w.connection}`}>{name}</Link> · {w.status === "proposed" ? "Waiting for two yeses" : w.status === "active" ? "Active" : w.status === "completed" ? "Completed" : "Closed"}</p>
       </PageHead>
+
+      <PairOfYou status={w.status} />
 
       {w.status === "proposed" && (
         <section className="panel gt-card">
@@ -220,4 +224,32 @@ function Gratus({ w, day, onClose, onSent }: { w: Wave; day: string; onClose: ()
       </form>
     </Sheet>
   );
+}
+
+/* You and your Give Guide as two lights. While the Wave waits for both yeses, the second light is out of
+   step and the water between you stays still; once it is active you ripple in step and the bands between
+   you glow. */
+function PairOfYou({ status }: { status: Wave["status"] }) {
+  const inStep = status === "active" || status === "completed";
+  const target = useRef(inStep ? 1 : 0);
+  target.current = inStep ? 1 : 0;
+  const handle = useRef<RippleHandle | null>(null);
+  const model = useRef<RippleModel>((() => {
+    let lock = target.current, last = 0;
+    return (t: number, w: number, h: number) => {
+      const dt = Math.min(0.1, Math.max(0, t - last)); last = t;
+      lock += (target.current - lock) * (1 - Math.exp(-dt * 1.2));
+      const lambda = Math.max(40, Math.min(90, Math.min(w, h) * 0.3));
+      const gap = lambda * 1.6, cy = h / 2;
+      return {
+        lambda, speed: lambda * 0.7, gain: 1.15, dots: 13, ground: 0.9,
+        sources: [
+          { x: w / 2 - gap, y: cy, a: 1, phase: 0, hue: 0.05, size: 4.2, born: -100, reach: 0.9 },
+          { x: w / 2 + gap, y: cy, a: 0.55 + 0.45 * ease(lock), phase: Math.PI * (1 - ease(lock)), hue: 0.3, size: 4.2, born: -100, reach: 0.9 },
+        ],
+      };
+    };
+  })());
+  useEffect(() => { handle.current?.redraw(); }, [inStep]);
+  return <Ripple model={model} handle={handle} className="gt-pair-scene" maxDpr={1.25} still={3} aria-hidden="true" />;
 }

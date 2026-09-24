@@ -85,6 +85,18 @@ and the light leaving as a spreading wave. The section "Why we call it a Wave Gu
 definition from Wikipedia and has a study version: move the pointer (or use the arrow keys)
 to change the launch angle, and past the critical angle the light escapes.
 
+## Ripples
+
+`src/together/ripple.tsx` is one WebGL2 fragment shader that adds up real waves. Each source
+sends out rings, A = Σ a·cos(k·r − ω·t + φ), with a reach that fades it with distance and a
+start time so a new source's wavefront spreads outward. Crests are soft bright bands, troughs a
+faint violet, and where the sum comes close to its peak a thin bright ridge appears. The water is
+drawn as a lit dot lattice on a dark pool that fades out at the edges, so it sits inside the
+Motus field instead of on top of it. A tap or click adds a short-lived source in step with you.
+Scenes pass a model function `(t, w, h) => frame`; the engine owns the canvas, the loop, pausing
+when hidden, and motion off (one still frame). The element carries `data-quiet`, so field
+networks never form over it.
+
 ## Give Together
 
 `src/give.tsx` (the /give landing) and `src/together/` (everything under /give/). The Give page is
@@ -92,19 +104,46 @@ Give Together: a Give Profile, a peer Give Guide found by what two people share,
 before any message, Shared Waves around real opportunities, and a private record. The full
 build is in docs/GIVE-TOGETHER.md.
 
-`src/together/scene.tsx` draws its ocean network. You are a soft cyan light with currents (slow
-contour lines of a moving flow). People who share something with you are distant points of
-light, nearer the more you share. A Give Guide is joined to you by a flowing strand. When both
-people say yes, the strand grows between them and a ring of light spreads from where they meet,
-then "Your Give Guide" and "You both want to make a difference." appear. On the landing page the
-scene is an illustration and is never shown as real people. The output fades to zero before the
-canvas edge, so no rectangle shows over the dots.
+Its physics is interference.
+
+| Place | What it shows | Statement |
+| --- | --- | --- |
+| Landing, first scene (`together/tank.tsx`) | A sticky scene over three scroll chapters, August's lines "Find Your People." "Give Together." "Build a Wave.": you, one light, with faint lights around you not yet in step; one comes near and falls into step, and the bands between you rise twice as high; then everyone lines up in step and the rings join into one straight wavefront (Huygens) | Two in step add up; many in step make one wave. |
+| Landing, A Give Guide (`PairStudy`) | Two sources; drag, use the slider or the arrow keys to change how far in step they are. In step the pattern doubles, out of step it goes still | Giving in step adds up. |
+| /give/guide (`together/scene.tsx`, field) | You at the centre. Give Guides ripple in step with you; people who share something are faint lights whose rings stay close; choose one and their rings reach toward yours and fall into step | A preview of giving together. |
+| The moment | Two lights fall into step over two seconds, then a ring spreads from where they meet, and "Your Give Guide" appears | You both said yes. |
+| Shared Wave (`together/wave.tsx`) | Two lights out of step while proposed, in step once active | The Wave is underway. |
+| Give Profile | Seven rings, one per question, lit as you answer | You are building your profile. |
+| Record | One ring per day given together | Each day adds a ring. |
+| Opportunities | Each kind has its wave symbol (Teachback: standing wave; volunteering: a pair in step; event: a travelling wave) | Kind at a glance. |
 
 ## The Teachback
 
-`src/teachback.tsx`, at /guide/teachback. One light teaches two; each learner sends a violet
-pulse back (the teach-back), then teaches two more, for five generations on rings. Drawn on a 2D
-canvas with stamped glow sprites. Motion off shows the finished tree.
+`src/teachback.tsx`, at /guide/teachback. Its physics is reflection and the standing wave.
+
+- The first scene: one light teaches two. A pulse runs out along each branch, reflects from the
+  learner (a fixed end flips it) and comes home violet; once taught back, the branch settles into
+  a steady standing-wave swing. Then each learner teaches two more, for five generations. 2D
+  canvas, stamped glow sprites; motion off shows the finished tree.
+- The string lab (`src/teachback-lab.tsx`): a string between Teacher and Learner, simulated with
+  the damped 1D wave equation. Hold "Hold To Teach" and the teacher's end moves at the string's
+  third harmonic; each push meets the returning echo in step and a standing wave builds (about
+  two seconds). Let go and it fades slowly. Touch the string to send one pulse and watch it
+  reflect. The words under it follow the height of the swing, not the instant.
+
+## Wave symbols
+
+`src/symbols.tsx` and `symbols.css`: small SVG symbols, each a real wave behaviour, moved with
+transforms only. StandingString (a sine scaled from +1 to −1), Travel (a sine slid one
+wavelength), Pair (two sources sending rings in step), Echo (a pulse out and back, flipped at the
+far end), Resonance (one string setting the next moving), Guided (a ray zigzagging between two
+walls) and Growing (a swing that grows). WaveList is a list joined by one wave that lights each
+step as it is reached. Where they appear: the Teachback steps (Learn it: Travel, Teach it
+together: Pair, Teach it back: Echo, Pass it on: Resonance) and the four practices on Learn
+(Learn: Travel, Guide: Guided, Give: Pair, Grow: Growing).
+
+A clearing can be round: `data-clear="round"` clears a circle instead of a rounded box (the
+profile rings and the record rings use it).
 
 ## Buttons
 
