@@ -167,12 +167,14 @@ Its physics is interference.
 - The first scene: one light teaches two. A pulse runs out along each branch, reflects from the
   learner (a fixed end flips it) and comes home violet; once taught back, the branch settles into
   a steady standing-wave swing. Then each learner teaches two more, for five generations. 2D
-  canvas, stamped glow sprites; motion off shows the finished tree.
+  canvas, stamped glow sprites; motion off shows the finished tree. It opens partway through its
+  cycle, so the first screen already shows learners taught back.
 - The string lab (`src/teachback-lab.tsx`): a string between Teacher and Learner, simulated with
   the damped 1D wave equation. Hold "Hold To Teach" and the teacher's end moves at the string's
   third harmonic; each push meets the returning echo in step and a standing wave builds (about
   two seconds). Let go and it fades slowly. Touch the string to send one pulse and watch it
-  reflect. The words under it follow the height of the swing, not the instant.
+  reflect. The words under it follow the height of the swing, not the instant. While no one is using
+  it, the teacher's end sends one small pulse every four beats.
 
 ## Wave symbols
 
@@ -182,8 +184,10 @@ wavelength), Pair (two sources sending rings in step), Echo (a pulse out and bac
 far end), Resonance (one string setting the next moving), Guided (a ray zigzagging between two
 walls) and Growing (a swing that grows). WaveList is a list joined by one wave that lights each
 step as it is reached. Where they appear: the Teachback steps (Learn it: Travel, Teach it
-together: Pair, Teach it back: Echo, Pass it on: Resonance) and the four practices on Learn
-(Learn: Travel, Guide: Guided, Give: Pair, Grow: Growing).
+together: Pair, Teach it back: Echo, Pass it on: Resonance), the four practices on Learn
+(Learn: Travel, Guide: Guided, Give: Pair, Grow: Growing) and the four steps on the Guide page (Tell your
+story: Echo, Build your Wave: Growing, Bring people together: Pair, Show what changed: Resonance). The
+moving parts are HTML layers, so the compositor animates them; each symbol clears its patch of dots.
 
 A clearing can be round: `data-clear="round"` clears a circle instead of a rounded box (the
 profile rings and the record rings use it).
