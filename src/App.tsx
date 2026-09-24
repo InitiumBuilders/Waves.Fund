@@ -30,6 +30,7 @@ import { Vessel } from "./vessel";
 import { useStateStore } from "./state";
 import { Trax, TraxCollector } from "./trax";
 import { FlowNavigation } from "./flow";
+import { Seamless } from "./seamless";
 import { api, CommunityProvider, useCommunity } from "./community";
 import type { Project } from "./community";
 import { Application, Privacy, ReceiptTracker, TeamReview } from "./forms";
@@ -363,12 +364,13 @@ function AppContent() {
       <Background />
       <WaveMind />
       <TraxCollector />
+      <Seamless />
       <div
         className={"app-shell " + (pathname === "/" ? "route-home" : pathname === "/grow" ? "route-grow" : pathname === "/waves" || pathname === "/projects" ? "route-waves route-reading" : "route-reading")}
       >
         <Header />
         <MemberBoundary><main id="content" key={pathname}>
-          <Suspense fallback={<div className="narrow-page" role="status">Opening your Wave…</div>}><Routes>
+          <Suspense fallback={<div className="narrow-page route-loading" role="status">Opening your Wave…</div>}><Routes>
             <Route path="/" element={<Home />} />
             <Route path="/now-lets-begin" element={<Suspense fallback={<div className="narrow-page" role="status">Opening the Wave Praxis…</div>}><Begin /></Suspense>} />
             <Route path="/learn" element={<Learn />} />

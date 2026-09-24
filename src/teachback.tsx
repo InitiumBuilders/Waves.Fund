@@ -5,6 +5,7 @@ import { useStateStore } from "./state";
 import { Stock } from "./mind/WaveMind";
 import { Echo, Pair, Resonance, Travel } from "./symbols";
 import { StringLab } from "./teachback-lab";
+import { BEAT } from "./cadence";
 import "./teachback.css";
 
 /* The Teachback: a core page of the Wave Guides. His lines are the mantra, "Give Together. Teach Together.
@@ -163,6 +164,8 @@ function TeachbackScene() {
     const CYCLE = 17, STEP = 2.2, SAMPLES = 26;
     const frame = (now: number) => {
       const clock = (now - t0) / 1000;
+      // Every branch swings once a beat on the page's shared clock (src/cadence.ts).
+      const beat = (now / 1000) * ((Math.PI * 2) / BEAT);
       const t = motion ? clock % CYCLE : 12.5;
       const fade = motion ? Math.min(1, Math.max(0, (CYCLE - t) / 1.4)) : 1;
       place(motion ? clock * 0.01 : 0.2);
@@ -182,7 +185,7 @@ function TeachbackScene() {
         // Once returned, the branch holds a standing wave that settles to a steady swing.
         const settled = motion ? Math.max(0, t - start - 1.8) : 3;
         const hold = back >= 1 ? (2.4 + 6 * Math.exp(-settled / 1.3)) * S : 0;
-        const swing = Math.cos(clock * 5.2 + n.seed * 6.28);
+        const swing = Math.cos(beat + n.seed * 6.28);
         const pulseAt = back > 0 ? 1 - back : out;
         const pulseSign = back > 0 ? -1 : 1;
         const pulseOn = motion && (out < 1 || (back > 0 && back < 1));

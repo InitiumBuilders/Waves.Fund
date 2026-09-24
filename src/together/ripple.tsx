@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { HTMLAttributes, MutableRefObject, PointerEvent, ReactNode } from "react";
 import { useStateStore } from "../state";
+import { BEAT, clock as shared } from "../cadence";
 
 /* Ripples of light, summed the way real waves sum. Each source sends out circular waves; where two crests
    arrive together they add up and glow brighter (constructive interference), where a crest meets a trough
@@ -21,6 +22,7 @@ export type RippleFrame = {
   ground?: number;           // how much of the page's own ground the pool covers (0 to 1), fading to its edges
   select?: [number, number, number];   // a ring around the chosen light: x, y, strength
   ring?: [number, number, number];     // one expanding ring of light: x, y, progress 0..1
+  front?: [number, number, number, number]; // a line the wave moves forward from: x, y, direction (radians), strength 0..1
 };
 export type RippleModel = (t: number, w: number, h: number) => RippleFrame;
 export type RippleHandle = { redraw: () => void };
@@ -31,12 +33,13 @@ in vec2 aPos; void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
 const FS = `#version 300 es
 precision highp float;
 uniform vec2 uRes;
-uniform float uDpr, uTime, uK, uW, uGain, uDots, uGround;
+uniform float uDpr, uTime, uWave, uK, uW, uGain, uDots, uGround;
 uniform int uCount;
 uniform vec4 uA[${MAX}];   // x, y, amplitude, phase
 uniform vec4 uB[${MAX}];   // born, hue, size, reach (how far its ripples carry, as a share of the scene)
 uniform vec3 uSel;
 uniform vec3 uRing;
+uniform vec4 uFront;
 out vec4 o;
 const vec3 CYAN = vec3(0.37, 0.91, 1.0), BLUE = vec3(0.2, 0.52, 1.0), VIOLET = vec3(0.64, 0.55, 1.0), WHITE = vec3(0.94, 0.99, 1.0);
 void main() {
@@ -53,7 +56,7 @@ void main() {
     float front = max(uTime - b.x, 0.0) * c;
     float env = smoothstep(front + 2.0, front - 40.0, r) * exp(-r / (R * max(b.w, 0.05)));
     float amp = s.z * env * inversesqrt(1.0 + r / 36.0);
-    A += amp * cos(uK * r - uW * uTime + s.w);
+    A += amp * cos(uK * r - uW * uWave + s.w);
     E += amp;
     hue += amp * b.y;
     // The source itself: a point of light.
@@ -66,6 +69,12 @@ void main() {
     }
   }
   float hm = E > 0.0005 ? hue / E : 0.0;
+  // A wave that has formed moves forward from its line: the water behind the line goes quiet.
+  if (uFront.w > 0.0) {
+    float ahead = dot(p - uFront.xy, vec2(cos(uFront.z), sin(uFront.z)));
+    float keep = mix(1.0, smoothstep(-0.6, 1.4, ahead * uK / 6.2831853), uFront.w);
+    A *= keep; E *= keep;
+  }
   // Crests glow; troughs keep a faint violet so the water has depth; a thin bright line runs along every
   // crest that is truly in step.
   float crest = max(A, 0.0), trough = max(-A, 0.0);
@@ -141,7 +150,7 @@ export function Ripple({ model, className = "", handle, tappable = false, maxDpr
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const U = (n: string) => gl.getUniformLocation(prog, n);
-    const loc = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), k: U("uK"), w: U("uW"), gain: U("uGain"), dots: U("uDots"), ground: U("uGround"), count: U("uCount"), a: U("uA"), b: U("uB"), sel: U("uSel"), ring: U("uRing") };
+    const loc = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), wave: U("uWave"), k: U("uK"), w: U("uW"), gain: U("uGain"), dots: U("uDots"), ground: U("uGround"), count: U("uCount"), a: U("uA"), b: U("uB"), sel: U("uSel"), ring: U("uRing"), front: U("uFront") };
     const A = new Float32Array(MAX * 4), B = new Float32Array(MAX * 4);
     let w = 1, h = 1, dpr = 1, raf = 0, visible = true;
     const t0 = performance.now();
@@ -162,11 +171,14 @@ export function Ripple({ model, className = "", handle, tappable = false, maxDpr
       gl.useProgram(prog);
       const k = (Math.PI * 2) / Math.max(8, f.lambda);
       gl.uniform2f(loc.res, w, h); gl.uniform1f(loc.dpr, dpr); gl.uniform1f(loc.time, t);
+      // Crests pass once a beat on the clock the whole page shares, so every scene ripples in step.
+      gl.uniform1f(loc.wave, motion ? shared() % BEAT : t);
       gl.uniform1f(loc.k, k); gl.uniform1f(loc.w, k * f.speed); gl.uniform1f(loc.gain, f.gain ?? 1); gl.uniform1f(loc.dots, f.dots ?? 0); gl.uniform1f(loc.ground, f.ground ?? 0);
       gl.uniform1i(loc.count, Math.min(MAX, list.length));
       gl.uniform4fv(loc.a, A); gl.uniform4fv(loc.b, B);
       gl.uniform3f(loc.sel, ...(f.select || [0, 0, 0] as [number, number, number]));
       gl.uniform3f(loc.ring, ...(f.ring || [0, 0, -1] as [number, number, number]));
+      gl.uniform4f(loc.front, ...(f.front || [0, 0, 0, 0] as [number, number, number, number]));
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };

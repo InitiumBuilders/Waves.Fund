@@ -46,7 +46,7 @@ void main() {
   // The guided mode: the fundamental shape across the core, with its phase travelling along it.
   float k = 2.0 * PI / (w * 2.6);
   float shape = pow(cos(clamp(v / w, -1.0, 1.0) * PI * 0.5), 2.0) * step(av, w);
-  float phase = 0.55 + 0.45 * cos(k * u - uTime * 3.2);
+  float phase = 0.55 + 0.45 * cos(k * u - uTime * 4.1887902);   // one beat (src/cadence.ts)
   float mode = shape * phase * along * (uAngle <= 1.0 ? 0.42 : 0.42 * max(0.0, 1.6 - uAngle));
   col += mix(blue, cyan, phase) * mode; a += mode * 0.8;
   // Evanescent field: a thin glow that reaches just past the core, dying exponentially.
@@ -75,7 +75,7 @@ void main() {
     float inside = du > 0.0 ? 1.0 : smoothstep(-60.0, 0.0, du);
     float ray = exp(-d * d / 1.3) * 0.5 * inside * lost * smoothstep(x1 + 40.0, x1 - 10.0, u);
     // A photon rides each ray: a bright head with a short tail.
-    float head = x0 + fract(uTime * 0.12 + ph) * (x1 - x0 + 120.0) - 60.0;
+    float head = x0 + fract(uTime / 9.0 + ph) * (x1 - x0 + 120.0) - 60.0;
     float dh = u - head;
     float ph2 = exp(-d * d / 2.2) * (exp(-dh * dh / 30.0) * 2.2 + (dh < 0.0 ? exp(dh / 26.0) * 0.8 : 0.0)) * inside * lost;
     vec3 rc = mix(cyan, white, 0.35);
@@ -96,7 +96,7 @@ void main() {
   float rr = length(dq);
   if (dq.x > 0.0) {
     float fan = exp(-pow(atan(dq.y, dq.x) / 0.7, 2.0));
-    float rings = 0.5 + 0.5 * sin(rr * 0.22 - uTime * 3.4);
+    float rings = 0.5 + 0.5 * sin(rr * 0.22 - uTime * 4.1887902);
     float spread = fan * rings * exp(-rr / (uRes.x * 0.055)) * 0.55;
     col += mix(cyan, violet, smoothstep(0.0, 80.0, rr)) * spread; a += spread * 0.8;
   }
@@ -133,7 +133,7 @@ export function WaveguideScene({ variant = "hero", className = "" }: { variant?:
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const u = (n: string) => gl.getUniformLocation(prog, n);
-    let w = 0, h = 0, dpr = 1, raf = 0, visible = true, t0 = performance.now();
+    let w = 0, h = 0, dpr = 1, raf = 0, visible = true, t0 = 0; // the shared clock, so the guide pulses in step with the field
     const resize = () => {
       const r = b.getBoundingClientRect();
       dpr = Math.min(window.devicePixelRatio || 1, 2);

@@ -1,43 +1,48 @@
-/* Wave symbols (src/symbols.tsx). Transform and opacity only. */
+/* Wave symbols (src/symbols.tsx). The moving parts are HTML layers, animated with transform and opacity
+   only, so the compositor runs them. Every loop is a whole number of beats (1.5 s, src/cadence.ts), so the
+   symbols move in step with the field and the ripples. */
 
-.sym { display: block; width: 100%; height: auto; overflow: visible; }
+.sym { position: relative; display: block; width: 100%; aspect-ratio: 320 / 72; }
+.sym > svg, .sym-move > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; display: block; }
+.sym-move, .sym-clip { position: absolute; inset: 0; }
+.sym-clip { overflow: hidden; }
 .sym-line { fill: none; stroke: #86f1ff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.sym-line.is-back, .sym-line.is-second { stroke: #b6a8ff; }
+.sym-line.is-second { stroke: #b6a8ff; }
 .sym-envelope { fill: none; stroke: rgba(154, 134, 255, 0.34); stroke-width: 1; stroke-dasharray: 2 5; }
 .sym-end { fill: #eafdff; filter: drop-shadow(0 0 6px rgba(94, 233, 255, 0.9)); }
 .sym-node { fill: rgba(170, 160, 255, 0.8); }
 .sym-rail { stroke: rgba(120, 200, 255, 0.28); stroke-width: 1; stroke-dasharray: 2 6; }
+.sym-wall { stroke: rgba(120, 200, 255, 0.45); stroke-width: 1.2; }
 
 /* A standing wave: one shape whose height swings from up to down and back. */
-.sym-swing { transform-box: fill-box; transform-origin: center; animation: sym-swing 1.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
-.sym-swing.is-late { animation-delay: 0.75s; }
+.sym-swing { transform-origin: 50% 50%; animation: sym-swing 1.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
+.sym-swing.is-first { transform-origin: 50% 30.56%; }
+.sym-swing.is-late { transform-origin: 50% 69.44%; animation-delay: 0.75s; }
 @keyframes sym-swing { from { transform: scaleY(1); } to { transform: scaleY(-1); } }
 
-/* A travelling wave: slid one wavelength, forever. */
-.sym-slide { animation: sym-slide 2.2s linear infinite; }
-@keyframes sym-slide { to { transform: translateX(-160px); } }
+/* A travelling wave: slid one wavelength, forever. The layer is twice the symbol's width. */
+.sym-slide { right: auto; width: 200%; animation: sym-slide 3s linear infinite; }
+@keyframes sym-slide { to { transform: translate3d(-25%, 0, 0); } }
+.sym-slide.is-guided { animation-name: sym-slide-guided; }
+@keyframes sym-slide-guided { to { transform: translate3d(-12.5%, 0, 0); } }
 
-.sym-wall { stroke: rgba(120, 200, 255, 0.45); stroke-width: 1.2; }
-.sym-slide.is-guided { animation-duration: 2.6s; }
-.sym-guided .sym-slide { animation-name: sym-slide-guided; }
-@keyframes sym-slide-guided { to { transform: translateX(-80px); } }
-.sym-grow { transform-box: fill-box; transform-origin: center; animation: sym-grow 3.4s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
+/* A wave gaining strength. */
+.sym-grow { transform-origin: 50% 50%; animation: sym-grow 3s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
 @keyframes sym-grow { from { transform: scaleY(0.18); } to { transform: scaleY(1); } }
 
 /* Rings from a source. */
-.sym-ring { fill: none; stroke: rgba(110, 230, 255, 0.75); stroke-width: 1.2; transform-box: fill-box; transform-origin: center; opacity: 0; animation: sym-ring 3s linear infinite; }
+.sym-ring { position: absolute; border-radius: 50%; box-shadow: inset 0 0 0 1.2px rgba(110, 230, 255, 0.75); opacity: 0; animation: sym-ring 3s linear infinite; }
 @keyframes sym-ring { 0% { transform: scale(0.12); opacity: 0.9; } 100% { transform: scale(1.7); opacity: 0; } }
 
 /* An echo: out along the rail, flipped by the fixed end, and home again. */
-.sym-echo .sym-pulse { animation: sym-echo 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+.sym-pulse { transform-origin: 0 50%; animation: sym-echo 3s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
 @keyframes sym-echo {
-  0% { transform: translate(12px, 0) scaleY(1); }
-  46% { transform: translate(282px, 0) scaleY(1); }
-  54% { transform: translate(282px, 0) scaleY(-1); }
-  100% { transform: translate(12px, 0) scaleY(-1); }
+  0% { transform: translate3d(3.75%, 0, 0) scaleY(1); }
+  46% { transform: translate3d(88.125%, 0, 0) scaleY(1); }
+  54% { transform: translate3d(88.125%, 0, 0) scaleY(-1); }
+  100% { transform: translate3d(3.75%, 0, 0) scaleY(-1); }
 }
-.sym-echo .sym-pulse { transform-box: view-box; transform-origin: 0 36px; }
-.sym-echo .is-far { animation: sym-flash 3.2s ease-out infinite; }
+.sym-far { position: absolute; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #eafdff; box-shadow: 0 0 8px 1px rgba(94, 233, 255, 0.9); opacity: 0.45; animation: sym-flash 3s ease-out infinite; }
 @keyframes sym-flash { 0%, 44% { opacity: 0.45; } 50% { opacity: 1; } 70%, 100% { opacity: 0.45; } }
 
 /* The list whose steps are joined by one wave. */
@@ -55,10 +60,10 @@
 .wave-list li > h3, .wave-list li > p, .wave-list li > .step-number { opacity: 0.86; transform: translate3d(0, 10px, 0); transition: opacity 0.8s var(--ease), transform 0.9s var(--ease-out); }
 .wave-list li.is-lit > h3, .wave-list li.is-lit > p, .wave-list li.is-lit > .step-number { opacity: 1; transform: none; }
 
-html[data-motion="off"] .sym-swing, html[data-motion="off"] .sym-grow, html[data-motion="off"] .sym-slide, html[data-motion="off"] .sym-ring, html[data-motion="off"] .sym-echo .sym-pulse, html[data-motion="off"] .sym-echo .is-far { animation: none; }
+html[data-motion="off"] :is(.sym-swing, .sym-grow, .sym-slide, .sym-ring, .sym-pulse, .sym-far) { animation: none; }
 html[data-motion="off"] .sym-ring { opacity: 0.5; transform: scale(0.8); }
 @media (prefers-reduced-motion: reduce) {
-  .sym-swing, .sym-grow, .sym-slide, .sym-ring, .sym-echo .sym-pulse, .sym-echo .is-far { animation: none !important; }
+  :is(.sym-swing, .sym-grow, .sym-slide, .sym-ring, .sym-pulse, .sym-far) { animation: none !important; }
   .sym-ring { opacity: 0.5; transform: scale(0.8); }
   .wave-list li > * { transition: none !important; }
 }

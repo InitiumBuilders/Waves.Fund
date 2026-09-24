@@ -7,6 +7,7 @@ import type { Wave } from "./core";
 import { Confirm } from "./safety";
 import { Sheet } from "../ui";
 import { mindWave } from "../mind/WaveMind";
+import { BEAT } from "../cadence";
 import { Ripple, ease } from "./ripple";
 import type { RippleHandle, RippleModel } from "./ripple";
 
@@ -242,7 +243,7 @@ function PairOfYou({ status }: { status: Wave["status"] }) {
       const lambda = Math.max(40, Math.min(90, Math.min(w, h) * 0.3));
       const gap = lambda * 1.6, cy = h / 2;
       return {
-        lambda, speed: lambda * 0.7, gain: 1.15, dots: 13, ground: 0.9,
+        lambda, speed: lambda / BEAT, gain: 1.15, dots: 13, ground: 0.9,
         sources: [
           { x: w / 2 - gap, y: cy, a: 1, phase: 0, hue: 0.05, size: 4.2, born: -100, reach: 0.9 },
           { x: w / 2 + gap, y: cy, a: 0.55 + 0.45 * ease(lock), phase: Math.PI * (1 - ease(lock)), hue: 0.3, size: 4.2, born: -100, reach: 0.9 },

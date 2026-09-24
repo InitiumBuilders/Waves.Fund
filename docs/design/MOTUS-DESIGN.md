@@ -85,6 +85,49 @@ and the light leaving as a spreading wave. The section "Why we call it a Wave Gu
 definition from Wikipedia and has a study version: move the pointer (or use the arrow keys)
 to change the launch angle, and past the critical angle the light escapes.
 
+## Cadence: one beat
+
+`src/cadence.ts`. The whole site keeps one beat, 1.5 seconds. Every loop lasts a whole number of beats
+(0.75, 1.5, 3, 4.5, 6, 7.5 s) and runs on one clock, the document timeline:
+
+- CSS loops: when a looping animation starts, its start time is set to zero, so its cycles fall on the
+  beat with every other loop on the page.
+- The dot field (`field.ts`), the waveguide scene and the energy layer use that clock (t0 = 0), and every
+  frequency in their shaders is a whole fraction of the beat (`OM = 2π / 1.5`).
+- Ripples: crests pass once a beat (`speed = λ / BEAT`, phase from the shared clock).
+
+Statement: everything here moves in step. It is Give Together's idea applied to the site itself.
+
+## Seamless page changes
+
+`src/seamless.tsx`, with the View Transitions API. A tap on a link (or a swipe between the five main
+views) sends a wave through the field from where you touched; the page you leave dissolves (0.34 s,
+opacity only) while the next page rises with its own arrival. The header and tab bar are captured on
+their own (`view-transition-name`), so they hold still. The change waits for a lazy page to load, so a
+placeholder never shows. Browsers without the API, and motion off, get the page's own arrival.
+
+## Arrival on scroll
+
+Blocks below the first screen rise into place as they are scrolled to (`.arrive`), driven by the scroll
+position with CSS scroll-driven animations, so they run off the main thread and rewind exactly when you
+scroll back. Cards in one row follow each other by 40px of scroll. Blocks already on screen never fade.
+The field measures blocks in their resting place (`html.mind-measuring`). Where the browser has no
+scroll timelines, the older timed arrival (`flow-arrival`) runs instead.
+
+## Open vessels
+
+A stock's vessel is open at the top and lit at its sides and floor, so an empty one reads as waiting to
+be filled, not as an input. A thin line of light rests on its floor and breathes on the beat until the
+energy from the step before pours in.
+
+## Performance rules found in this round
+
+- SVG animations run on the main thread even off screen. The wave symbols now animate HTML layers
+  (compositor), and rest while out of view, rejoining the beat in phase when they return.
+- Never animate `filter` in a loop (the Learn nav mark's glow is steady now).
+- Measure at 6x CPU on a phone viewport against a production build; compare with the live site in the
+  same sitting, because the machine's load moves the numbers.
+
 ## Ripples
 
 `src/together/ripple.tsx` is one WebGL2 fragment shader that adds up real waves. Each source

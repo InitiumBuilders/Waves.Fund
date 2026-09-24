@@ -555,7 +555,8 @@ html:not([data-mind="on"]) .stock::before {
 .cascade-step svg { width: 44px; height: 44px; padding: 11px; border-radius: 15px; corner-shape: superellipse(2.15); background: radial-gradient(circle at 50% 35%, rgba(47, 141, 255, 0.34), rgba(4, 16, 40, 0.9) 75%); box-shadow: inset 0 0 0 1px rgba(120, 220, 255, 0.26); color: #dffbff; }
 .cascade h3 { font-size: clamp(22px, 2vw, 28px); margin-bottom: 10px; }
 /* The four practices on Learn each carry their wave (src/symbols.tsx), not a boxed icon. */
-.cascade-step svg.practice-symbol { width: min(56%, 200px); height: auto; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.cascade-step .practice-symbol { width: min(56%, 200px); }
+.cascade-step .sym svg { width: 100%; height: 100%; padding: 0; border-radius: 0; background: none; box-shadow: none; }
 
 /* ---------- Grow: the whale film steps back so the words lead ---------- */
 .whale-background video { opacity: 0.4; }
@@ -627,3 +628,71 @@ html:not([data-mind="on"]) .stock::before {
 }
 
 
+
+/* ---------- Seamless: one motion between pages (src/seamless.tsx) ---------- */
+/* The page you leave dissolves over the next one, which rises with its own arrival. The header and the tab
+   bar are captured on their own, so they hold still while the words change. */
+.app-header { view-transition-name: masthead; }
+.bottom-nav { view-transition-name: tabbar; }
+::view-transition-old(root) { animation: seamless-leave 0.34s cubic-bezier(0.4, 0, 0.9, 0.6) both; }
+::view-transition-new(root) { animation: none; }
+::view-transition-group(masthead), ::view-transition-group(tabbar) { animation-duration: 0.34s; }
+@keyframes seamless-leave { to { opacity: 0; } }
+
+/* ---------- Arrival on scroll (src/cadence.ts) ---------- */
+/* Driven by the scroll position, so it rewinds exactly when you scroll back. Cards in one row follow each
+   other by 40px of scroll. */
+@supports (animation-timeline: view()) {
+  .arrive {
+    animation: arrive linear both;
+    animation-timeline: view();
+    animation-range: entry calc(var(--arrive-i, 0) * 40px) entry calc(170px + var(--arrive-i, 0) * 40px);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}
+@keyframes arrive { from { opacity: 0; transform: translate3d(0, 16px, 0); } }
+html[data-motion="off"] .arrive { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .arrive { animation: none !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* ---------- File pickers ---------- */
+/* The picker's button matches the site's own squircle buttons instead of the browser's grey one. */
+input[type="file"] { width: 100%; min-height: 0; padding: 6px 0; border: 0; border-radius: 0; background: none; box-shadow: none; color: var(--ink); font: inherit; font-size: 14px; }
+input[type="file"]::file-selector-button {
+  margin-right: 16px; min-height: 44px; padding: 0 22px;
+  border: 1px solid rgba(120, 220, 255, 0.5); border-radius: 15px; corner-shape: superellipse(2.15);
+  background: radial-gradient(circle at 50% 0%, rgba(47, 141, 255, 0.32), rgba(4, 16, 40, 0.92) 75%);
+  color: #eafdff; font: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.01em; cursor: pointer;
+  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+input[type="file"]::file-selector-button:hover { border-color: rgba(160, 244, 255, 0.9); box-shadow: 0 0 22px rgba(94, 233, 255, 0.28); }
+input[type="file"]:focus-visible { outline: none; }
+input[type="file"]:focus-visible::file-selector-button { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+/* ---------- Open vessels ---------- */
+/* A vessel is open at the top and lit at its sides and floor, so it reads as something waiting to be
+   filled, not a box to type in. Until the energy from the step before arrives, a thin line of light rests
+   on its floor and breathes on the beat. The liquid is drawn above it once it comes. */
+html[data-mind="on"] .stock {
+  background: linear-gradient(180deg, rgba(1, 6, 18, 0), rgba(2, 10, 28, 0.72));
+  box-shadow: inset 1px 0 0 rgba(140, 220, 255, 0.13), inset -1px 0 0 rgba(140, 220, 255, 0.13), inset 0 -1px 0 rgba(170, 240, 255, 0.36), inset 0 -12px 18px -12px rgba(94, 233, 255, 0.32);
+}
+html[data-mind="on"] .stock::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 5px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(130, 238, 255, 0.85) 30%, rgba(150, 140, 255, 0.75) 70%, transparent);
+  transform-origin: center;
+  animation: stock-wait 3s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
+}
+@keyframes stock-wait { from { opacity: 0.22; transform: scaleX(0.55); } to { opacity: 0.7; transform: scaleX(1); } }
+html[data-motion="off"] .stock::before { animation: none; opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) { html[data-mind="on"] .stock::before { animation: none; opacity: 0.5; } }
+/* While the field measures the page, arriving blocks are read in their resting place (src/mind/WaveMind.tsx). */
+html.mind-measuring .arrive { animation: none !important; }

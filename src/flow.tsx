@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useStateStore } from './state';
+import { go } from './seamless';
 const views = ['/', '/learn', '/guide', '/give', '/grow'];
 export function FlowNavigation() {
   const { pathname } = useLocation();
@@ -30,7 +31,7 @@ export function FlowNavigation() {
       start=null;
       if (!allowed || document.querySelector('dialog[open]') || window.getSelection()?.toString()) return;
       const next = views.indexOf(pathname)+(dx<0?1:-1);
-      if (next>=0&&next<views.length) navigate(views[next]);
+      if (next>=0&&next<views.length) go(navigate, views[next], {x:point.clientX,y:point.clientY});
     };
     const cancel=()=>{start=null};
     document.addEventListener('touchstart',begin,{passive:true});
@@ -39,7 +40,8 @@ export function FlowNavigation() {
     return ()=>{document.removeEventListener('touchstart',begin);document.removeEventListener('touchend',finish);document.removeEventListener('touchcancel',cancel)};
   }, [pathname,navigate]);
   useEffect(() => {
-    if (!motion) return;
+    // Where the browser can drive arrivals from the scroll position, src/cadence.ts does it per block instead.
+    if (!motion || (typeof CSS !== 'undefined' && CSS.supports('animation-timeline: view()'))) return;
     const observer = new IntersectionObserver(entries=>{
       for(const entry of entries) if(entry.isIntersecting){entry.target.classList.add('flow-arrival');observer.unobserve(entry.target)};
     },{threshold:0.08});

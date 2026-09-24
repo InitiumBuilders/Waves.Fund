@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { PointerEvent } from "react";
+import { BEAT } from "../cadence";
 import { Ripple, ease, hash, mix } from "./ripple";
 import type { RippleHandle, RippleModel, Source } from "./ripple";
 
@@ -76,7 +77,7 @@ function fieldModel(live: { current: { nodes: SceneNode[]; selected: string | nu
     });
     placed.current = spots;
     const chosen = spots.find((s) => s.key === selected);
-    return { sources, lambda, speed: lambda * 0.7, gain: 1.1, dots: 14, ground: 0.86, select: chosen ? [chosen.x, chosen.y, 1] : undefined };
+    return { sources, lambda, speed: lambda / BEAT, gain: 1.1, dots: 14, ground: 0.86, select: chosen ? [chosen.x, chosen.y, 1] : undefined };
   };
 }
 
@@ -92,7 +93,7 @@ function momentModel(): RippleModel {
     const lock = ease(t / 2);
     const ringP = (t - 1.6) / 2.8;
     return {
-      lambda, speed: lambda * 0.7, gain: 1.2, dots: 15, ground: 0.95,
+      lambda, speed: lambda / BEAT, gain: 1.2, dots: 15, ground: 0.95,
       sources: [
         { ...a, a: 1, phase: 0, hue: 0.05, size: 4.8, born: -100, reach: 0.62 },
         { ...b, a: mix(0.5, 1, lock), phase: mix(Math.PI, 0, lock), hue: 0.3, size: 4.8, born: 0, reach: mix(0.3, 0.62, lock) },

@@ -107,7 +107,7 @@ void main() {
     float a = core + glass + glow;
     // Light inside: pulses travel from source to target, weaving wall to wall the way light stays in a fibre.
     for (int k = 0; k < 3; k++) {
-      float sp = fract(uTime * 0.14 + float(k) / 3.0 + float(bi) * 0.37) * (gd.z + 80.0) - 40.0;
+      float sp = fract(uTime / 7.5 + float(k) / 3.0 + float(bi) * 0.37) * (gd.z + 80.0) - 40.0;
       float ds = bs - sp;
       float head = exp(-ds * ds / 70.0);
       float trail = ds < 0.0 ? exp(ds / 70.0) * 0.5 : 0.0;

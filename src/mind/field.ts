@@ -53,6 +53,9 @@ void route(inout F f, vec2 p, vec2 a, vec2 b, float t, float s, float speed) {
   f.a += lane * (0.45 + 1.3 * sig);
   f.z += lane * sig * 30.0;
 }
+// One beat (1.5 s, src/cadence.ts) as an angular speed. Every motion below repeats in whole beats, so the
+// field moves in step with the ripples, the symbols and the energy on the page.
+const float OM = 4.1887902;
 F mode(int m, vec2 p, vec4 rect, float t) {
   F f = F(0.0, vec2(0.0), 0.0);
   vec2 c = rect.xy, h = max(rect.zw, vec2(40.0));
@@ -63,11 +66,11 @@ F mode(int m, vec2 p, vec4 rect, float t) {
   if (m == 0) {                                   // vision: a mass, and waves radiating from it
     float r = length(p - c);
     well(f, p, c, s * 0.5, 1.1);
-    float ring = 0.5 + 0.5 * sin(r / s * 9.0 - t * 1.6);
+    float ring = 0.5 + 0.5 * sin(r / s * 9.0 - t * OM / 3.0);
     f.a += ring * exp(-r / (s * 1.05)) * 0.6;
     f.z += (ring - 0.5) * 34.0 * exp(-r / (s * 1.2));
   } else if (m == 1) {                            // layers: a forward pass
-    float phase = fract(t * 0.24) * 5.0;
+    float phase = fract(t / 4.5) * 5.0;
     for (int i = 0; i < 4; i++) {
       float xi = -0.75 + float(i) * 0.5;
       float col = exp(-pow((q.x - xi) / 0.075, 2.0));
@@ -83,7 +86,7 @@ F mode(int m, vec2 p, vec4 rect, float t) {
       f.a += sig; f.z += sig * 30.0;
     }
   } else if (m == 2) {                            // orbit: two masses in each other's orbit
-    float w = t * 0.42;
+    float w = t * OM / 10.0;
     vec2 o = vec2(cos(w), sin(w) * 0.55) * s * 0.52;
     well(f, p, c + o, s * 0.22, 1.35);
     well(f, p, c - o, s * 0.22, 1.35);
@@ -92,14 +95,14 @@ F mode(int m, vec2 p, vec4 rect, float t) {
     f.a += exp(-pow((r - 0.62) * 11.0, 2.0)) * (0.45 + 0.45 * cos(atan(q.y, q.x) - w - 3.14159));
   } else if (m == 3) {                            // vortex: drawn inward, and down
     vec2 d = p - c; float r = length(d) + 0.001, th = atan(d.y, d.x);
-    float arms = 0.5 + 0.5 * cos(th * 3.0 - log(r / s + 0.05) * 5.0 + t * 1.05);
+    float arms = 0.5 + 0.5 * cos(th * 3.0 - log(r / s + 0.05) * 5.0 + t * OM / 4.0);
     float fall = exp(-r / (s * 0.8));
     f.a += pow(arms, 2.2) * fall * 1.9 + fall * 0.45;
     f.d += (vec2(-d.y, d.x) / r * 12.0 - d / r * 7.0) * fall;
     f.z -= fall * 90.0;
   } else if (m == 4) {                            // rise
     float up = smoothstep(1.2, -1.2, q.y);
-    float crest = pow(0.5 + 0.5 * sin(q.y * 7.0 + t * 1.25), 4.0);
+    float crest = pow(0.5 + 0.5 * sin(q.y * 7.0 + t * OM / 3.0), 4.0);
     f.a += up * (0.28 + 0.55 * crest);
     f.z += up * crest * 36.0;
   } else if (m == 5 || m == 6) {                  // gather and hubs: masses and the paths between them
@@ -111,15 +114,15 @@ F mode(int m, vec2 p, vec4 rect, float t) {
       if (i >= n) break;
       vec2 a = c + P[i] * h;
       well(f, p, a, s * 0.17, 1.25);
-      route(f, p, a, c + P[(i + 1) % n] * h, t + float(i) * 0.37, s, 0.3);
+      route(f, p, a, c + P[(i + 1) % n] * h, t + float(i) * 0.75, s, 1.0 / 3.0);
     }
   } else if (m == 7) {                            // ocean: three waves roll through the lattice in depth
     for (int i = 0; i < 3; i++) {
       float fi = float(i);
-      float line = -0.42 + fi * 0.42 + 0.2 * sin(q.x * 2.3 - t * 1.0 + fi * 0.8);
+      float line = -0.42 + fi * 0.42 + 0.2 * sin(q.x * 2.3 - t * OM / 4.0 + fi * 0.8);
       float d = (q.y - line) * h.y / s;
       float near = exp(-d * d * 55.0);
-      float crest = pow(0.5 + 0.5 * sin(q.x * 3.2 - t * 2.1 + fi * 1.7), 3.0);
+      float crest = pow(0.5 + 0.5 * sin(q.x * 3.2 - t * OM / 2.0 + fi * 1.7), 3.0);
       f.a += near * (0.55 + 0.6 * crest) * step(abs(q.x), 1.05);
       f.d.y -= d * s * near * 0.35;
       f.z += near * (20.0 + 50.0 * crest);
@@ -128,7 +131,7 @@ F mode(int m, vec2 p, vec4 rect, float t) {
     int n = m == 8 ? 6 : 5;
     float y = m == 8 ? 0.36 * sin(q.x * 3.14159 * 1.25) : 0.0;
     float d = abs(q.y - y) * h.y / s;
-    float head = fract(t * 0.16) * 2.6 - 1.3;
+    float head = fract(t / 6.0) * 2.6 - 1.3;
     float pulse = exp(-pow((q.x - head) * 3.2, 2.0));
     float lane = exp(-d * d * 70.0) * step(abs(q.x), 1.02);
     f.a += lane * (0.3 + 1.2 * pulse);
@@ -156,10 +159,10 @@ F mode(int m, vec2 p, vec4 rect, float t) {
 F field(vec2 p, float t) {
   F f = F(0.0, vec2(0.0), 0.0);
   // The brand wave rolls across the whole field in depth, always.
-  float w = sin(dot(p, vec2(0.0092, -0.003)) - t * 0.72 + sin(p.y * 0.0042 + t * 0.2) * 1.4);
+  float w = sin(dot(p, vec2(0.0092, -0.003)) - t * OM / 6.0 + sin(p.y * 0.0042 + t * OM / 20.0) * 1.4);
   f.a += smoothstep(0.4, 1.0, w) * 0.34 * uAmb;
   // The ground itself rolls in depth: a long slow swell under the brand wave.
-  float swell = sin(p.x * 0.0037 + t * 0.23) * sin(p.y * 0.0029 - t * 0.17 + 1.3);
+  float swell = sin(p.x * 0.0037 + t * OM / 18.0) * sin(p.y * 0.0029 - t * OM / 24.0 + 1.3);
   f.z += (w * 38.0 + swell * 54.0) * uAmb;
   F a = mode(uModeA, p, uRectA, t), b = mode(uModeB, p, uRectB, t);
   float ka = (1.0 - uMix) * uVisA, kb = uMix * uVisB;
@@ -408,7 +411,7 @@ export class Field {
   private b: Anchor | null = null;
   private morphStart = -1; private mix = 1; private raf = 0; private running = false;
   private stirred = 0; private odd = false;
-  private t0 = performance.now(); private last = 0;
+  private t0 = 0; private last = 0; // t0 = 0: the shared clock every loop on the page uses (src/cadence.ts)
   private dpr = 1; private w = 0; private h = 0;
   private pointer = { x: 0, y: 0, s: 0, target: 0, moved: 0 };
   private tilt = [0.2, 0];
@@ -423,7 +426,7 @@ export class Field {
   private tint = { x: 0, y: 0, r: 160, s: 0, target: 0, hue: [0.36, 0.86, 1.0] };
   private clears: Clear[] = [];
   // Places where the dots stay but no network may form, such as a scene drawn on its own canvas.
-  private quiet: Clear[] = [];
+  private quiet: () => Clear[] = () => [];
   motion = true;
   trust = 0;
   grow = 1;
@@ -495,7 +498,8 @@ export class Field {
     this.wake();
   }
   track(anchor: Anchor) { if (this.b && this.b.name === anchor.name) { this.b = anchor; this.wake(); } }
-  setQuiet(list: Clear[]) { this.quiet = list; }
+  /** Places networks must never form, read when one looks for space (a scene may be sticky, so it is read live). */
+  setQuiet(list: () => Clear[]) { this.quiet = list; }
   /** Content to frame: measured on layout changes only, uploaded once, moved by the scroll in the shader. */
   setClears(list: Clear[]) {
     const gl = this.gl;
@@ -537,7 +541,7 @@ export class Field {
     const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
     const free = new Uint8Array(cols * rows).fill(1);
     const pad = 28;
-    for (const c of [...this.clears, ...this.quiet]) {
+    for (const c of [...this.clears, ...this.quiet()]) {
       const top = c.fixed ? c.top : c.top - this.sy;
       if (top > H + pad || top + c.height < -pad) continue;
       const x0 = Math.max(0, Math.floor((c.left - pad) / cell)), x1 = Math.min(cols - 1, Math.floor((c.left + c.width + pad) / cell));
@@ -641,7 +645,7 @@ export class Field {
       const a = remap[pa], b = remap[pb];
       if (a === b || netEdges.some(e => (e.a === a && e.b === b) || (e.a === b && e.b === a))) continue;
       if (edgesUsed + netEdges.length >= MAX_EDGES) break;
-      netEdges.push({ a, b, delay: nodes[a].delay + 0.18, phase: rnd(), speed: 0.32 + rnd() * 0.22, last: 0 });
+      netEdges.push({ a, b, delay: nodes[a].delay + 0.18, phase: rnd(), speed: rnd() < 0.5 ? 1 / 3 : 1 / 4.5, last: 0 });
     }
     this.nets.push({ nodes, edges: netEdges, t0: this.now(), life: 7.5 + rnd() * 3 });
     this.wake();

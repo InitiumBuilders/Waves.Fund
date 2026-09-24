@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, MutableRefObject, PointerEvent } from "react";
+import { BEAT } from "../cadence";
 import { Ripple, ease, hash, mix } from "./ripple";
 import type { RippleHandle, RippleModel, Source } from "./ripple";
 
@@ -8,7 +9,9 @@ import type { RippleHandle, RippleModel, Source } from "./ripple";
       each with their own ripples, not yet in step with yours.
    2. Give Together. One of them comes near and falls into step. Where your crests meet, the water rises
       twice as high: bright bands of reinforcement appear between you.
-   3. Build a Wave. Everyone lines up in step, and the separate ripples merge into one straight wavefront. */
+   3. Build a Wave. Everyone lines up in step, and the separate ripples merge into one straight wavefront that
+      moves forward, away from the words. While people are still finding their place in the line, the water
+      is quieter, so the move reads as people gathering, not as noise. */
 
 const PEOPLE = Array.from({ length: 7 }, (_, i) => ({ angle: i * 0.9 + hash(`a${i}`) * 0.6 - 0.9, dist: 0.3 + hash(`d${i}`) * 0.14, phase: hash(`p${i}`) * Math.PI * 2 }));
 const SLOTS = 11;
@@ -68,7 +71,12 @@ function tankModel(progress: MutableRefObject<number>): RippleModel {
       if (a <= 0.01) { born.delete(20 + j); return; }
       out.push({ ...slot(k), a, phase: 0, hue: 0.6, size: 3.2, born: bornAt(20 + j, a, t) });
     });
-    return { sources: out, lambda, speed: lambda * 0.7, gain: 1.15, dots: wide ? 15 : 13, ground: 0.94 };
+    // Quieter while the line forms; once it has formed, the wave moves forward (right on a wide screen, up on a phone).
+    const moving = c3 > 0 && c3 < 1 ? Math.sin(Math.PI * c3) : 0;
+    for (const s of out) { s.a *= 1 - 0.55 * moving; s.reach = (s.reach ?? 0.62) * (1 - 0.35 * moving); }
+    const line = slot(LINE.you);
+    const front: [number, number, number, number] = [line.x, line.y, wide ? 0 : -Math.PI / 2, ease((c3 - 0.55) / 0.45)];
+    return { sources: out, lambda, speed: lambda / BEAT, gain: 1.15, dots: wide ? 15 : 13, ground: 0.94, front };
   };
 }
 
@@ -93,7 +101,7 @@ export function PairStudy() {
     const cx = w / 2, cy = h / 2;
     const [a, b] = wide ? [{ x: cx - sep, y: cy }, { x: cx + sep, y: cy }] : [{ x: cx, y: cy - sep }, { x: cx, y: cy + sep }];
     return {
-      lambda, speed: lambda * 0.7, gain: 1.15, dots: 13, ground: 0.9,
+      lambda, speed: lambda / BEAT, gain: 1.15, dots: 13, ground: 0.9,
       sources: [
         { ...a, a: 1, phase: 0, hue: 0.05, size: 4, born: -100 },
         { ...b, a: 1, phase: shiftRef.current * Math.PI, hue: 0.7, size: 4, born: -100 },

@@ -128,13 +128,23 @@ function clearPath(pts: number[][], content: Box[], own: Element[], pad = 6) {
   return true;
 }
 
+/** Measures with every block in its resting place: blocks still waiting to arrive on scroll sit lower until
+    they do (src/cadence.ts), and the field must frame where they will be, not where they are waiting. */
 function measure() {
+  const root = document.documentElement;
+  root.classList.add("mind-measuring");
+  try { measureNow(); } finally { root.classList.remove("mind-measuring"); }
+}
+function measureNow() {
   if (!engine) return;
   const sy = scrollY, vw = document.documentElement.clientWidth;
   engine.sy = sy;
   const main = document.querySelector("main");
   const content: Box[] = [];
   if (main) collectContent(main, sy, content);
+  // The footer carries his mantra and the colophon; it sits outside main but is framed the same way.
+  const footer = document.querySelector(".app-footer");
+  if (footer) collectContent(footer, sy, content);
   const clears: Clear[] = content.map(b => ({ left: b.left, top: b.top, width: b.width, height: b.height, fixed: false, radius: b.radius }));
   for (const sel of [".app-header", ".bottom-nav"]) {
     const el = document.querySelector(sel);
@@ -142,7 +152,7 @@ function measure() {
     if (r && r.height > 0 && r.width > 0) clears.push({ left: r.left, top: r.top, width: r.width, height: r.height, fixed: true, radius: 0 });
   }
   engine.setClears(clears);
-  engine.setQuiet([...document.querySelectorAll("main [data-quiet]")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top + sy, width: r.width, height: r.height, fixed: false, radius: 0 }; }));
+  engine.setQuiet(() => [...document.querySelectorAll("main [data-quiet]")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, fixed: true, radius: 0 }; }));
 
   // Vessels.
   const vessels: Vessel[] = [];

@@ -21,7 +21,7 @@ html:has(.begin-page), body:has(.begin-page) { overflow-x:clip; }
 .begin-branches ellipse { fill:none; stroke:#78cfff25; stroke-dasharray:3 7; }
 .begin-branches path { fill:none; stroke-width:1.5; opacity:.55; }
 .begin-branches .begin-branch-base { stroke:#174d86; stroke-width:8; opacity:.12; }
-.begin-branches .begin-branch-current { opacity:1; stroke-width:2.5; stroke-dasharray:16 13; animation:begin-current 5s linear infinite; filter:drop-shadow(0 0 5px #43c4ff); }
+.begin-branches .begin-branch-current { opacity:1; stroke-width:2.5; stroke-dasharray:16 13; animation:begin-current 4.5s linear infinite; filter:drop-shadow(0 0 5px #43c4ff); }
 @keyframes begin-current { to {stroke-dashoffset:-116;} }
 .begin-orbit-core { position:absolute; left:50%; top:29%; transform:translate(-50%,-15%); display:grid; justify-items:center; gap:6px; }
 .begin-orbit-core .wave-mark { width:124px; height:70px; filter:drop-shadow(0 0 20px #039ce844); }
@@ -99,7 +99,7 @@ html:has(.begin-page), body:has(.begin-page) { overflow-x:clip; }
 .begin-pass h3 { font-size:26px; margin-top:4px; }
 .begin-pass-path { width:70%; height:48px; position:relative; margin:13px auto 0; border:1px solid #51bfff75; border-bottom:0; border-radius:22px 22px 0 0; }
 .begin-pass-path::before { content:''; position:absolute; left:50%; width:1px; height:48px; background:#68d9ff; }
-.begin-pass-path i { position:absolute; left:-3px; top:16px; width:5px; height:5px; background:#a5faff; box-shadow:0 0 9px 2px #2790ff; border-radius:50%; animation:begin-travel 2.8s ease-in-out infinite alternate; }
+.begin-pass-path i { position:absolute; left:-3px; top:16px; width:5px; height:5px; background:#a5faff; box-shadow:0 0 9px 2px #2790ff; border-radius:50%; animation:begin-travel 3s ease-in-out infinite alternate; }
 .begin-pass-path i:nth-child(2) { left:calc(50% - 2px); animation-delay:.5s; }.begin-pass-path i:nth-child(3) { left:auto; right:-3px; animation-delay:1s; }
 @keyframes begin-travel { to { transform:translateY(22px); } }
 .begin-pass-options { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
