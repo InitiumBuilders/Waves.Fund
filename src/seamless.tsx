@@ -41,6 +41,14 @@ export function Seamless() {
 
   useEffect(() => startCadence(), []);
 
+  // The pages behind the Guide tab, the Teachback and the Praxis load quietly once this page is idle, so moving
+  // to them is instant. (The Give app is left to load on demand: it brings the sign-in library.)
+  useEffect(() => {
+    const warm = () => { void import("./guide-library"); void import("./teachback"); void import("./begin"); };
+    const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+    if (idle) idle(warm, { timeout: 5000 }); else setTimeout(warm, 3000);
+  }, []);
+
   // Blocks below the first screen arrive as they are scrolled to. Pages fill in after data loads, so look twice.
   useEffect(() => {
     const first = setTimeout(arriveOnScroll, 60);

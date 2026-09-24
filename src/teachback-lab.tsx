@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent } from "react";
 import { useStateStore } from "./state";
+import { BEAT } from "./cadence";
 
 /* A string between a teacher and a learner, simulated with the wave equation.
    Hold "Teach" and the teacher's end moves in time with the string's third harmonic: each pulse runs to the
    learner, reflects (a fixed end flips it) and comes back, and because the next push arrives in step with the
    echo, the two add up into a standing wave that holds its shape (resonance). Let go and it fades slowly.
-   Touch the string anywhere to pluck it once and watch a single pulse go out and come back. */
+   Touch the string anywhere to pluck it once and watch a single pulse go out and come back. While no one is
+   using it, the teacher's end sends one small pulse every four beats, so the idea is visible before you touch it. */
 
 const N = 150;               // segments
 const HARMONIC = 3;          // the shape it settles into: three loops
@@ -18,7 +20,8 @@ export function StringLab() {
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const holding = useRef(false);
-  const plucks = useRef<number[]>([]);
+  const plucks = useRef<{ at: number; amp: number }[]>([]);
+  const lastUser = useRef(-100);
   const [held, setHeld] = useState(false);
   const [state, setState] = useState<"rest" | "sending" | "holding" | "fading">("rest");
   const { motion } = useStateStore();
@@ -26,7 +29,7 @@ export function StringLab() {
   useEffect(() => {
     const b = box.current, c = canvas.current, ctx = c?.getContext("2d");
     if (!b || !c || !ctx) return;
-    let w = 1, h = 1, dpr = 1, raf = 0, visible = true, last = performance.now(), t = 0, shown = "rest", envelope = 0;
+    let w = 1, h = 1, dpr = 1, raf = 0, visible = true, last = performance.now(), t = 0, shown = "rest", envelope = 0, slot = -1;
     let y = new Float32Array(N + 1), prev = new Float32Array(N + 1), next = new Float32Array(N + 1);
     const resize = () => {
       const r = b.getBoundingClientRect(); w = Math.max(1, r.width); h = Math.max(1, r.height);
@@ -47,10 +50,13 @@ export function StringLab() {
         next[N] = 0;
         const tmp = prev; prev = y; y = next; next = tmp;
       }
-      for (const at of plucks.current.splice(0)) {
+      for (const { at, amp } of plucks.current.splice(0)) {
         const ci = Math.round(at * N);
-        for (let i = 1; i < N; i++) { const d = (i - ci) / 5; const bump = Math.exp(-d * d) * h * 0.22; y[i] += bump; prev[i] += bump; }
+        for (let i = 1; i < N; i++) { const d = (i - ci) / 5; const bump = Math.exp(-d * d) * h * amp; y[i] += bump; prev[i] += bump; }
       }
+      // Idle: one small pulse from the teacher's end on every fourth beat of the shared clock.
+      const now = performance.now() / 1000, beat4 = Math.floor(now / (BEAT * 4));
+      if (beat4 !== slot) { slot = beat4; if (!holding.current && now - lastUser.current > 8) plucks.current.push({ at: 0.07, amp: 0.13 }); }
     };
     const draw = () => {
       const P = pad(), L = w - P * 2, mid = h / 2;
@@ -82,7 +88,8 @@ export function StringLab() {
       // Say what the string is doing, but only when it changes. The envelope follows the height of the swing,
       // not the instant, which passes through zero twice a swing.
       envelope = Math.max(envelope * 0.985, peak);
-      const now = !motion ? "holding" : holding.current ? (envelope > h * 0.15 ? "holding" : "sending") : envelope > h * 0.04 ? "fading" : "rest";
+      const using = performance.now() / 1000 - lastUser.current < 8;
+      const now = !motion ? "holding" : holding.current ? (envelope > h * 0.15 ? "holding" : "sending") : using && envelope > h * 0.04 ? "fading" : "rest";
       if (now !== shown) { shown = now; setState(now as typeof state); }
     };
     const loop = (now: number) => {
@@ -97,11 +104,12 @@ export function StringLab() {
     return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); };
   }, [motion]);
 
-  const hold = (on: boolean) => { holding.current = on; setHeld(on); };
+  const hold = (on: boolean) => { holding.current = on; lastUser.current = performance.now() / 1000; setHeld(on); };
   const pluck = (e: PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const P = Math.max(26, r.width * 0.07);
-    plucks.current.push(Math.min(0.95, Math.max(0.05, (e.clientX - r.left - P) / (r.width - P * 2))));
+    lastUser.current = performance.now() / 1000;
+    plucks.current.push({ at: Math.min(0.95, Math.max(0.05, (e.clientX - r.left - P) / (r.width - P * 2))), amp: 0.22 });
   };
   const words = {
     rest: "Hold to teach, or touch the string to send one pulse.",

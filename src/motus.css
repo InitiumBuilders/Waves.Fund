@@ -696,3 +696,9 @@ html[data-motion="off"] .stock::before { animation: none; opacity: 0.5; }
 @media (prefers-reduced-motion: reduce) { html[data-mind="on"] .stock::before { animation: none; opacity: 0.5; } }
 /* While the field measures the page, arriving blocks are read in their resting place (src/mind/WaveMind.tsx). */
 html.mind-measuring .arrive { animation: none !important; }
+
+/* An answer settles into place as its question opens, instead of appearing all at once. */
+.question-list details[open] > :not(summary) { animation: answer-in 0.5s var(--ease-out) both; }
+@keyframes answer-in { from { opacity: 0; transform: translate3d(0, -6px, 0); } }
+html[data-motion="off"] .question-list details[open] > :not(summary) { animation: none; }
+@media (prefers-reduced-motion: reduce) { .question-list details[open] > :not(summary) { animation: none; } }

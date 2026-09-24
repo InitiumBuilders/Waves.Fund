@@ -166,8 +166,9 @@ function TeachbackScene() {
       const clock = (now - t0) / 1000;
       // Every branch swings once a beat on the page's shared clock (src/cadence.ts).
       const beat = (now / 1000) * ((Math.PI * 2) / BEAT);
-      const t = motion ? clock % CYCLE : 12.5;
-      const fade = motion ? Math.min(1, Math.max(0, (CYCLE - t) / 1.4)) : 1;
+      // It opens partway through, with the first learners already taught back, so the first screen is never empty.
+      const t = motion ? (clock + 5.2) % CYCLE : 12.5;
+      const fade = motion ? Math.min(1, Math.max(0, (CYCLE - t) / 1.4), clock < 1 ? clock : 1) : 1;
       place(motion ? clock * 0.01 : 0.2);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);

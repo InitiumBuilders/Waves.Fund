@@ -2,12 +2,15 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowDownToLine, ArrowLeft, ArrowRight, BookOpen, Check, Compass, FileText, Users, Waves } from "lucide-react";
+import { ArrowDownToLine, ArrowLeft, ArrowRight, Check, Compass, FileText } from "lucide-react";
 import { ButtonLink, Intro } from "./ui";
 import { guideHandbook, guideLessons, guidePractices, guideWorksheets, downloadGuideMarkdown } from "./guide-library-data";
 import type { GuideLessonData } from "./guide-library-data";
 import "./guide-library.css";
 import { Stock } from "./mind/WaveMind";
+import { Echo, Growing, Pair, Resonance } from "./symbols";
+// Two in step, set to the left edge like the other symbols in a cascade step.
+const LeftPair = ({ className }: { className?: string }) => <Pair className={className} at={[30, 130]} />;
 import { WaveguideScene } from "./mind/WaveguideScene";
 
 function Download({ content, filename, children }: { content: string; filename: string; children: React.ReactNode }) {
@@ -45,7 +48,7 @@ export function GuidePitch() {
         <li><span>03</span><h3>Low loss</h3><p>Guided light crosses oceans through undersea cables. A guided Wave keeps its energy from the first conversation to the outcome.</p></li>
       </ol>
     </section>
-    <section className="guide-section" aria-labelledby="guide-circle-title" data-mind="path"><div className="guide-section-heading"><p className="eyebrow">FROM INTENTION TO OUTCOME</p><h2 id="guide-circle-title">Build it. Move it.<br />See what changes.</h2></div><ol className="cascade guide-cascade">{[{ title: "Tell your story", text: "Your Guide listens, shapes the brief with you, and agrees the first useful move.", Icon: BookOpen }, { title: "Build your Wave", text: "A custom experience brings your story, tools, and ways to participate together.", Icon: Waves }, { title: "Bring people together", text: "Acknowledge offers, agree the work, and let people carry the Wave with permission.", Icon: Users }, { title: "Show what changed", text: "Report the outcome, recognize the help, and adapt to what is needed next.", Icon: Compass }].map(({ title, text, Icon }, index) => <li className="panel" key={title}><div className="cascade-step"><Icon size={22} strokeWidth={1.6} aria-hidden="true" /><span className="step-number">0{index + 1}</span></div><h3>{title}</h3><p>{text}</p><Stock level={0.12 + index * 0.12} /></li>)}</ol></section>
+    <section className="guide-section" aria-labelledby="guide-circle-title" data-mind="path"><div className="guide-section-heading"><p className="eyebrow">FROM INTENTION TO OUTCOME</p><h2 id="guide-circle-title">Build it. Move it.<br />See what changes.</h2></div><ol className="cascade guide-cascade">{[{ title: "Tell your story", text: "Your Guide listens, shapes the brief with you, and agrees the first useful move.", Icon: Echo }, { title: "Build your Wave", text: "A custom experience brings your story, tools, and ways to participate together.", Icon: Growing }, { title: "Bring people together", text: "Acknowledge offers, agree the work, and let people carry the Wave with permission.", Icon: LeftPair }, { title: "Show what changed", text: "Report the outcome, recognize the help, and adapt to what is needed next.", Icon: Resonance }].map(({ title, text, Icon }, index) => <li className="panel" key={title}><div className="cascade-step"><Icon className="practice-symbol" /><span className="step-number">0{index + 1}</span></div><h3>{title}</h3><p>{text}</p><Stock level={0.12 + index * 0.12} /></li>)}</ol></section>
     <Practices />
     <section className="guide-learning-callout panel"><div><p className="eyebrow">LIFELONG LEARNERS. LIFELONG LEADERS.</p><h2>Learn the practice.<br />Become a Wave Guide.</h2><p>Six practical lessons. Seven working templates. A shared foundation you can adapt with every builder.</p><p>Designers, makers, teachers, researchers, artists, operators, and community builders can apply. Share what you can do, what you are learning, and the work you want to help move forward.</p></div><div className="guide-actions"><ButtonLink to="/guide/library">Open The Library</ButtonLink><ButtonLink to="/guide/apply" secondary>Apply To Be A Wave Guide</ButtonLink></div></section>
     <section className="guide-learning-callout panel guide-teachback-callout"><div><p className="eyebrow">THE TEACHBACK</p><h2>Give Together. Teach Together.<br />Organize a teachback.</h2><p>Learn it, teach it together, and hear it taught back. The Teachback is how Wave Guides pass on what they learn, and how anyone can teach with a friend.</p></div><div className="guide-actions"><ButtonLink to="/guide/teachback">Read The Teachback</ButtonLink><ButtonLink to="/give/opportunities/new?kind=teachback" secondary>Organize A Teachback</ButtonLink></div></section>
