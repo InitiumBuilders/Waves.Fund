@@ -36,7 +36,6 @@
 .gt-chapter-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(150, 190, 255, 0.35); transition: transform 0.5s var(--ease-out), background 0.5s; }
 .gt-chapter-dots i.past { background: rgba(94, 233, 255, 0.55); }
 .gt-chapter-dots i.on { background: #e6fdff; transform: scale(1.6); box-shadow: 0 0 12px rgba(94, 233, 255, 0.9); }
-.gt-tank-hint { display: none; }
 @media (min-width: 900px) {
   .gt-tank-copy { justify-content: center; max-width: 720px; padding: 120px 0 80px var(--gutter); gap: 0; }
   .gt-tank-copy h1 { font-size: clamp(64px, 6.4vw, 96px); }
@@ -45,7 +44,6 @@
   .gt-tank-copy::after { display: none; }
   .gt-chapters { margin: 34px 0 0; }
   .gt-chapter-dots { right: 28px; }
-  .gt-tank-hint { display: block; position: absolute; right: var(--gutter); bottom: 34px; z-index: 2; margin: 0; font-size: 13px; letter-spacing: 0.02em; }
 }
 html[data-motion="off"] .gt-tank-copy > * { animation: none; }
 @media (prefers-reduced-motion: reduce) { .gt-chapters li { transition: none; } }
@@ -60,25 +58,11 @@ html[data-motion="off"] .gt-tank-copy > * { animation: none; }
 .gt-pair { display: grid; gap: 30px; align-items: center; }
 .gt-pair-text { display: grid; gap: 16px; justify-items: start; }
 .gt-pair-text > * { margin: 0; }
-.gt-pair-text a:not(.glow-button), .gt-safe a, .gt-sources a { text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.45); text-underline-offset: 3px; }
-.gt-physics { padding-left: 18px; position: relative; }
-.gt-physics::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; border-radius: 1px; background: linear-gradient(180deg, #5ee9ff, rgba(154, 134, 255, 0.35)); }
+.gt-pair-text a:not(.glow-button), .gt-safe a { text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.45); text-underline-offset: 3px; }
 .gt-study { margin: 0; display: grid; gap: 16px; }
-.gt-study-scene { position: relative; height: clamp(320px, 92vw, 540px); cursor: ew-resize; touch-action: pan-y; }
-.gt-study-scene:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 6px; border-radius: 28px; }
-.gt-study-readout { display: grid; gap: 8px; }
-.gt-study-readout b { font-size: clamp(20px, 2vw, 26px); font-weight: 520; letter-spacing: -0.02em; }
-.gt-study-readout span { font-size: 16px; line-height: 1.55; min-height: 3.1em; }
-.gt-study-range { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; margin: 4px 0 0; background: none; cursor: pointer; }
-.gt-study-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, #5ee9ff, #8da2ff 55%, rgba(154, 134, 255, 0.35)); }
-.gt-study-range::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, #5ee9ff, #8da2ff 55%, rgba(154, 134, 255, 0.35)); }
-.gt-study-range::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -11px; border-radius: 50%; background: #effdff; box-shadow: 0 0 0 5px rgba(94, 233, 255, 0.2), 0 0 18px rgba(94, 233, 255, 0.8); }
-.gt-study-range::-moz-range-thumb { width: 26px; height: 26px; border: 0; border-radius: 50%; background: #effdff; box-shadow: 0 0 0 5px rgba(94, 233, 255, 0.2), 0 0 18px rgba(94, 233, 255, 0.8); }
-.gt-study-range:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 4px; border-radius: 12px; }
-.gt-sources { font-size: 13px !important; line-height: 1.6; margin: 0; }
+.gt-study-scene { position: relative; height: clamp(320px, 92vw, 540px); touch-action: pan-y; }
 @media (min-width: 960px) {
   .gt-pair { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 20px 56px; }
-  .gt-sources { grid-column: 1 / -1; }
 }
 
 /* ---------- The Teachback, with its standing wave ---------- */

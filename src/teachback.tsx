@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useStateStore } from "./state";
 import { Stock } from "./mind/WaveMind";
 import { Echo, Pair, Resonance, Travel } from "./symbols";
-import { StringLab } from "./teachback-lab";
+import { StringScene } from "./teachback-string";
 import { BEAT } from "./cadence";
 import "./teachback.css";
 
@@ -68,8 +68,7 @@ export default function Teachback() {
       <section className="section tb-why" aria-labelledby="tb-why-title">
         <p className="eyebrow">WHY IT WORKS</p>
         <h2 id="tb-why-title">Explaining It Back<br /><span>Makes It Stick</span></h2>
-        <p className="tb-lede">A wave sent along a string reflects from the far end and comes back. If the next push meets the echo in step, the two add up, and the string settles into one steady shape, a standing wave. A Teachback runs the same loop: you teach, the learner explains it back, and what you teach next builds on what came back. Hold the button to try it.</p>
-        <StringLab />
+        <StringScene />
         <div className="tb-why-grid">
           <p>In health care, the teach-back method asks patients to explain instructions in their own words, so the clinician can check what was understood and fix what was not.</p>
           <p>Research on learning by teaching points the same way. People who study in order to teach recall more and organize it better, and people who then explain it to others remember it longer.</p>
@@ -78,7 +77,6 @@ export default function Teachback() {
           <li><a href="https://www.ahrq.gov/health-literacy/improve/precautions/tool5.html" target="_blank" rel="noreferrer">AHRQ Health Literacy Universal Precautions Toolkit: Use the Teach-Back Method</a></li>
           <li><a href="https://doi.org/10.3758/s13421-014-0416-z" target="_blank" rel="noreferrer">Nestojko, Bui, Kornell and Bjork (2014), Expecting to teach enhances learning and organization of knowledge in free recall of text passages. Memory & Cognition.</a></li>
           <li><a href="https://doi.org/10.1016/j.cedpsych.2013.06.001" target="_blank" rel="noreferrer">Fiorella and Mayer (2013), The relative benefits of learning by teaching and teaching expectancy. Contemporary Educational Psychology.</a></li>
-          <li><a href="https://en.wikipedia.org/wiki/Standing_wave" target="_blank" rel="noreferrer">Standing wave, Wikipedia.</a></li>
         </ul>
       </section>
 

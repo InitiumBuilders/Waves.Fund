@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import type { KeyboardEvent, MutableRefObject, PointerEvent } from "react";
+import { useEffect, useRef } from "react";
+import type { MutableRefObject } from "react";
 import { BEAT } from "../cadence";
 import { Ripple, ease, hash, mix } from "./ripple";
 import type { RippleHandle, RippleModel, Source } from "./ripple";
@@ -87,45 +87,39 @@ export function TankScene({ progress, handle }: { progress: MutableRefObject<num
   return <Ripple model={model} handle={handle} tappable className="gt-tank-scene" maxDpr={1.25} still={7.5} aria-hidden="true" />;
 }
 
-/* Two people, and how much they add up to. Drag across the water (or use the arrow keys) to bring the
-   second light in or out of step with the first. In step, the crests meet and the bands between them glow;
-   out of step, a crest meets a trough and the water between them goes still. */
-export function PairStudy() {
-  const [shift, setShift] = useState(0.15);   // 0 = in step, 1 = fully out of step
-  const shiftRef = useRef(shift);
-  shiftRef.current = shift;
+/* Two people meeting. As the section is scrolled into view, the second light arrives and falls into step
+   with the first, and the bands between them brighten. Scrolling back reverses it. No controls or labels. */
+export function PairScene() {
+  const wrap = useRef<HTMLDivElement>(null);
+  const progress = useRef(0);
   const handle = useRef<RippleHandle | null>(null);
+  useEffect(() => {
+    const onScroll = () => {
+      const el = wrap.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      progress.current = Math.min(1, Math.max(0, (innerHeight - r.top) / (innerHeight * 0.5 + r.height * 0.5)));
+      handle.current?.redraw();
+    };
+    onScroll();
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onScroll);
+    return () => { removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); };
+  }, []);
   const model = useRef<RippleModel>((_t, w, h) => {
     const wide = w > h;
     const lambda = Math.max(44, Math.min(110, Math.min(w, h) * 0.2));
     const sep = lambda * 1.5;
     const cx = w / 2, cy = h / 2;
     const [a, b] = wide ? [{ x: cx - sep, y: cy }, { x: cx + sep, y: cy }] : [{ x: cx, y: cy - sep }, { x: cx, y: cy + sep }];
+    const lock = ease((progress.current - 0.2) / 0.65);
     return {
       lambda, speed: lambda / BEAT, gain: 1.15, dots: 13, ground: 0.9,
       sources: [
         { ...a, a: 1, phase: 0, hue: 0.05, size: 4, born: -100 },
-        { ...b, a: 1, phase: shiftRef.current * Math.PI, hue: 0.7, size: 4, born: -100 },
+        { ...b, a: mix(0.35, 1, lock), phase: mix(Math.PI, 0, lock), hue: 0.7, size: mix(3, 4, lock), born: -100, reach: mix(0.3, 0.62, lock) },
       ],
     };
   });
-  useEffect(() => { handle.current?.redraw(); }, [shift]);
-  const inStep = shift < 0.2, against = shift > 0.8;
-  return (
-    <figure className="gt-study">
-      <Ripple
-        model={model} handle={handle} className="gt-study-scene" maxDpr={1.25} still={4}
-        role="slider" tabIndex={0} aria-label="How far in step the two lights are"
-        aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round((1 - shift) * 100)}
-        aria-valuetext={inStep ? "In step: the waves add up" : against ? "Out of step: the waves cancel" : "Partly in step"}
-        onPointerMove={(e: PointerEvent<HTMLDivElement>) => { if (e.pointerType === "mouse" || e.buttons) { const r = e.currentTarget.getBoundingClientRect(); setShift(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width))); } }}
-        onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => { if (e.key === "ArrowLeft" || e.key === "ArrowDown") { e.preventDefault(); setShift((s) => Math.max(0, s - 0.1)); } if (e.key === "ArrowRight" || e.key === "ArrowUp") { e.preventDefault(); setShift((s) => Math.min(1, s + 0.1)); } }}
-      />
-      <figcaption className={"gt-study-readout" + (against ? " is-apart" : inStep ? " is-together" : "")}>
-        <b>{inStep ? "In step" : against ? "Out of step" : "Partly in step"}</b>
-        <span>{inStep ? "Where their crests meet, the wave is twice as tall." : against ? "A crest meets a trough, and the water between them goes still." : "Some of the effort adds up, some of it cancels."}</span>
-        <input className="gt-study-range" type="range" min={0} max={100} value={Math.round(shift * 100)} aria-label="Move the second light out of step" onChange={(e) => setShift(Number(e.target.value) / 100)} />
-      </figcaption>
-    </figure>
-  );
+  return <div ref={wrap} className="gt-study"><Ripple model={model} handle={handle} tappable className="gt-study-scene" maxDpr={1.25} still={4} aria-hidden="true" /></div>;
 }

@@ -10,7 +10,7 @@ import type { RippleHandle } from "./together/ripple";
 import "./together/give-landing.css";
 
 const TankScene = lazy(() => import("./together/tank").then((m) => ({ default: m.TankScene })));
-const PairStudy = lazy(() => import("./together/tank").then((m) => ({ default: m.PairStudy })));
+const PairScene = lazy(() => import("./together/tank").then((m) => ({ default: m.PairScene })));
 
 // Step names are August's. The one-line descriptions are placeholders for his review.
 const FLOW = [
@@ -25,8 +25,8 @@ const FLOW = [
 // The lines are August's statement. The smaller line under each is plain placeholder wording for his review.
 const CHAPTERS = [
   { line: "Find Your People.", note: "Make a Give Profile. The people who care about what you care about appear around you." },
-  { line: "Give Together.", note: "Choose one of them and both say yes. When two people give in step, their effort adds up." },
-  { line: "Build a Wave.", note: "Choose something to do together. Many pairs in step become one wave." },
+  { line: "Give Together.", note: "Choose one of them and both say yes." },
+  { line: "Build a Wave.", note: "Choose something to do together." },
 ];
 const SAFE: [typeof Users, string][] = [
   [UserCheck, "Adults only, 18 and over."],
@@ -63,14 +63,9 @@ export function Give() {
             <h2 id="gt-what-title">A Friend<br /><span>You Give With</span></h2>
             <p>A Give Guide is someone who cares about the same things you do and is free when you are. You find each other here, both say yes, and give your time together.</p>
             <p>A Give Guide is not a Wave Guide. A <Link to="/guide">Wave Guide</Link> works with a builder on their Wave. A Give Guide is a peer, and you choose each other.</p>
-            <p className="gt-physics">Two waves that meet in step add up: where their crests arrive together, the wave is twice as tall and carries four times the energy of one. Out of step, they cancel. Move the second light to see it.</p>
             <Link className="glow-button" to="/give/guide">Find Your Give Guide<ArrowRight size={18} /></Link>
           </div>
-          <Suspense fallback={<div className="gt-study" aria-hidden="true" />}><PairStudy /></Suspense>
-          <p className="gt-sources">
-            Physics: <a href="https://en.wikipedia.org/wiki/Wave_interference" target="_blank" rel="noreferrer">Wave interference</a> and the{" "}
-            <a href="https://en.wikipedia.org/wiki/Huygens%E2%80%93Fresnel_principle" target="_blank" rel="noreferrer">Huygens–Fresnel principle</a>, Wikipedia.
-          </p>
+          <Suspense fallback={<div className="gt-study" aria-hidden="true" />}><PairScene /></Suspense>
         </section>
 
         <section className="section gt-teachback-callout" aria-labelledby="gt-tb-title">
@@ -164,7 +159,6 @@ function Chapters({ actions }: { actions: ReactNode }) {
           <div className="gt-tank-actions">{actions}</div>
         </div>
         <div className="gt-chapter-dots" aria-hidden="true">{CHAPTERS.map((c, i) => <i key={c.line} className={i === chapter ? "on" : i < chapter ? "past" : ""} />)}</div>
-        <p className="gt-tank-hint" aria-hidden="true">Click the water to add your ripple.</p>
       </div>
     </section>
   );

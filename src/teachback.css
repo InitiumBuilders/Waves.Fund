@@ -3,7 +3,7 @@
 .teachback-page .guide-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; }
 .tb-hero .tb-scene { position: relative; height: clamp(330px, 94vw, 460px); margin-top: 6px; }
 @media (min-width: 900px) { .tb-hero .tb-scene { height: min(70vh, 660px); margin: 0; } }
-.tb-scene canvas, .tb-lab-string canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tb-scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .tb-hero .intro-description p { font-size: clamp(19px, 2vw, 25px); letter-spacing: -0.015em; line-height: 1.4; }
 .tb-lede { max-width: 58ch; margin: 22px 0 0; font-size: clamp(17px, 1.5vw, 20px) !important; line-height: 1.6 !important; }
 
@@ -16,17 +16,9 @@
 .tb-steps h3 { margin: 0; font-size: clamp(22px, 2.2vw, 28px); }
 .tb-steps p { margin: 0; max-width: 42ch; }
 
-/* The string between a teacher and a learner. */
-.tb-lab { margin: 40px 0 0; display: grid; gap: 10px; max-width: 900px; }
-.tb-lab-string { position: relative; height: clamp(170px, 42vw, 260px); cursor: pointer; touch-action: pan-y; }
-.tb-lab-ends { display: flex; justify-content: space-between; padding-inline: clamp(8px, 5%, 40px); font-size: 12px; font-weight: 620; letter-spacing: 0.16em; text-transform: uppercase; }
-.tb-lab-caption { display: grid; gap: 16px; justify-items: start; margin-top: 14px; }
-.tb-lab-hold { user-select: none; -webkit-user-select: none; touch-action: none; min-width: 200px; }
-.tb-lab-hold.is-held { filter: drop-shadow(0 0 26px rgba(94, 233, 255, 0.75)); transform: scale(0.985); }
-.tb-lab-hold.is-held::after { background-position: 0 100%, 0 0; }
-.tb-lab-hold:disabled { opacity: 1; cursor: default; }
-.tb-lab-words { font-size: 17px; line-height: 1.55; min-height: 3.2em; max-width: 52ch; }
-@media (min-width: 820px) { .tb-lab-caption { grid-template-columns: auto 1fr; align-items: center; gap: 28px; } .tb-lab-words { min-height: 0; } }
+/* The string: it starts by itself when scrolled into view (src/teachback-string.tsx). */
+.tb-string { position: relative; height: clamp(170px, 42vw, 260px); margin: 34px 0 6px; max-width: 900px; cursor: pointer; touch-action: pan-y; }
+.tb-string canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
 .tb-why-grid { display: grid; gap: 18px; margin: 40px 0 0; max-width: 980px; }
 @media (min-width: 820px) { .tb-why-grid { grid-template-columns: 1fr 1fr; gap: 40px; } }
