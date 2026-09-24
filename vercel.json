@@ -24,6 +24,10 @@
       "destination": "/share/give.html"
     },
     {
+      "source": "/guide/teachback",
+      "destination": "/share/teachback.html"
+    },
+    {
       "source": "/grow",
       "destination": "/share/grow.html"
     },
@@ -71,20 +75,9 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' https://clerk.www.waves.fund https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.clerk.com; font-src 'self'; media-src 'self'; connect-src 'self' https://clerk.www.waves.fund; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         }
       ]
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/volunteer-sync",
-      "schedule": "17 7 * * *"
-    }
-  ],
-  "functions": {
-    "api/volunteer-sync.js": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }

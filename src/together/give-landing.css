@@ -1,0 +1,53 @@
+/* The Give landing page (/give). Loaded with the page itself, so it stays small. */
+
+.gt-hero .gt-hero-scene { height: clamp(300px, 86vw, 420px); margin-top: 6px; }
+@media (min-width: 900px) { .gt-hero .gt-hero-scene { height: min(66vh, 620px); margin: 0; } }
+.give-together .gt-scene { position: relative; width: 100%; }
+.give-together .gt-scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.give-together .gt-scene[data-still]::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: #e8fdff; box-shadow: 0 0 0 6px rgba(94, 233, 255, 0.12), 0 0 40px 10px rgba(94, 233, 255, 0.4); }
+.gt-hero .intro-description p { font-size: clamp(19px, 2vw, 25px); color: var(--ink); letter-spacing: -0.015em; line-height: 1.4; }
+
+/* The seven steps: points of light on one line. Down the page on a phone, across on a wide screen. */
+.gt-flow { list-style: none; padding: 0; margin: 34px 0 0; display: grid; gap: 0; position: relative; }
+.gt-flow li { position: relative; padding: 0 0 30px 34px; }
+.gt-flow li::before { content: ""; position: absolute; left: 2px; top: 5px; width: 9px; height: 9px; border-radius: 50%; background: #dffbff; box-shadow: 0 0 0 3px rgba(94, 233, 255, 0.14), 0 0 14px 2px rgba(94, 233, 255, 0.7); }
+.gt-flow li::after { content: ""; position: absolute; left: 6px; top: 22px; bottom: 2px; width: 1px; background: linear-gradient(180deg, rgba(94, 233, 255, 0.6), rgba(94, 128, 255, 0.15)); }
+.gt-flow li:last-child::after { display: none; }
+.gt-flow .step-number { position: static; display: block; margin: 0; }
+.gt-flow h3 { margin: 6px 0 6px; }
+.gt-flow p { margin: 0; max-width: 40ch; }
+@media (min-width: 1000px) {
+  .gt-flow { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 28px; }
+  .gt-flow li { padding: 26px 0 0; }
+  .gt-flow li::before { left: 0; top: -4px; }
+  .gt-flow li::after { left: 16px; right: -14px; top: 0; bottom: auto; width: auto; height: 1px; background: linear-gradient(90deg, rgba(94, 233, 255, 0.6), rgba(94, 128, 255, 0.12)); }
+  .gt-flow li:nth-child(4)::after { display: none; }
+}
+
+.gt-explain, .gt-partner-card { max-width: 780px; display: grid; gap: 16px; justify-items: start; }
+.gt-explain > *, .gt-partner-card > * { margin: 0; }
+.gt-explain a:not(.glow-button), .gt-safe a, .gt-teachback-callout a:not(.glow-button):not(.text-button) { color: #cff6ff; text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.4); text-underline-offset: 3px; }
+
+.gt-teachback-callout { max-width: 880px; }
+.gt-teachback-callout h2 { margin-bottom: 18px; }
+.gt-teachback-callout > p { max-width: 50ch; margin-bottom: 26px; }
+
+.gt-partner-label { text-transform: uppercase; }
+.gt-partner-card .giving-logo { margin: 4px 0; }
+.gt-partner-card .button-row { display: flex; flex-wrap: wrap; }
+
+.gt-safe h2 { margin-bottom: 26px; }
+.gt-safe-list { list-style: none; padding: 0; margin: 0 0 22px; display: grid; gap: 14px; }
+@media (min-width: 700px) { .gt-safe-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 30px; } }
+@media (min-width: 1100px) { .gt-safe-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.gt-safe-list li { display: flex; align-items: flex-start; gap: 14px; font-size: 16.5px; line-height: 1.5; color: var(--ink); }
+.gt-safe-list svg { flex: none; color: #9ff3ff; margin-top: 1px; }
+.gt-safe .fine-print { max-width: 70ch; }
+
+/* The principle, said once, large. */
+.gt-principle { display: grid; justify-items: center; gap: 24px; text-align: center; }
+.gt-principle > svg { color: #9ff3ff; }
+.gt-principle p { margin: 0; font-size: clamp(32px, 5.4vw, 64px); font-weight: 460; letter-spacing: -0.045em; line-height: 1.05; max-width: 16ch; background: linear-gradient(100deg, #e4fcff 0%, #6fe3ff 40%, #8da2ff 75%, #b69cff 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #7fe4ff; }
+
+/* Gradient words: the site's dark text-shadow would show through the transparent fill and dull them. */
+.give-together h2 span, .teachback-page h2 span, .gt-principle p { text-shadow: none; }

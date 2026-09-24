@@ -13,7 +13,9 @@ export default defineConfig(({ command, mode }) => ({
                 process.env,
                 loadEnv("development", process.cwd(), ""),
               );
-              const handlers = { community: (await import("./api/community.js")).default, trax: (await import("./api/trax.js")).default, workspace: (await import("./api/workspace.js")).default, waves: (await import("./api/waves.js")).default, volunteer: (await import("./api/volunteer.js")).default };
+              // Give Together in local development: stand-in people and a throwaway schema, never the live tables.
+              Object.assign(process.env, { GIVE_DEV_ACTORS: "on", GIVE_SCHEMA: "give_test" });
+              const handlers = { give: (await import("./api/give.js")).default, community: (await import("./api/community.js")).default, trax: (await import("./api/trax.js")).default, workspace: (await import("./api/workspace.js")).default, waves: (await import("./api/waves.js")).default };
               for (const [name, handler] of Object.entries(handlers)) {
               server.middlewares.use(
                 `/api/${name}`,

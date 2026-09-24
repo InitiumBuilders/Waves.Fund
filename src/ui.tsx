@@ -260,6 +260,12 @@ export function Header() {
             <Link to="/guide/library" onClick={() => setOpen(false)}>
               Guide Library <ArrowRight />
             </Link>
+            <Link to="/guide/teachback" onClick={() => setOpen(false)}>
+              The Teachback <ArrowRight />
+            </Link>
+            <Link to="/give" onClick={() => setOpen(false)}>
+              Give Together <ArrowRight />
+            </Link>
             <Link to="/workspace" onClick={() => setOpen(false)}>
               Your Workspace <ArrowRight />
             </Link>

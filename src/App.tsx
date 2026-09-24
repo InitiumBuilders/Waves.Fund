@@ -24,6 +24,7 @@ import {
 import { Home } from "./home";
 import { MindAnchor, mindWave, WaveMind, Stock } from "./mind/WaveMind";
 import { Give } from "./give";
+import { MemberBoundary } from "./member-boundary";
 import { Current } from "./mind/Current";
 import { Vessel } from "./vessel";
 import { useStateStore } from "./state";
@@ -48,13 +49,24 @@ const GuideLesson = lazy(() => import("./guide-library").then(m => ({ default: m
 const Workspace = lazy(() => import("./workspace").then(m => ({ default: m.Workspace })));
 const PublicWave = lazy(() => import("./public-wave").then(m => ({ default: m.PublicWave })));
 const MemberSignIn = lazy(() => import("./member-auth").then(m => ({ default: m.MemberSignIn })));
+const GiveApp = lazy(() => import("./together/app"));
+const Teachback = lazy(() => import("./teachback"));
 const MindLab = import.meta.env.DEV ? lazy(() => import("./mind/MindLab")) : null;
 const TITLES: Record<string, string> = {
   "/": "Trust People. And They Become Trustworthy.",
   "/learn": "Raise Capital In A Whole New Way.",
   "/guide": "Wave Guides",
   "/guide/library": "The Wave Guide Library",
-  "/give": "Give",
+  "/give": "Give Together",
+  "/give/profile": "Give Profile",
+  "/give/guide": "Find Your Give Guide",
+  "/give/opportunities": "Join Or Build a Wave Together",
+  "/give/opportunities/new": "Post An Opportunity",
+  "/give/record": "Your Record",
+  "/give/privacy": "Privacy & Safety",
+  "/give/sign-in": "Give Together",
+  "/give/join": "Give Together",
+  "/guide/teachback": "The Teachback",
   "/grow": "Grow",
   "/waves": "Waves In Motion",
   "/projects": "Waves In Motion",
@@ -78,7 +90,8 @@ function ScreenPosition() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
     const last = pathname.split("/").filter(Boolean).pop()?.replaceAll("-", " ") || "";
-    const title = TITLES[pathname] || (last ? last[0].toUpperCase() + last.slice(1) : TITLES["/"]);
+    const within = pathname.startsWith("/give/with/") ? "Your Give Guide" : pathname.startsWith("/give/wave/") ? "Shared Wave" : pathname.startsWith("/give/") ? "Give Together" : "";
+    const title = TITLES[pathname] || within || (last ? last[0].toUpperCase() + last.slice(1) : TITLES["/"]);
     document.title = `Waves.Fund — ${title}`;
   }, [pathname]);
   return null;
@@ -354,7 +367,7 @@ function AppContent() {
         className={"app-shell " + (pathname === "/" ? "route-home" : pathname === "/grow" ? "route-grow" : pathname === "/waves" || pathname === "/projects" ? "route-waves route-reading" : "route-reading")}
       >
         <Header />
-        <main id="content" key={pathname}>
+        <MemberBoundary><main id="content" key={pathname}>
           <Suspense fallback={<div className="narrow-page" role="status">Opening your Wave…</div>}><Routes>
             <Route path="/" element={<Home />} />
             <Route path="/now-lets-begin" element={<Suspense fallback={<div className="narrow-page" role="status">Opening the Wave Praxis…</div>}><Begin /></Suspense>} />
@@ -377,6 +390,8 @@ function AppContent() {
             <Route path="/guide/partners/semble" element={<SemblePartner />} />
             <Route path="/guide/partners/ocean97" element={<OceanPartner />} />
             <Route path="/give" element={<Give />} />
+            <Route path="/give/*" element={<GiveApp />} />
+            <Route path="/guide/teachback" element={<Teachback />} />
             <Route path="/grow" element={<Grow />} />
             <Route path="/apply" element={<Application />} />
             <Route
@@ -406,7 +421,7 @@ function AppContent() {
             {MindLab && <Route path="/mind-lab" element={<MindLab />} />}
             <Route path="*" element={<NotFound />} />
           </Routes></Suspense>
-        </main>
+        </main></MemberBoundary>
         <Footer />
         <BottomNav />
         <Status />

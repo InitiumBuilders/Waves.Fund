@@ -1,0 +1,37 @@
+/* The Teachback page (/guide/teachback). */
+
+.teachback-page .guide-back { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; color: var(--ink-2); }
+.tb-hero .tb-scene { position: relative; height: clamp(320px, 92vw, 440px); margin-top: 6px; }
+@media (min-width: 900px) { .tb-hero .tb-scene { height: min(68vh, 640px); margin: 0; } }
+.tb-scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tb-hero .intro-description p { font-size: clamp(19px, 2vw, 25px); color: var(--ink); letter-spacing: -0.015em; line-height: 1.4; }
+
+.tb-lede { max-width: 58ch; margin: 22px 0 0; font-size: clamp(17px, 1.5vw, 20px) !important; line-height: 1.6 !important; }
+.tb-steps { list-style: none; padding: 0; margin: 40px 0 0; display: grid; gap: 34px; }
+.tb-steps li { position: relative; padding-top: 22px; }
+.tb-steps li::before { content: ""; position: absolute; top: 0; left: 0; right: 18%; height: 1px; background: var(--edge); }
+.tb-steps li::after { content: ""; position: absolute; top: -4px; left: 0; width: 9px; height: 9px; border-radius: 50%; background: #dffbff; box-shadow: 0 0 0 3px rgba(94, 233, 255, 0.14), 0 0 14px 2px rgba(94, 233, 255, 0.7); }
+.tb-steps li:nth-child(3)::after { background: #e6e0ff; box-shadow: 0 0 0 3px rgba(154, 134, 255, 0.18), 0 0 14px 2px rgba(154, 134, 255, 0.75); }
+.tb-steps .step-number { position: static; display: block; }
+.tb-steps h3 { margin: 10px 0 8px; }
+.tb-steps p { margin: 0; }
+@media (min-width: 900px) { .tb-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px; } }
+
+.tb-mind-list { list-style: none; padding: 0; margin: 36px 0 0; display: grid; gap: 28px; }
+@media (min-width: 800px) { .tb-mind-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 48px; } }
+.tb-mind-list li { position: relative; padding-left: 24px; }
+.tb-mind-list li::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 6px; width: 2px; border-radius: 1px; background: linear-gradient(180deg, #5ee9ff, rgba(154, 134, 255, 0.3)); }
+.tb-mind-list h3 { margin: 0 0 8px; }
+.tb-mind-list p { margin: 0; }
+
+.tb-why-card, .tb-vision-card { max-width: 860px; display: grid; gap: 16px; }
+.tb-why-card > *, .tb-vision-card > * { margin: 0; }
+.tb-sources { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 10px; }
+.tb-sources a { font-size: 13.5px; line-height: 1.55; color: var(--ink-3); text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.3); text-underline-offset: 3px; }
+.tb-sources a:hover { color: var(--ink); }
+
+.tb-commit h2 { margin-bottom: 8px; }
+.tb-commit-list { list-style: none; counter-reset: tb; padding: 0; margin: 30px 0 32px; display: grid; gap: 16px; max-width: 720px; }
+.tb-commit-list li { counter-increment: tb; display: grid; grid-template-columns: 44px 1fr; align-items: baseline; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.5; color: var(--ink); }
+.tb-commit-list li::before { content: counter(tb, decimal-leading-zero); font-size: 12px; font-weight: 620; letter-spacing: 0.16em; color: var(--cyan); }
+.tb-vision-card .button-row { display: flex; flex-wrap: wrap; }

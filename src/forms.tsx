@@ -12,6 +12,7 @@ import type { Receipt, WaveType } from "./community";
 import { ActionButton, ButtonLink, CONTACT, Intro } from "./ui";
 import { useStateStore } from "./state";
 import { MindAnchor, mindGrow, mindWave } from "./mind/WaveMind";
+import { GiveReview } from "./together/team";
 export function Application({
   kind = "project",
 }: {
@@ -684,6 +685,7 @@ export function TeamReview() {
           {error}
         </p>
       )}
+      {signed && <GiveReview />}
     </div>
   );
 }
@@ -742,6 +744,20 @@ export function Privacy() {
           terms, and any receipts. Waves.Fund does not collect card information
           or automatically verify those donations. A contribution through that
           link is not a project-specific grant commitment.
+        </p>
+        <h2>Give Together</h2>
+        <p>
+          Give Together is for adults and uses a Waves.Fund account. Your Give
+          Profile holds the name you choose, your answers, an optional town and
+          an approximate point rounded to about 10 km, and your statement.
+          People you match with see only what you choose to share, and never
+          your email or exact location. Messages open only after both people
+          accept. Time you log and Gratus are visible to you and the Give
+          Guide you gave with; your record is visible only to you. Notes you
+          add to a logged day stay private. Hours are peer-confirmed, not verified
+          by a host organization. Reports go to the Waves.Fund team. You can
+          pause matching or delete your Give Profile at any time from Privacy
+          & Safety inside Give Together.
         </p>
         <h2>Access & Retention</h2>
         <p>

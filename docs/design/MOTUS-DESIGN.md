@@ -75,7 +75,6 @@ words, so clearings follow a ragged right edge and never open up empty space.
 | Guides | Glass channels between vessels, routed through gutters and the empty foot of cards; light weaves inside them the way it stays inside an optical fibre | Guided energy keeps its strength. |
 | Flow | When the next card comes into view, a slug of liquid runs down the guide and pours in: the surface takes the impact, droplets leap and fall back, bubbles rise | Energy flows on from one step to the next. |
 | Welling up | A vessel with no guide into it fills from below as it comes into view | A card fills as it is reached. |
-| Beams | On Give, four guides of light run from the Support core to Time, Mentorship, Funding and Signal; the chosen one burns brightest and energy flows along a guide into the panel | Direct energy with intention. |
 
 ## The waveguide
 
@@ -86,15 +85,26 @@ and the light leaving as a spreading wave. The section "Why we call it a Wave Gu
 definition from Wikipedia and has a study version: move the pointer (or use the arrow keys)
 to change the launch angle, and past the critical angle the light escapes.
 
-## Volunteer near you
+## Give Together
 
-`src/give.tsx` and `api/volunteer.js`. Live listings from Volunteer Connector (Canada by
-postal area, and remote roles), sorted by distance from the visitor's approximate location, or
-an exact one they choose to share (rounded to about 10km, never stored). A constellation shows
-the visitor at the centre and each opportunity at its real bearing. Idealist switches on when
-`IDEALIST_API_KEY` is set: `api/volunteer-sync.js` (daily cron, needs `CRON_SECRET`) and
-`scripts/idealist-sync.mjs` (the first full sync, by hand) file its listings into location
-tiles in Blob storage, since its API has no location search.
+`src/give.tsx` (the /give landing) and `src/together/` (everything under /give/). The Give page is
+Give Together: a Give Profile, a peer Give Guide found by what two people share, a mutual yes
+before any message, Shared Waves around real opportunities, and a private record. The full
+build is in docs/GIVE-TOGETHER.md.
+
+`src/together/scene.tsx` draws its ocean network. You are a soft cyan light with currents (slow
+contour lines of a moving flow). People who share something with you are distant points of
+light, nearer the more you share. A Give Guide is joined to you by a flowing strand. When both
+people say yes, the strand grows between them and a ring of light spreads from where they meet,
+then "Your Give Guide" and "You both want to make a difference." appear. On the landing page the
+scene is an illustration and is never shown as real people. The output fades to zero before the
+canvas edge, so no rectangle shows over the dots.
+
+## The Teachback
+
+`src/teachback.tsx`, at /guide/teachback. One light teaches two; each learner sends a violet
+pulse back (the teach-back), then teaches two more, for five generations on rings. Drawn on a 2D
+canvas with stamped glow sprites. Motion off shows the finished tree.
 
 ## Buttons
 
