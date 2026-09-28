@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /give/
+Disallow: /team/
+Disallow: /workspace
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /trax
+Disallow: /mind-lab
+
+Sitemap: https://www.waves.fund/sitemap.xml
