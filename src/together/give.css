@@ -296,3 +296,6 @@ a.gt-row:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 3px; }
 /* ---------- Wave symbols inside the app ---------- */
 .gt-opp-symbol { width: 150px; margin: 2px 0 -2px; }
 .gt-pair-scene { position: relative; height: clamp(170px, 46vw, 240px); margin: -6px calc(var(--gutter) * -1) 10px; }
+
+/* The seed the Give Profile grows in (src/mind, mode "seed"). */
+.gt-seed { height: clamp(120px, 26vw, 160px); margin: -6px 0 6px; }

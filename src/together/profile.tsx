@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, LocateFixed } from "lucide-react";
 import { CAUSES, Choices, GIVES, Loading, Problem, SENTIMENTS, Switch, TIMES, Tags, WAYS, useCall, useMe } from "./core";
 import type { Me, Profile, Shares, Where } from "./core";
-import { mindWave } from "../mind/WaveMind";
+import { MindAnchor, mindGrow, mindWave } from "../mind/WaveMind";
 
 type Draft = {
   name: string; gives: string[]; causes: string[]; causeOther: string; times: string[]; ways: string[]; skills: string[];
@@ -42,6 +42,9 @@ function ProfileForm({ me }: { me: Me }) {
   const existing = me?.profile;
   const [draft, setDraft] = useState<Draft>(() => start(existing, me?.where));
   const [step, setStep] = useState(0);
+  // The profile is a seed in the field: it grows with each question answered.
+  useEffect(() => { mindGrow(0.12 + 0.88 * (step / (STEPS.length - 1))); }, [step]);
+  useEffect(() => () => mindGrow(1), []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -178,6 +181,7 @@ function ProfileForm({ me }: { me: Me }) {
         <h1>Give <span>Together</span></h1>
         <p className="gt-lede">A few short questions. Skip any you like; you can change them later.</p>
       </header>
+      <MindAnchor name="seed" className="gt-seed" />
       <ol className="gt-progress" aria-label={`Question ${step + 1} of ${STEPS.length}`}>
         {STEPS.map((k, i) => <li key={k} className={i < step ? "done" : i === step ? "now" : ""} aria-current={i === step ? "step" : undefined} />)}
       </ol>

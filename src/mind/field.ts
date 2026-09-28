@@ -63,11 +63,11 @@ F mode(int m, vec2 p, vec4 rect, float t) {
   float s = min(h.x, h.y);
   float env = 1.0 - smoothstep(1.0, 1.6, max(abs(q.x), abs(q.y)));
   if (env <= 0.0) return f;
-  if (m == 0) {                                   // vision: a mass, and waves radiating from it
+  if (m == 0) {                                   // vision: a mass, and waves radiating from it; it grows as the vision is written
     float r = length(p - c);
-    well(f, p, c, s * 0.5, 1.1);
+    well(f, p, c, s * 0.5, 1.1 * mix(0.55, 1.0, uGrow));
     float ring = 0.5 + 0.5 * sin(r / s * 9.0 - t * OM / 3.0);
-    f.a += ring * exp(-r / (s * 1.05)) * 0.6;
+    f.a += ring * exp(-r / (s * 1.05)) * 0.6 * mix(0.55, 1.0, uGrow);
     f.z += (ring - 0.5) * 34.0 * exp(-r / (s * 1.2));
   } else if (m == 1) {                            // layers: a forward pass
     float phase = fract(t / 4.5) * 5.0;
@@ -262,7 +262,7 @@ ${FIELD}
 ${PROJECT}
 uniform int uCols, uRows, uBond;
 uniform vec2 uOrigin;
-uniform float uSpacing, uDispK, uActK;
+uniform float uSpacing, uDispK, uActK, uCalm;
 uniform vec3 uHue;
 out float vA; out vec3 vColor;
 void main() {
@@ -284,7 +284,8 @@ void main() {
     lit = max(lit, step(0.955, k) * inside * uMix * uVisB * (0.7 + uTrust * 0.3));
   }
   gl_Position = toClip(end == 0 ? sa.xy : sb.xy);
-  vA = lit * 0.62 * uOpacity * maskAt((sa.xy + sb.xy) * 0.5);
+  // Links settle while someone reads and come forward in open space and on any move (uCalm).
+  vA = lit * 0.62 * mix(0.55, 1.0, uCalm) * uOpacity * maskAt((sa.xy + sb.xy) * 0.5);
   vColor = mix(uHue, vec3(0.9, 0.98, 1.0), clamp(both - 1.2, 0.0, 0.6));
 }`;
 const LINK_FS = `#version 300 es
@@ -431,6 +432,12 @@ export class Field {
   trust = 0;
   grow = 1;
   opacity = 1;
+  /** 1 in open space or on the move; eases toward 0 while a block of words sits across the middle of the screen. */
+  calm = 1;
+  private calmTarget = 1; private calmTick = 0; private movedAt = -10;
+  /** Where the world is always forward: page openings, chapter headings, anchors, the closing mantra (document space). */
+  private forward: Clear[] = [];
+  setForward(list: Clear[]) { this.forward = list; }
   docHeight = 0;
   /** The scroll position, kept by the scroll listener: reading it inside a frame would force a style pass every frame. */
   sy = window.scrollY;
@@ -513,14 +520,18 @@ export class Field {
   }
   wave(x: number, y: number, strength = 1) {
     if (!this.motion) return;
+    this.movedAt = this.now();
     this.pulses.set([x, y, this.now(), strength], this.slot * 4);
     this.slot = (this.slot + 1) % 4;
     this.wake();
   }
   point(x: number, y: number, active = true) {
     this.pointer.x = x; this.pointer.y = y; this.pointer.target = active ? 1 : 0; this.pointer.moved = this.now();
+    this.movedAt = this.now();
     this.wake();
   }
+  /** The person moved (scrolled, touched): the world comes forward. Internal ticks never count as a move. */
+  moved() { this.movedAt = this.now(); this.wake(); }
   move(x: number, y: number, strength: number) { this.mover.x = x; this.mover.y = y; this.mover.s = strength; this.wake(); }
   setHue(rgb: number[]) { this.hueTarget = rgb; this.wake(); }
   touchTint(x: number, y: number, rgb: number[] | null) {
@@ -716,6 +727,19 @@ export class Field {
       if (k >= 1) { this.a = this.b; this.mix = 1; this.morphStart = -1; }
       animating = true;
     }
+    // The world makes room while you read: with words across the middle of the screen and nothing stirring, the
+    // ambient wave and the links settle. In open space, at a chapter break, or on any move, they come forward.
+    if (++this.calmTick % 3 === 0) {
+      let reading = false;
+      if (t0 - this.movedAt > 0.6) {
+        const y0 = this.sy + this.h * 0.38, y1 = this.sy + this.h * 0.62, minW = this.w * 0.28;
+        const inBand = (c: Clear) => c.top < y1 && c.top + c.height > y0;
+        if (!this.forward.some(inBand)) for (const c of this.clears) { if (!c.fixed && c.width >= minW && inBand(c)) { reading = true; break; } }
+      }
+      this.calmTarget = reading ? 0 : 1;
+    }
+    this.calm = this.motion ? approach(this.calm, this.calmTarget, 2.2, dt) : 1;
+    if (Math.abs(this.calm - this.calmTarget) > 0.005) animating = true;
     const va = this.visible(this.a), vb = this.visible(this.b);
     this.visA = this.motion ? approach(this.visA, va, 5, dt) : va;
     this.visB = this.motion ? approach(this.visB, vb, 5, dt) : vb;
@@ -775,7 +799,7 @@ export class Field {
       gl.uniform1f(p.u("uVisA"), this.a ? this.visA : 0);
       gl.uniform1f(p.u("uVisB"), this.b ? this.visB : 0);
       gl.uniform1f(p.u("uGrow"), this.grow);
-      gl.uniform1f(p.u("uAmb"), this.motion ? 1 : 0.6);
+      gl.uniform1f(p.u("uAmb"), (this.motion ? 1 : 0.6) * (0.5 + 0.5 * this.calm));
       gl.uniform1f(p.u("uTrust"), this.trust);
       gl.uniform1f(p.u("uScrollP"), scrollP);
       gl.uniform1i(p.u("uModeA"), modeIndex(this.a));
@@ -805,6 +829,7 @@ export class Field {
     gl.uniform1i(this.link.u("uCols"), front.cols);
     gl.uniform1i(this.link.u("uRows"), front.rows);
     gl.uniform1i(this.link.u("uBond"), this.b && this.b.name === "bond" ? 1 : 0);
+    gl.uniform1f(this.link.u("uCalm"), this.calm);
     gl.uniform2f(this.link.u("uOrigin"), fo[0], fo[1]);
     gl.uniform1f(this.link.u("uSpacing"), front.spacing);
     gl.uniform1f(this.link.u("uDispK"), front.disp);

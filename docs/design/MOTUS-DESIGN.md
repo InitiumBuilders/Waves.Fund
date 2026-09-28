@@ -129,6 +129,27 @@ energy from the step before pours in.
 - Measure at 6x CPU on a phone viewport against a production build; compare with the live site in the
   same sitting, because the machine's load moves the numbers.
 
+## The world makes room while you read
+
+`field.ts`, `calm`. With a wide block of words across the middle of the screen and no move for 0.6 s
+(a scroll, the pointer, a touch; the engine's own ticks do not count), the ambient wave settles to half
+and the links dim to about half, over about a second. In open space, at a page opening, a chapter
+heading, an anchor or the closing mantra (the "forward" zones WaveMind measures), and on any move, the
+world comes forward again. Statement: the world makes room while you read, and comes forward when you move.
+
+## Every page ends the same way
+
+The footer's mantra is an anchor (`data-mind="bond"`). When it comes into view, links light between
+neighbours around it and a network forms in the open space beside it. An anchor that leaves the screen
+is let go after 0.7 s, so the mantra is found fresh on every page, including pages that load lazily.
+Statement: trust is the links between people.
+
+## Seeds
+
+The home vision and the Give Profile drive the seed the way the application form does: on the home page
+the vision's mass and rings grow as the words are written (mode "vision" scales with `uGrow`); on the
+Give Profile a seed anchor above the questions grows with each one answered.
+
 ## Ripples
 
 `src/together/ripple.tsx` is one WebGL2 fragment shader that adds up real waves. Each source

@@ -152,6 +152,8 @@ function measureNow() {
     if (r && r.height > 0 && r.width > 0) clears.push({ left: r.left, top: r.top, width: r.width, height: r.height, fixed: true, radius: 0 });
   }
   engine.setClears(clears);
+  // Where the world stays forward while you read: openings, chapter headings, anchors and the closing mantra.
+  engine.setForward([...document.querySelectorAll("main .page-intro, main .gt-tank, main [data-mind], main .section-heading, main h2, .app-footer")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top + sy, width: r.width, height: r.height, fixed: false, radius: 0 }; }));
   engine.setQuiet(() => [...document.querySelectorAll("main [data-quiet]")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, fixed: true, radius: 0 }; }));
 
   // Vessels.
@@ -276,7 +278,7 @@ export function WaveMind() {
     const onPointer = (e: PointerEvent) => { if (e.pointerType === "mouse") engine?.point(e.clientX, e.clientY); };
     const onDown = (e: PointerEvent) => { if (e.pointerType !== "mouse") engine?.wave(e.clientX, e.clientY, 0.55); };
     const onLeave = () => engine?.point(0, 0, false);
-    const onScroll = () => { if (engine) { engine.sy = scrollY; engine.invalidate(); } };
+    const onScroll = () => { if (engine) { engine.sy = scrollY; engine.moved(); } };
     // What you reach for colours the field around it.
     const onOver = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
@@ -376,8 +378,10 @@ export function WaveMind() {
     const choose = () => {
       let best: Element | null = null, bestV = 0;
       for (const [el, s] of seen) if (s.visible > bestV) { bestV = s.visible; best = el; }
-      if (!best) { if (!seen.size) { current = null; engine?.focus(null); } return; }
-      if (best === current) { engine?.track(seen.get(best)!.anchor); return; }
+      // Nothing in view: let go of the last anchor after a short grace, so a gap between two chapters still
+      // crossfades, but an anchor seen only while a page was loading does not stay focused for the whole visit.
+      if (!best) { if (pending) clearTimeout(pending); pending = setTimeout(() => { current = null; engine?.focus(null); }, seen.size ? 700 : 0); return; }
+      if (best === current) { if (pending) { clearTimeout(pending); pending = null; } engine?.track(seen.get(best)!.anchor); return; }
       if (pending) clearTimeout(pending);
       const target = best;
       pending = setTimeout(() => {
@@ -402,7 +406,7 @@ export function WaveMind() {
       if (current) { const s = seen.get(current); if (s) engine?.track(s.anchor); }
     });
     const scan = () => {
-      const found = [...document.querySelectorAll<HTMLElement>("main [data-mind]")];
+      const found = [...document.querySelectorAll<HTMLElement>("main [data-mind], .app-footer [data-mind]")];
       for (const el of found) {
         const name = el.dataset.mind as FieldMode, s = seen.get(el);
         if (!s) { seen.set(el, { visible: 0, anchor: rectOf(el, name) }); io.observe(el); ro.observe(el); }

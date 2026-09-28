@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { WaveMark } from './ui';
 import { useStateStore } from './state';
-import { mindWave } from './mind/WaveMind';
+import { mindGrow, mindWave } from './mind/WaveMind';
 const INTRO_TEXT='Start Building Your Wave Right Here, Right Now. Set It Into Motion.';
 type IntroPhase='waiting'|'typing'|'flow'|'idle';
 export function Home() {
@@ -20,6 +20,10 @@ export function Home() {
   const transferMode=useRef<'intro'|'submit'|null>(null);
   const done=useRef(false);
   const lastSpark=useRef(0);
+  // Your vision has gravity: the mass in the field grows as the words do.
+  const written=(introPhase==='idle'?state.vision:introText).length;
+  useEffect(()=>{mindGrow(0.25+0.75*Math.min(1,written/160))},[written]);
+  useEffect(()=>()=>mindGrow(1),[]);
   const clearIntroTimer=()=>{if(introTimer.current){clearTimeout(introTimer.current);introTimer.current=null}};
   const finishIntro=()=>{
     clearIntroTimer();

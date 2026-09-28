@@ -455,7 +455,8 @@ export function Intro({
 export function Footer() {
   return (
     <footer className="app-footer">
-      <p>
+      {/* The mantra is an anchor of the field: links light between neighbours around it (mode "bond"). */}
+      <p data-mind="bond">
         Trust People.
         <br />
         And They Become Trustworthy.
