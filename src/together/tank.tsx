@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import { BEAT } from "../cadence";
-import { Ripple, ease, hash, mix } from "./ripple";
+import { ease, hash, mix } from "./ripple";
+import { Sea } from "./sea";
 import type { RippleHandle, RippleModel, Source } from "./ripple";
 
 /* The Give page's first scene, in three chapters that follow the scroll:
@@ -33,10 +34,9 @@ function tankModel(progress: MutableRefObject<number>): RippleModel {
     const c2 = ease((p - 0.75) / 0.9), c3 = ease((p - 1.75) / 0.9);
     const cx = wide ? w * 0.68 : w * 0.5, cy = wide ? h * 0.5 : h * 0.46;
     const sep = lambda * (wide ? 1.75 : 2.1);
-    // Where the line of people stands in the last chapter.
-    const slot = (k: number) => wide
-      ? { x: w * 0.54, y: h * (0.1 + 0.8 * (k + 0.5) / SLOTS) }
-      : { x: w * (0.04 + 0.92 * (k + 0.5) / SLOTS), y: h * 0.56 };
+    // Where the line of people stands in the last chapter: across the water, a third of the way out, so the
+    // wave they make rolls toward you.
+    const slot = (k: number) => ({ x: w * (0.08 + 0.84 * (k + 0.5) / SLOTS), y: h * 0.3 });
     const out: Source[] = [];
     // You.
     const you0 = { x: cx, y: cy }, you1 = { x: cx - sep, y: cy }, youS = slot(LINE.you);
@@ -76,7 +76,7 @@ function tankModel(progress: MutableRefObject<number>): RippleModel {
     // Each moving light keeps its ripples close, so the move reads as people walking into place.
     for (const s of out) { s.a *= 1 - 0.5 * moving; s.reach = (s.reach ?? 0.62) * (1 - 0.8 * moving); }
     const line = slot(LINE.you);
-    const front: [number, number, number, number] = [line.x, line.y, wide ? 0 : -Math.PI / 2, ease((c3 - 0.55) / 0.45)];
+    const front: [number, number, number, number] = [line.x, line.y, Math.PI / 2, ease((c3 - 0.55) / 0.45)];
     return { sources: out, lambda, speed: lambda / BEAT, gain: 1.15, dots: wide ? 15 : 13, ground: 0.94, front };
   };
 }
@@ -84,7 +84,7 @@ function tankModel(progress: MutableRefObject<number>): RippleModel {
 /** The scene alone; the words around it live in the page so they paint before this loads. */
 export function TankScene({ progress, handle }: { progress: MutableRefObject<number>; handle: MutableRefObject<RippleHandle | null> }) {
   const model = useRef<RippleModel>(tankModel(progress));
-  return <Ripple model={model} handle={handle} tappable className="gt-tank-scene" maxDpr={1.25} still={7.5} aria-hidden="true" />;
+  return <Sea model={model} handle={handle} tappable className="gt-tank-scene" maxDpr={1.25} still={7.5} aria-hidden="true" />;
 }
 
 /* Two people meeting. As the section is scrolled into view, the second light arrives and falls into step
@@ -107,11 +107,11 @@ export function PairScene() {
     return () => { removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); };
   }, []);
   const model = useRef<RippleModel>((_t, w, h) => {
-    const wide = w > h;
+    // Side by side across the water, at mid-distance.
     const lambda = Math.max(44, Math.min(110, Math.min(w, h) * 0.2));
     const sep = lambda * 1.5;
-    const cx = w / 2, cy = h / 2;
-    const [a, b] = wide ? [{ x: cx - sep, y: cy }, { x: cx + sep, y: cy }] : [{ x: cx, y: cy - sep }, { x: cx, y: cy + sep }];
+    const cx = w / 2, cy = h * 0.5;
+    const [a, b] = [{ x: cx - sep, y: cy }, { x: cx + sep, y: cy }];
     const lock = ease((progress.current - 0.2) / 0.65);
     return {
       lambda, speed: lambda / BEAT, gain: 1.15, dots: 13, ground: 0.9,
@@ -121,5 +121,5 @@ export function PairScene() {
       ],
     };
   });
-  return <div ref={wrap} className="gt-study"><Ripple model={model} handle={handle} tappable className="gt-study-scene" maxDpr={1.25} still={4} aria-hidden="true" /></div>;
+  return <div ref={wrap} className="gt-study"><Sea model={model} handle={handle} tappable className="gt-study-scene" maxDpr={1.25} still={4} aria-hidden="true" /></div>;
 }

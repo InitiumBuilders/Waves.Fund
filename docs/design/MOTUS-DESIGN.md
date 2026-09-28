@@ -163,6 +163,19 @@ Scenes pass a model function `(t, w, h) => frame`; the engine owns the canvas, t
 when hidden, and motion off (one still frame). The element carries `data-quiet`, so field
 networks never form over it.
 
+## The sea
+
+`src/together/sea.tsx`. The same summed waves as the ripples, drawn as a surface seen from just above the
+water. A grid of points (from `gl_VertexID`, no buffers) is the surface: each point rises with the summed
+wave, a wireframe joins neighbours, and the lights standing on the water light the slopes that face them
+and lay a reflection toward you. Crests that are in step go white; a slow swell on the beat keeps the sea
+alive between waves. The water runs on past the scene's own plane toward the horizon (1.8x the depth), it
+is wider than a narrow box (up to 1.6:1), and it goes quiet under the words (the left on a wide screen,
+the bottom on a tall one). Taps land on the water through the inverse camera. All of it is vertex work,
+so a phone at 6x CPU throttle still holds 60 fps. The Give page's opening chapters and "A Friend You Give
+With" use it; the top-down ripples stay where a map is needed (Find Your Give Guide, the moment, a Shared
+Wave). Statement: one person's ripples; two in step; a line of people making one wave that comes to you.
+
 ## Give Together
 
 `src/give.tsx` (the /give landing) and `src/together/` (everything under /give/). The Give page is
@@ -174,8 +187,8 @@ Its physics is interference.
 
 | Place | What it shows | Statement |
 | --- | --- | --- |
-| Landing, first scene (`together/tank.tsx`) | A sticky scene over three scroll chapters, August's lines "Find Your People." "Give Together." "Build a Wave.": you, one light, with faint lights around you not yet in step; one comes near and falls into step, and the bands between you rise twice as high; then everyone lines up in step and the rings join into one straight wavefront (Huygens) | Two in step add up; many in step make one wave. |
-| Landing, A Give Guide (`PairScene`) | Two sources; as the section scrolls into view the second one arrives and falls into step with the first, and the bands between them brighten. Scrolling back reverses it | Meeting someone to give with. |
+| Landing, first scene (`together/tank.tsx`, drawn by the sea) | A sticky scene over three scroll chapters, August's lines "Find Your People." "Give Together." "Build a Wave.": you, one light, with faint lights around you not yet in step; one comes near and falls into step, and the bands between you rise twice as high; then everyone lines up in step and the rings join into one straight wavefront (Huygens) | Two in step add up; many in step make one wave. |
+| Landing, A Give Guide (`PairScene`, the sea) | Two lights side by side across the water; as the section scrolls into view the second one arrives and falls into step with the first, and the bands between them brighten. Scrolling back reverses it | Meeting someone to give with. |
 | /give/guide (`together/scene.tsx`, field) | You at the centre. Give Guides ripple in step with you; people who share something are faint lights whose rings stay close; choose one and their rings reach toward yours and fall into step | A preview of giving together. |
 | The moment | Two lights fall into step over two seconds, then a ring spreads from where they meet, and "Your Give Guide" appears | You both said yes. |
 | Shared Wave (`together/wave.tsx`) | Two lights out of step while proposed, in step once active | The Wave is underway. |
