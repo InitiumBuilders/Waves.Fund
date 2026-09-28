@@ -37,13 +37,13 @@ export function Graphic({
     </svg>
   );
 }
-export function WaveMark({ className = "" }: { className?: string }) {
+/* The wave mark, cut from the home drawing at its native size (media/wave-mark.webp), so pages load the
+   mark alone instead of the whole 941x1672 drawing. */
+export function WaveMark({ className = "", plain = false }: { className?: string; plain?: boolean }) {
   return (
-    <Graphic
-      className={"wave-mark " + className}
-      page="home"
-      box="327 48 280 154"
-    />
+    <svg className={(plain ? "" : "wave-mark ") + className} viewBox="0 0 280 154" aria-hidden="true" focusable="false">
+      <image href="/media/wave-mark.webp" width="280" height="154" />
+    </svg>
   );
 }
 export function Semble({ className = "" }: { className?: string }) {
@@ -120,9 +120,9 @@ export function Background() {
   );
 }
 const tabs = [
-  { path: "/learn", label: "Learn", image: "nav-learn.png" },
-  { path: "/guide", label: "Guide", image: "nav-guide.png" },
-  { path: "/give", label: "Give", image: "nav-give.png" },
+  { path: "/learn", label: "Learn", image: "nav-learn.webp" },
+  { path: "/guide", label: "Guide", image: "nav-guide.webp" },
+  { path: "/give", label: "Give", image: "nav-give.webp" },
 ];
 function GrowTab() {
   const { pathname } = useLocation();
@@ -174,7 +174,7 @@ function GrowTab() {
         }
       }}
     >
-      <img className="nav-logo" src="/media/nav-waves.png" alt="" />
+      <img className="nav-logo" src="/media/nav-waves.webp" alt="" />
       <span className="nav-label">{waves ? "Waves" : "Grow"}</span>
     </NavLink>
   );

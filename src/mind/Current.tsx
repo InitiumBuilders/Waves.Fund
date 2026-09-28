@@ -62,7 +62,7 @@ export function Current() {
       aria-label="Back to the top"
       onClick={() => { scrollTo({ top: 0, behavior: motion ? "smooth" : "instant" }); if (ref.current) mindWave(ref.current, 1); }}
     >
-      <img src="/media/nav-waves.png" alt="" width="64" height="64" />
+      <img src="/media/nav-waves.webp" alt="" width="64" height="64" />
     </button>
   );
 }

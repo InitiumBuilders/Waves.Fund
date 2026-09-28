@@ -65,7 +65,7 @@ export function WaveOne() {
             <circle cx="229" cy="113" r="3.5" />
             <circle cx="130" cy="36" r="3" />
           </svg>
-          <img src="/media/nav-waves.png" alt="" loading="lazy" width="128" height="108" />
+          <img src="/media/nav-waves.webp" alt="" loading="lazy" width="128" height="108" />
         </div>
         <h3 id={titleId}>Waves.Fund</h3>
         <p className="wave-one-mantra">Trust People.<br />And They Become Trustworthy.</p>

@@ -15,7 +15,7 @@ import {
   BottomNav,
   ButtonLink,
   Footer,
-  Graphic,
+  WaveMark,
   Header,
   Intro,
   Sheet,
@@ -146,7 +146,7 @@ function Projects() {
         </div>
       ) : !filtered.length ? (
         <section className="panel empty-state">
-          <Graphic className="empty-wave" page="home" box="327 48 280 154" />
+          <WaveMark className="empty-wave" plain />
           <h2>
             {query ? "No Matching Projects" : "Raise Waves."}
           </h2>
