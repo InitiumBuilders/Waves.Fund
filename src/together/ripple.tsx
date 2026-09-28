@@ -68,7 +68,7 @@ void main() {
       light += WHITE * g * 0.9 + mix(CYAN, VIOLET, b.y) * (g * 0.3 + h);
     }
   }
-  float hm = E > 0.0005 ? hue / E : 0.0;
+  float hm = clamp(E > 0.0005 ? hue / E : 0.0, 0.0, 1.0);
   // A wave that has formed moves forward from its line: the water behind the line goes quiet.
   if (uFront.w > 0.0) {
     float ahead = dot(p - uFront.xy, vec2(cos(uFront.z), sin(uFront.z)));

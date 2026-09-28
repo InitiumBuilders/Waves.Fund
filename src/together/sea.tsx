@@ -20,7 +20,7 @@ uniform mat4 uVP;
 uniform vec3 uEye;
 uniform vec2 uPlane, uRes;
 uniform float uDpr, uTime, uWave, uK, uW, uHeight, uDot, uLines, uDepth;
-uniform int uCount, uCols, uRows;
+uniform int uCount, uCols, uRows, uOff;   // uOff: a dev-only switch that removes one term (see Sea)
 uniform vec4 uA[${MAX}];   // x, y, amplitude, phase
 uniform vec4 uB[${MAX}];   // born, hue, size, reach
 uniform vec4 uFront;       // x, y, direction, strength
@@ -64,9 +64,11 @@ void main() {
   if (uFront.w > 0.0) {
     float ahead = dot(p - uFront.xy, vec2(cos(uFront.z), sin(uFront.z)));
     float keep = mix(1.0, smoothstep(-0.6, 1.4, ahead * uK / 6.2831853), uFront.w);
-    A *= keep; E *= keep; g *= keep; kq = keep;
+    A *= keep; E *= keep; g *= keep; hue *= keep; kq = keep;
   }
-  float hm = E > 0.0005 ? hue / E : 0.0;
+  // The mean hue of the sources at this point, kept inside the palette: an unbounded mix extrapolates into
+  // negative green and prints magenta.
+  float hm = clamp(E > 0.0005 ? hue / E : 0.0, 0.0, 1.0);
   // A slow swell under everything, on the beat, so the sea is never flat.
   float swell = sin(p.x * 0.011 + uWave * 4.1887902 * 0.5) * cos(p.y * 0.017 - uWave * 4.1887902 * 0.25);
   float z = (A + swell * 0.22) * uHeight;
@@ -91,11 +93,15 @@ void main() {
   float fade = smoothstep(1.0, 0.7, depth) * smoothstep(0.0, 0.03, depth) * smoothstep(0.5, 0.4, abs(P.x) / uPlane.x)
              * smoothstep(1.0, 0.86, max(abs(ndc.x), abs(ndc.y))) * (0.12 + 0.88 * words);
   float lit = 0.14 + 0.95 * diff * diff;
+  if (uOff == 3) { streak = 0.0; streakCol = vec3(0.0); }
+  if (uOff == 4) ridge = 0.0;
+  if (uOff == 5) low = 0.0;
+  if (uOff == 9) spec = 0.0;
   vec3 shade = tint * lit + WHITE * spec * 0.9 + mix(tint, WHITE, 0.55) * ridge * 0.95 + VIOLET * low * 0.12 + streakCol * (0.35 + 0.65 * diff) * 0.8;
   float a = lit * 0.75 + spec * 0.8 + ridge * 0.9 + streak * 0.5;
   if (uLines > 0.5) { a *= 0.42; shade *= 0.9; }
   vA = clamp(a, 0.0, 1.0) * fade;
-  vColor = min(shade, vec3(1.2));
+  vColor = clamp(shade, vec3(0.0), vec3(1.2));
   float px = uDot * uDpr * clamp(uPlane.y * 0.75 / max(clip.w, 1.0), 0.3, 2.4);
   gl_PointSize = uLines > 0.5 ? 1.0 : px * (1.0 + ridge * 0.5);
 }`;
@@ -228,6 +234,9 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
     let w = 1, h = 1, pw = 1, pd = 1, dpr = 1, raf = 0, visible = true, cols = 120, rows = 80, vp: M4 = perspective(1, 1, 1, 10), inv: M4 | null = null, eye = [0, 0, 0];
     const t0 = performance.now();
     clockRef.current = () => (motion ? (performance.now() - t0) / 1000 : still);
+    // Dev only: ?seaoff=N removes one term, to find where a colour comes from. 1 halo, 2 core, 3 reflection,
+    // 4 ridge, 5 trough, 6 lines, 7 points, 8 ground, 9 specular.
+    const off = import.meta.env.DEV ? Number(new URLSearchParams(location.search).get("seaoff") || 0) : 0;
     const camera = () => {
       // Just above the near edge, looking out toward the far edge, which sits a little below the top.
       pw = Math.max(w, Math.min(h * 1.6, w * 1.6)); pd = h * 1.8;
@@ -264,7 +273,7 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       // The pool of dark ground the sea lies in.
       gl.useProgram(ground); gl.bindVertexArray(vao);
-      gl.uniform2f(U(ground, "uRes"), w, h); gl.uniform1f(U(ground, "uDpr"), dpr); gl.uniform1f(U(ground, "uGround"), f.ground ?? 0.94);
+      gl.uniform2f(U(ground, "uRes"), w, h); gl.uniform1f(U(ground, "uDpr"), dpr); gl.uniform1f(U(ground, "uGround"), off === 8 ? 0 : f.ground ?? 0.94);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       // The surface: lines, then dots.
       gl.useProgram(sea); gl.bindVertexArray(emptyVao);
@@ -273,18 +282,18 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
       gl.uniform1f(U(sea, "uTime"), t); gl.uniform1f(U(sea, "uWave"), wave);
       gl.uniform1f(U(sea, "uK"), k); gl.uniform1f(U(sea, "uW"), k * f.speed);
       gl.uniform1f(U(sea, "uHeight"), f.lambda * 0.2); gl.uniform1f(U(sea, "uDot"), 2.4); gl.uniform1f(U(sea, "uDepth"), pd);
-      gl.uniform1i(U(sea, "uCount"), n); gl.uniform1i(U(sea, "uCols"), cols); gl.uniform1i(U(sea, "uRows"), rows);
+      gl.uniform1i(U(sea, "uCount"), n); gl.uniform1i(U(sea, "uCols"), cols); gl.uniform1i(U(sea, "uRows"), rows); gl.uniform1i(U(sea, "uOff"), off);
       gl.uniform4fv(U(sea, "uA"), A); gl.uniform4fv(U(sea, "uB"), B);
       gl.uniform4f(U(sea, "uFront"), ...(f.front || [0, 0, 0, 0] as [number, number, number, number]));
-      gl.uniform1f(U(sea, "uLines"), 1); gl.drawArrays(gl.LINES, 0, cols * rows * 4);
-      gl.uniform1f(U(sea, "uLines"), 0); gl.drawArrays(gl.POINTS, 0, cols * rows);
+      if (off !== 6) { gl.uniform1f(U(sea, "uLines"), 1); gl.drawArrays(gl.LINES, 0, cols * rows * 4); }
+      if (off !== 7) { gl.uniform1f(U(sea, "uLines"), 0); gl.drawArrays(gl.POINTS, 0, cols * rows); }
       // The lights on the water: halo, then core.
       if (n) {
         gl.useProgram(light);
         gl.uniformMatrix4fv(U(light, "uVP"), false, vp); gl.uniform2f(U(light, "uPlane"), pw, h); gl.uniform1f(U(light, "uDpr"), dpr);
         gl.uniform4fv(U(light, "uA"), A); gl.uniform4fv(U(light, "uB"), B);
-        gl.uniform1f(U(light, "uHalo"), 1); gl.drawArrays(gl.POINTS, 0, n);
-        gl.uniform1f(U(light, "uHalo"), 0); gl.drawArrays(gl.POINTS, 0, n);
+        if (off !== 1) { gl.uniform1f(U(light, "uHalo"), 1); gl.drawArrays(gl.POINTS, 0, n); }
+        if (off !== 2) { gl.uniform1f(U(light, "uHalo"), 0); gl.drawArrays(gl.POINTS, 0, n); }
       }
     };
     const resize = () => {
