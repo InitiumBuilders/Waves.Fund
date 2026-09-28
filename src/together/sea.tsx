@@ -60,10 +60,11 @@ void main() {
   // Many lights in a row do not stack their streaks into a bar: one light's worth at most.
   vec3 sCol = streak > 0.0 ? streakCol / streak : vec3(0.0);
   streak = min(streak, 1.0); streakCol = sCol * streak;
+  float kq = 1.0;
   if (uFront.w > 0.0) {
     float ahead = dot(p - uFront.xy, vec2(cos(uFront.z), sin(uFront.z)));
     float keep = mix(1.0, smoothstep(-0.6, 1.4, ahead * uK / 6.2831853), uFront.w);
-    A *= keep; E *= keep; g *= keep;
+    A *= keep; E *= keep; g *= keep; kq = keep;
   }
   float hm = E > 0.0005 ? hue / E : 0.0;
   // A slow swell under everything, on the beat, so the sea is never flat.
@@ -76,7 +77,8 @@ void main() {
   vec3 V = normalize(uEye - P);
   float diff = max(dot(n, L), 0.0);
   float spec = pow(max(dot(reflect(-L, n), V), 0.0), 28.0);
-  float ridge = smoothstep(0.86, 1.0, A / max(E, 0.0005)) * min(E * 1.8, 1.3);
+  // A crest is in step only where it is also high: the ratio alone would light still water behind a row of lights.
+  float ridge = smoothstep(0.86, 1.0, A / max(E, 0.0005)) * min(E * 1.8, 1.3) * kq * min(abs(A) * 0.9, 1.0);
   float low = clamp(-A, 0.0, 1.0);   // a trough tints violet a little, never a bar
   vec3 tint = mix(mix(BLUE, CYAN, 0.7), VIOLET, hm);
   vec4 clip = uVP * vec4(P, 1.0);
