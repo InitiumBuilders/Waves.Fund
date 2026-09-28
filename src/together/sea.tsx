@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import type { HTMLAttributes, MutableRefObject, PointerEvent, ReactNode } from "react";
 import { useStateStore } from "../state";
 import { BEAT, clock as shared } from "../cadence";
-import type { RippleHandle, RippleModel } from "./ripple";
+import type { RippleHandle, RippleModel, Source } from "./ripple";
+import "./ripple.css";
 
 /* The sea: the same waves as ripple.tsx (each light sends out circular waves, and where they arrive in step
    they add up), drawn as a surface seen from just above the water. The lattice of dots is the surface: every
@@ -24,6 +25,7 @@ uniform int uCount, uCols, uRows, uOff;   // uOff: a dev-only switch that remove
 uniform vec4 uA[${MAX}];   // x, y, amplitude, phase
 uniform vec4 uB[${MAX}];   // born, hue, size, reach
 uniform vec4 uFront;       // x, y, direction, strength
+uniform vec2 uRoll;        // a wave rising from the horizon: how far it has come (0..1), its height
 out vec3 vColor; out float vA;
 const vec3 CYAN = vec3(0.37, 0.91, 1.0), BLUE = vec3(0.2, 0.52, 1.0), VIOLET = vec3(0.64, 0.55, 1.0), WHITE = vec3(0.94, 0.99, 1.0);
 void main() {
@@ -71,8 +73,20 @@ void main() {
   float hm = clamp(E > 0.0005 ? hue / E : 0.0, 0.0, 1.0);
   // A slow swell under everything, on the beat, so the sea is never flat.
   float swell = sin(p.x * 0.011 + uWave * 4.1887902 * 0.5) * cos(p.y * 0.017 - uWave * 4.1887902 * 0.25);
-  float z = (A + swell * 0.22) * uHeight;
-  vec2 gz = vec2(g.x + 0.011 * 0.22 * cos(p.x * 0.011 + uWave * 2.0944) * cos(p.y * 0.017 - uWave * 1.0472), g.y) * uHeight;
+  // A wave that rises from the horizon and comes to you: born far out, growing as it nears, gone at the shore.
+  float roll = 0.0, rollG = 0.0, crest = 0.0;
+  if (uRoll.y > 0.0) {
+    float yc = (1.0 - uRoll.x) * uDepth, sg = uDepth * 0.07, d = (uPlane.y - p.y) - yc;
+    float hump = exp(-d * d / (2.0 * sg * sg));
+    float da = d + 1.8 * sg;   // the trough runs ahead of it, on your side
+    float dip = exp(-da * da / (2.0 * sg * sg));
+    float amp = uRoll.y * smoothstep(0.0, 0.6, uRoll.x) * (1.0 - smoothstep(0.84, 1.0, uRoll.x)) * 2.4;
+    roll = amp * (hump - 0.4 * dip);
+    rollG = amp * (-d / (sg * sg) * hump + 0.4 * da / (sg * sg) * dip);
+    crest = smoothstep(0.6, 1.0, hump) * amp * 0.45;
+  }
+  float z = (A + swell * 0.22 + roll) * uHeight;
+  vec2 gz = vec2(g.x + 0.011 * 0.22 * cos(p.x * 0.011 + uWave * 2.0944) * cos(p.y * 0.017 - uWave * 1.0472), g.y - rollG) * uHeight;
   vec3 P = vec3(p.x - uPlane.x * 0.5, uPlane.y - p.y, z);
   vec3 n = normalize(vec3(-gz.x, gz.y, 1.0));
   vec3 L = normalize(vec3(-0.22, -0.5, 0.82));
@@ -81,6 +95,7 @@ void main() {
   float spec = pow(max(dot(reflect(-L, n), V), 0.0), 28.0);
   // A crest is in step only where it is also high: the ratio alone would light still water behind a row of lights.
   float ridge = smoothstep(0.86, 1.0, A / max(E, 0.0005)) * min(E * 1.8, 1.3) * kq * min(abs(A) * 0.9, 1.0);
+  ridge += crest;   // the rising wave's own crest goes white as it comes
   float low = clamp(-A, 0.0, 1.0);   // a trough tints violet a little, never a bar
   vec3 tint = mix(mix(BLUE, CYAN, 0.7), VIOLET, hm);
   vec4 clip = uVP * vec4(P, 1.0);
@@ -157,7 +172,9 @@ out vec4 o;
 void main() {
   vec2 p = vec2(gl_FragCoord.x, uRes.y * uDpr - gl_FragCoord.y) / uDpr;
   vec2 q = (p - uRes * 0.5) / (uRes * 0.5);
-  float a = uGround * smoothstep(1.02, 0.6, length(q * vec2(0.92, 0.96)));
+  // A squircle, so the pool reaches the corners of the box and the page's own dots do not show through them.
+  vec2 s = abs(q) * vec2(0.96, 0.98); float d = pow(s.x * s.x * s.x * s.x + s.y * s.y * s.y * s.y, 0.25);
+  float a = uGround * smoothstep(1.16, 0.74, d);
   o = vec4(vec3(0.004, 0.02, 0.075) * a, a);
 }`;
 
@@ -190,8 +207,10 @@ const invert = (m: M4): M4 | null => {
 
 type Tap = { x: number; y: number; born: number };
 
-export function Sea({ model, className = "", handle, tappable = false, maxDpr = 1.25, still = 6, children, onPointerDown, ...rest }: {
+export function Sea({ model, className = "", handle, tappable = false, onLight, maxDpr = 1.25, still = 6, children, onPointerDown, ...rest }: {
   model: MutableRefObject<RippleModel>; className?: string; handle?: MutableRefObject<RippleHandle | null>; tappable?: boolean; maxDpr?: number; still?: number;
+  /** A tap that lands on one of the model's lights is a choice: its index, and where on the screen. */
+  onLight?: (index: number, at: { x: number; y: number }) => void;
   children?: ReactNode;
 } & Omit<HTMLAttributes<HTMLDivElement>, "className" | "children">) {
   const box = useRef<HTMLDivElement>(null);
@@ -199,6 +218,8 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
   const taps = useRef<Tap[]>([]);
   const clockRef = useRef<() => number>(() => 0);
   const unproject = useRef<(x: number, y: number) => [number, number] | null>(() => null);
+  const project = useRef<(x: number, y: number) => [number, number] | null>(() => null);
+  const last = useRef<Source[]>([]);
   const { motion } = useStateStore();
 
   useEffect(() => {
@@ -241,7 +262,8 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
       // Just above the near edge, looking out toward the far edge, which sits a little below the top.
       pw = Math.max(w, Math.min(h * 1.6, w * 1.6)); pd = h * 1.8;
       eye = [0, -h * 0.25, h * 0.42];
-      const view = lookAt(eye, [0, h * 0.7, 0], [0, 0, 1]);
+      // A tall box looks further down, so its horizon sits high and most of the box is water.
+      const view = lookAt(eye, [0, h * 0.7, w < h ? -h * 0.17 : 0], [0, 0, 1]);
       const proj = perspective(0.95, w / h, h * 0.05, h * 4);
       vp = mul(proj, view); inv = invert(vp);
       cols = Math.round(Math.min(200, Math.max(90, pw / 8.5)));
@@ -257,10 +279,17 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
       const X = a[0] + (d[0] - a[0]) * k, Y = a[1] + (d[1] - a[1]) * k;
       return [X + pw * 0.5, h - Y];
     };
+    project.current = (x, y) => {
+      const v = [x - pw * 0.5, h - y, 2, 1], o = [0, 0, 0, 0];
+      for (let j = 0; j < 4; j++) o[j] = vp[j] * v[0] + vp[4 + j] * v[1] + vp[8 + j] * v[2] + vp[12 + j] * v[3];
+      if (o[3] <= 0) return null;
+      return [(o[0] / o[3] + 1) * 0.5 * w, (1 - o[1] / o[3]) * 0.5 * h];
+    };
     const draw = () => {
       const t = clockRef.current();
       const f = model.current(t, pw, h);
       const list = [...f.sources];
+      last.current = f.sources;
       taps.current = taps.current.filter((x) => t - x.born < 4);
       for (const x of taps.current) if (list.length < MAX) list.push({ x: x.x, y: x.y, a: 0.9 * (1 - (t - x.born) / 4), phase: 0, hue: 0.2, size: 3, born: x.born });
       A.fill(0); B.fill(0);
@@ -285,6 +314,9 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
       gl.uniform1i(U(sea, "uCount"), n); gl.uniform1i(U(sea, "uCols"), cols); gl.uniform1i(U(sea, "uRows"), rows); gl.uniform1i(U(sea, "uOff"), off);
       gl.uniform4fv(U(sea, "uA"), A); gl.uniform4fv(U(sea, "uB"), B);
       gl.uniform4f(U(sea, "uFront"), ...(f.front || [0, 0, 0, 0] as [number, number, number, number]));
+      // The rising wave keeps the shared clock, so it comes on the beat; a still frame shows it mid-rise.
+      const roll = f.roll ? ((motion ? shared() : t) % f.roll[0]) / f.roll[0] : 0;
+      gl.uniform2f(U(sea, "uRoll"), roll, f.roll ? f.roll[1] : 0);
       if (off !== 6) { gl.uniform1f(U(sea, "uLines"), 1); gl.drawArrays(gl.LINES, 0, cols * rows * 4); }
       if (off !== 7) { gl.uniform1f(U(sea, "uLines"), 0); gl.drawArrays(gl.POINTS, 0, cols * rows); }
       // The lights on the water: halo, then core.
@@ -313,6 +345,7 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
     c.addEventListener("webglcontextlost", lost);
     resize(); start();
     if (handle) handle.current = { redraw: () => { if (!raf) draw(); else start(); } };
+    if (import.meta.env.DEV) (window as Window & { __sea?: unknown }).__sea = { count: () => last.current.length, at: (i: number) => { const s = last.current[i]; return s ? project.current(s.x, s.y) : null; } };
     return () => {
       cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
       document.removeEventListener("visibilitychange", onVis); c.removeEventListener("webglcontextlost", lost);
@@ -323,9 +356,21 @@ export function Sea({ model, className = "", handle, tappable = false, maxDpr = 
   }, [motion, model, handle, maxDpr, still]);
 
   const tap = (e: PointerEvent<HTMLDivElement>) => {
-    if (!tappable || !motion) return;
     const r = e.currentTarget.getBoundingClientRect();
-    const at = unproject.current(e.clientX - r.left, e.clientY - r.top);
+    const sx = e.clientX - r.left, sy = e.clientY - r.top;
+    // A tap on a light is a choice; anywhere else it is a ripple.
+    if (onLight) {
+      let hit = -1, best = e.pointerType === "touch" ? 40 : 28;
+      last.current.forEach((s, i) => {
+        if (s.a < 0.05) return;
+        const q = project.current(s.x, s.y);
+        const d = q ? Math.hypot(q[0] - sx, q[1] - sy) : Infinity;
+        if (d < best) { best = d; hit = i; }
+      });
+      if (hit >= 0) { onLight(hit, { x: e.clientX, y: e.clientY }); return; }
+    }
+    if (!tappable || !motion) return;
+    const at = unproject.current(sx, sy);
     if (!at) return;
     taps.current.push({ x: at[0], y: at[1], born: clockRef.current() });
     if (taps.current.length > 4) taps.current.shift();

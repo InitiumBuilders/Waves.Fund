@@ -41,10 +41,10 @@ export function Seamless() {
 
   useEffect(() => startCadence(), []);
 
-  // The pages behind the Guide tab, the Teachback and the Praxis load quietly once this page is idle, so moving
-  // to them is instant. (The Give app is left to load on demand: it brings the sign-in library.)
+  // The pages behind the Guide tab, the Teachback, the Praxis and the sea load quietly once this page is idle, so
+  // moving to them is instant. (The Give app is left to load on demand: it brings the sign-in library.)
   useEffect(() => {
-    const warm = () => { void import("./guide-library"); void import("./teachback"); void import("./begin"); };
+    const warm = () => { void import("./guide-library"); void import("./teachback"); void import("./begin"); void import("./together/sea"); };
     const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
     if (idle) idle(warm, { timeout: 5000 }); else setTimeout(warm, 3000);
   }, []);

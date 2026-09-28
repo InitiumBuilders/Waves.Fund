@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import type { HTMLAttributes, MutableRefObject, PointerEvent, ReactNode } from "react";
 import { useStateStore } from "../state";
 import { BEAT, clock as shared } from "../cadence";
+import "./ripple.css";
 
 /* Ripples of light, summed the way real waves sum. Each source sends out circular waves; where two crests
    arrive together they add up and glow brighter (constructive interference), where a crest meets a trough
@@ -23,6 +24,7 @@ export type RippleFrame = {
   select?: [number, number, number];   // a ring around the chosen light: x, y, strength
   ring?: [number, number, number];     // one expanding ring of light: x, y, progress 0..1
   front?: [number, number, number, number]; // a line the wave moves forward from: x, y, direction (radians), strength 0..1
+  roll?: [number, number];  // the sea only: a wave that rises from the horizon and comes to you; its period in seconds, its height 0..1
 };
 export type RippleModel = (t: number, w: number, h: number) => RippleFrame;
 export type RippleHandle = { redraw: () => void };

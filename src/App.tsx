@@ -1,9 +1,11 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import type { MutableRefObject } from "react";
 import {
   Navigate,
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import {
   ArrowRight,
@@ -30,7 +32,11 @@ import { Vessel } from "./vessel";
 import { useStateStore } from "./state";
 import { Trax, TraxCollector } from "./trax";
 import { FlowNavigation } from "./flow";
-import { Seamless } from "./seamless";
+import { go, Seamless } from "./seamless";
+import { SeaHero } from "./sea-hero";
+import { BEAT } from "./cadence";
+import { hash } from "./together/ripple";
+import type { RippleModel, Source } from "./together/ripple";
 import { api, CommunityProvider, useCommunity } from "./community";
 import type { Project } from "./community";
 import { Application, Privacy, ReceiptTracker, TeamReview } from "./forms";
@@ -97,8 +103,26 @@ function ScreenPosition() {
   }, [pathname]);
   return null;
 }
+/* Waves In Motion: every published Wave is a light on the water, all in step, so the water between them adds
+   up. A Wave's ripples reach as far as its learner signals. Near the shore, a faint light: yours, still to come. */
+function wavesModel(list: MutableRefObject<Project[]>): RippleModel {
+  const born = new Map<string, number>();
+  return (t, w, h) => {
+    const lambda = Math.max(44, Math.min(110, Math.min(w, h) * 0.17));
+    const ps = list.current.slice(0, 10), n = ps.length;
+    const sources: Source[] = ps.map((p, i) => {
+      if (!born.has(p.id)) born.set(p.id, t + i * BEAT * 0.5);
+      const strength = 0.45 + 0.55 * Math.min(p.signals, 11) / 11;
+      const u = n === 1 ? 0.62 : 0.22 + 0.62 * (i + 0.5) / n + (hash(p.id) - 0.5) * 0.08;
+      return { x: w * u, y: h * (0.3 + 0.28 * hash("y" + p.id)), a: strength, phase: 0, hue: 0.1 + 0.5 * hash(p.category), size: 3 + strength * 1.2, born: born.get(p.id), reach: 0.45 + 0.2 * strength };
+    });
+    sources.push({ x: w * 0.5, y: h * 0.82, a: 0.28, phase: 0, hue: 0.2, size: 2.6, born: -100, reach: 0.3 });
+    return { sources, lambda, speed: lambda / BEAT, gain: 1.1, dots: 14, ground: 0.92, roll: [8 * BEAT, 0.5] };
+  };
+}
 function Projects() {
   const { projects, loading, error, refresh } = useCommunity();
+  const navigate = useNavigate();
   const [query, setQuery] = useState(""),
     [selected, setSelected] = useState<Project | null>(null);
   const filtered = projects.filter((p) =>
@@ -106,11 +130,18 @@ function Projects() {
       .toLowerCase()
       .includes(query.toLowerCase()),
   );
+  const list = useRef<Project[]>(filtered);
+  list.current = filtered;
+  const model = useRef<RippleModel>(wavesModel(list));
   return (
-    <div className="document-page">
-      <Intro
+    <div className="waves-page">
+      <SeaHero
         eyebrow="STUDENT DRIVEN PROJECTS"
-        mind="ocean"
+        model={model}
+        onLight={(i, at) => {
+          const p = list.current[i];
+          if (p) { setSelected(p); mindWave(at, 1); } else go(navigate, "/apply", at);
+        }}
         title={
           <>
             Waves
@@ -123,7 +154,8 @@ function Projects() {
           Explore approved Wave projects in community review. Learn about the
           work and add your voice.
         </p>
-      </Intro>
+      </SeaHero>
+      <div className="document-page sea-after">
       <div className="projects-toolbar">
         <label className="search-field">
           <Search size={20} />
@@ -211,6 +243,7 @@ function Projects() {
           onClose={() => setSelected(null)}
         />
       )}
+      </div>
     </div>
   );
 }

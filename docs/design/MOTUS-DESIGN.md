@@ -31,12 +31,12 @@ crossfade as you scroll from one anchor to the next. Source: `src/mind/field.ts`
 | Mode | Where | Statement |
 | --- | --- | --- |
 | vision | Home, the vision box; each Wave card | Your vision has gravity; waves radiate from it. |
-| layers | Learn | A forward pass through four layers: learning is how a network gets stronger. |
+| layers | (unused since 2026-09-28: Learn opens on the sea) | A forward pass through four layers: learning is how a network gets stronger. |
 | bond | Learn, the mantra | Links form between neighbours who act together. Trust People. And They Become Trustworthy. |
 | orbit | Guide, inside the circle; Team | Two masses, a builder and a Guide, in each other's orbit. |
 | vortex | Give | Energy directed with intention, drawn inward. |
 | rise | Grow | Growth moving upward through everyone. |
-| ocean | Waves, Begin, Green Reef, the Proposal | Three waves travel through the grid, like the strokes of the mark. |
+| ocean | Begin, Green Reef, the Proposal (Waves opens on the sea since 2026-09-28) | Three waves travel through the grid, like the strokes of the mark. |
 | gather, hubs | Semble; Partners and the Guide page's partners | Masses, and signals travelling the paths between them. |
 | path | Library; Guide's steps | A practice is learned in steps. |
 | timeline | Learn's roadmap; the Proposal's cadence | Ninety days, five stations, one pulse moving forward. |
@@ -175,6 +175,20 @@ the bottom on a tall one). Taps land on the water through the inverse camera. Al
 so a phone at 6x CPU throttle still holds 60 fps. The Give page's opening chapters and "A Friend You Give
 With" use it; the top-down ripples stay where a map is needed (Find Your Give Guide, the moment, a Shared
 Wave). Statement: one person's ripples; two in step; a line of people making one wave that comes to you.
+
+Two more pages open on the sea through `src/sea-hero.tsx` (`SeaHero`): the first screen under the header,
+the words on the quiet side of the water, the renderer loaded lazily and warmed once the page is idle.
+
+| Page | What it shows | Statement |
+| --- | --- | --- |
+| Learn, "Raise Waves." | One light far out on the water, the vision, sending its ripples. Every eight beats a wave rises from the horizon and comes all the way to you: a travelling hump with a trough ahead of it, growing as it nears, gone at the shore, its crest going white (`roll` in the frame). It keeps the shared clock, so it comes on the beat and a still frame shows it mid-rise | Raise Waves. |
+| Waves, "Waves In Motion" | Every published Wave is a light on the water, all in step, so the water between them adds up; each one's ripples reach as far as its learner signals, and they are born half a beat apart as the list arrives. Near the shore, a faint light: yours, still to come | The fund's Waves, on one sea. |
+
+A tap that lands on a light is a choice (`onLight`): the lights are projected to the screen and the nearest
+within 28 px (40 on touch) wins. On Waves, a Wave's light opens that Wave and the near light goes to Apply;
+anywhere else a tap is a ripple. A tall box looks further down, so its horizon sits high and most of a phone's
+screen is water. The dark pool is a squircle, so it reaches the corners of the box and the page's own dots do
+not show through them. In dev, `window.__sea` gives the test rigs a light's screen position.
 
 ## Give Together
 

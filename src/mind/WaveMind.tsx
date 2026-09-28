@@ -153,7 +153,7 @@ function measureNow() {
   }
   engine.setClears(clears);
   // Where the world stays forward while you read: openings, chapter headings, anchors and the closing mantra.
-  engine.setForward([...document.querySelectorAll("main .page-intro, main .gt-tank, main [data-mind], main .section-heading, main h2, main .gt-principle, .app-footer")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top + sy, width: r.width, height: r.height, fixed: false, radius: 0 }; }));
+  engine.setForward([...document.querySelectorAll("main .page-intro, main .sea-hero, main .gt-tank, main [data-mind], main .section-heading, main h2, main .gt-principle, .app-footer")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top + sy, width: r.width, height: r.height, fixed: false, radius: 0 }; }));
   engine.setQuiet(() => [...document.querySelectorAll("main [data-quiet]")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, fixed: true, radius: 0 }; }));
 
   // Vessels.

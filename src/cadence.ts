@@ -56,7 +56,7 @@ export function startCadence() {
 // arriving items stays put, so nothing fades twice.
 const ARRIVE = [
   "main :is(.cascade, .three-grid, .tb-steps, .tb-mind-list, .gt-safe-list, .growth-stats, .guide-cards, .card-grid, .flow-list, .roadmap) > *",
-  "main section:not(.page-intro):not(.gt-tank) > :not(script):not(style):not([data-window]):not(.gt-front)",
+  "main section:not(.page-intro):not(.gt-tank):not(.sea-hero) > :not(script):not(style):not([data-window]):not(.gt-front)",
 ];
 
 export function arriveOnScroll() {
@@ -65,7 +65,7 @@ export function arriveOnScroll() {
   const rows = new Map<Element, Map<number, number>>();
   const blocks = ARRIVE.flatMap((q) => [...document.querySelectorAll<HTMLElement>(q)]);
   for (const el of blocks) {
-    if (el.classList.contains("arrive") || el.closest(".page-intro, dialog, [data-window], .gt-tank")) continue;
+    if (el.classList.contains("arrive") || el.closest(".page-intro, dialog, [data-window], .gt-tank, .sea-hero")) continue;
     if (el.querySelector(".arrive") || el.parentElement?.closest(".arrive")) continue;
     const r = el.getBoundingClientRect();
     if (r.height === 0 || r.top + scrollY < fold) continue;
@@ -102,7 +102,7 @@ export function waveOnArrival(send: (x: number, y: number) => void) {
   }, { rootMargin: "-38% 0px -38% 0px" });
   const watch = () => {
     for (const h of document.querySelectorAll("main section h2")) {
-      if (!h.closest(".page-intro, .gt-tank, dialog")) io.observe(h);
+      if (!h.closest(".page-intro, .gt-tank, .sea-hero, dialog")) io.observe(h);
     }
   };
   watch();

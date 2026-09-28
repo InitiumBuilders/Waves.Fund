@@ -1,0 +1,42 @@
+/* A page that opens on the sea. Mobile first: the stage is the first screen, the words stand at its foot on
+   a dark floor; on a wide screen they stand at its left and the water runs out to the right. */
+.sea-hero { --head: 72px; position: relative; }
+.sea-hero-stage { position: relative; height: calc(100svh - var(--head)); overflow: hidden; }
+.sea-hero-scene { position: absolute; inset: 0; cursor: crosshair; touch-action: pan-y; }
+
+.sea-hero-copy {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  /* The tab bar's fade reaches 72px above it; the words stay clear of it. */
+  padding: 40px var(--gutter) calc(150px + env(safe-area-inset-bottom));
+}
+.sea-hero-copy > * { pointer-events: auto; margin: 0; }
+.sea-hero-copy::before, .sea-hero-copy::after { content: ""; position: absolute; left: 0; right: 0; z-index: -1; pointer-events: none; }
+.sea-hero-copy::before { top: 0; height: 90px; background: linear-gradient(rgba(1, 5, 19, 0.7), rgba(1, 5, 19, 0)); }
+.sea-hero-copy::after { bottom: 0; height: 64%; background: linear-gradient(rgba(1, 5, 19, 0), rgba(1, 5, 19, 0.88) 40%, rgba(1, 5, 19, 0.96)); }
+.sea-hero-copy .eyebrow { margin-bottom: 22px; }
+.sea-hero-copy h1 { font-size: clamp(44px, 7.4vw, 108px); font-weight: 460; letter-spacing: -0.052em; line-height: 0.98; text-shadow: none; }
+.sea-hero-copy h1 span {
+  background: linear-gradient(100deg, #d8fbff 0%, #6fe3ff 38%, #8da2ff 72%, #b69cff 100%);
+  background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #7fe4ff;
+}
+.sea-hero-copy .intro-description { margin-top: 24px; }
+.sea-hero-copy .intro-actions { margin-top: 26px; }
+.sea-hero-copy > * { animation: motus-rise 1s var(--ease-out) both; }
+.sea-hero-copy > h1 { animation-delay: 0.08s; }
+.sea-hero-copy > .intro-description { animation-delay: 0.16s; }
+.sea-hero-copy > .intro-actions { animation-delay: 0.24s; }
+html[data-motion="off"] .sea-hero-copy > * { animation: none; }
+@media (prefers-reduced-motion: reduce) { .sea-hero-copy > * { animation: none !important; } }
+
+/* The page after the sea starts close under it. */
+.sea-after { padding-top: 0; }
+.sea-after > :first-child { margin-top: clamp(36px, 7vw, 80px); }
+
+@media (min-width: 800px) { .sea-hero { --head: 88px; } }
+@media (min-width: 900px) {
+  .sea-hero-stage { height: min(calc(100svh - var(--head)), 900px); }
+  .sea-hero-copy { justify-content: center; max-width: 760px; padding: 40px 0 60px var(--gutter); }
+  .sea-hero-copy::before { top: 0; bottom: 0; left: 0; right: auto; width: 780px; height: auto; background: linear-gradient(90deg, rgba(1, 5, 19, 0.92) 0%, rgba(1, 5, 19, 0.82) 58%, rgba(1, 5, 19, 0)); }
+  .sea-hero-copy::after { display: none; }
+}

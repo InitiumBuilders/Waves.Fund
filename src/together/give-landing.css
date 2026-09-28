@@ -3,9 +3,6 @@
 /* ---------- The ripple chapters: a stage that holds still while three chapters pass ---------- */
 .gt-tank { position: relative; height: 330svh; }
 .gt-tank-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.ripple { position: relative; }
-.ripple canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.ripple[data-still]::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: #e8fdff; box-shadow: 0 0 0 6px rgba(94, 233, 255, 0.12), 0 0 40px 10px rgba(94, 233, 255, 0.4); }
 .gt-tank-scene { position: absolute; inset: 0; cursor: crosshair; touch-action: pan-y; }
 
 /* The words sit on a dark floor so the water never runs under them. */

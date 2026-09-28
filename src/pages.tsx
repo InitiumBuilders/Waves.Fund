@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -14,6 +14,9 @@ import { ButtonLink, CONTACT, External, Intro, Semble, DONATE } from "./ui";
 import { download } from "./community";
 import { Stock } from "./mind/WaveMind";
 import { Growing, Guided, Pair, Travel } from "./symbols";
+import { SeaHero } from "./sea-hero";
+import { BEAT } from "./cadence";
+import type { RippleModel } from "./together/ripple";
 const reefURL = "https://www.greenreef.org/";
 // The Give practice on Learn: two in step, set to the left edge like the other practice waves.
 const GivePair = ({ className }: { className?: string }) => <Pair className={className} at={[30, 130]} />;
@@ -66,12 +69,22 @@ export function PartnerCards() {
     </div>
   );
 }
+/* Raise Waves: one light far out on the water, the vision, sending its ripples; and every eight beats a wave
+   rises from the horizon and comes all the way to you. */
+const raise: RippleModel = (_t, w, h) => {
+  const lambda = Math.max(48, Math.min(120, Math.min(w, h) * 0.18));
+  return {
+    sources: [{ x: w * 0.6, y: h * 0.16, a: 0.85, phase: 0, hue: 0.12, size: 3.6, born: -100, reach: 0.75 }],
+    lambda, speed: lambda / BEAT, gain: 1.1, dots: 14, ground: 0.92, roll: [8 * BEAT, 1],
+  };
+};
 export function Learn() {
+  const model = useRef<RippleModel>(raise);
   return (
-    <div className="document-page">
-      <Intro
+    <div className="learn-page">
+      <SeaHero
         eyebrow="THE WAVES FUND"
-        mind="layers"
+        model={model}
         title={
           <>
             Raise Capital
@@ -86,7 +99,8 @@ export function Learn() {
       >
         <p>Welcome To The Frontier Of Funding</p>
         <p className="hashtags">#BuildDifferent #BuildAWave</p>
-      </Intro>
+      </SeaHero>
+      <div className="document-page sea-after">
       {/* The pitch: what Waves.Fund does, in two paragraphs, and the match drawn as three nodes on one guide. */}
       <section className="learn-pitch" aria-labelledby="learn-pitch-title">
         <div>
@@ -306,6 +320,7 @@ export function Learn() {
           </ButtonLink>
         </div>
       </section>
+      </div>
     </div>
   );
 }
