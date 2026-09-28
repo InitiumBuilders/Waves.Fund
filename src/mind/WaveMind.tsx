@@ -153,7 +153,7 @@ function measureNow() {
   }
   engine.setClears(clears);
   // Where the world stays forward while you read: openings, chapter headings, anchors and the closing mantra.
-  engine.setForward([...document.querySelectorAll("main .page-intro, main .gt-tank, main [data-mind], main .section-heading, main h2, .app-footer")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top + sy, width: r.width, height: r.height, fixed: false, radius: 0 }; }));
+  engine.setForward([...document.querySelectorAll("main .page-intro, main .gt-tank, main [data-mind], main .section-heading, main h2, main .gt-principle, .app-footer")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top + sy, width: r.width, height: r.height, fixed: false, radius: 0 }; }));
   engine.setQuiet(() => [...document.querySelectorAll("main [data-quiet]")].map(el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, fixed: true, radius: 0 }; }));
 
   // Vessels.
@@ -372,6 +372,14 @@ export function WaveMind() {
       const topo = TOPOLOGY[name];
       if (!engine || !topo || !el.isConnected) return;
       const r = el.getBoundingClientRect();
+      // The closing mantra is a line of text with open ground above it: the network forms in that band, across
+      // the whole width, and where the band is short (phones) a chain forms instead of a web.
+      if (name === "bond") {
+        const above = Math.min(380, innerHeight * 0.5);
+        const region = engine.openRegion({ x: 0, y: r.top - above, w: innerWidth, h: above + r.height + 24 });
+        if (region && !engine.emerge(region, topo)) engine.emerge(region, "chain");
+        return;
+      }
       const region = engine.openRegion({ x: r.left - 30, y: r.top - 30, w: r.width + 60, h: r.height + 60 });
       if (region) engine.emerge(region, topo);
     };

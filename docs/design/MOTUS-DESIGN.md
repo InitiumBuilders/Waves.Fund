@@ -140,7 +140,8 @@ world comes forward again. Statement: the world makes room while you read, and c
 ## Every page ends the same way
 
 The footer's mantra is an anchor (`data-mind="bond"`). When it comes into view, links light between
-neighbours around it and a network forms in the open space beside it. An anchor that leaves the screen
+neighbours around it and a network forms in the open band above it, across the whole width (a chain where
+the band is short, on phones). An anchor that leaves the screen
 is let go after 0.7 s, so the mantra is found fresh on every page, including pages that load lazily.
 Statement: trust is the links between people.
 
