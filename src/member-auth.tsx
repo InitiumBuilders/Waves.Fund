@@ -18,7 +18,16 @@ const localization = {
   signUp: { emailLink: toContinue },
   organizationList: toContinue,
 };
-const appearance = { variables: { colorPrimary: '#56dfff', colorBackground: '#06172b', colorForeground: '#ffffff', colorMutedForeground: '#ffffff', colorInput: '#031020', colorInputForeground: '#ffffff', colorNeutral: '#ffffff', borderRadius: '1rem', fontFamily: 'Inter Variable, sans-serif' } };
+// Clerk's buttons wear the site's own: a dark plate inside the cyan-to-violet rim, with light text.
+const plate = 'linear-gradient(160deg, #081c3e, #030b1f 72%) padding-box, linear-gradient(120deg, #9df4ff, #4f8fff 52%, #a28dff) border-box';
+const appearance = {
+  variables: { colorPrimary: '#56dfff', colorPrimaryForeground: '#eafdff', colorTextOnPrimaryBackground: '#eafdff', colorBackground: '#06172b', colorForeground: '#ffffff', colorMutedForeground: '#ffffff', colorInput: '#031020', colorInputForeground: '#ffffff', colorNeutral: '#ffffff', borderRadius: '1rem', fontFamily: 'Inter Variable, sans-serif' },
+  elements: {
+    formButtonPrimary: { background: plate, border: '1.4px solid transparent', color: '#eafdff', minHeight: '48px', borderRadius: '18px', fontWeight: 600, boxShadow: '0 0 22px rgba(94, 233, 255, 0.16)', '&:hover': { boxShadow: '0 0 30px rgba(94, 233, 255, 0.3)' }, '&::after': { opacity: 0 } },
+    socialButtonsBlockButton: { background: 'linear-gradient(160deg, #081c3e, #030b1f 72%)', border: '1px solid rgba(130, 220, 255, 0.38)', color: '#eafdff', minHeight: '48px', borderRadius: '16px' },
+    footerActionLink: { color: '#8ff0ff' },
+  },
+};
 export function MemberProvider({ area, children }: { area: 'give' | 'workspace'; children: ReactNode }) {
   const navigate = useNavigate();
   const give = area === 'give';
