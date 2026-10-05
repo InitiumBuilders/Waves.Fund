@@ -14,6 +14,7 @@ import { ButtonLink, CONTACT, External, Intro, Semble, DONATE } from "./ui";
 import { download } from "./community";
 import { Growing, Guided, Pair, Travel } from "./symbols";
 import { SeaHero } from "./sea-hero";
+import { Circuit } from "./circuit";
 import { BEAT } from "./cadence";
 import type { RippleModel } from "./together/ripple";
 const reefURL = "https://www.greenreef.org/";
@@ -167,7 +168,8 @@ export function Learn() {
             And Funded Together
           </h2>
         </div>
-        {/* The four steps step down the page; energy drips from each one's stock into the next. */}
+        {/* The four steps step down the page, joined by a circuit: energy flows from each one into the next. */}
+        <Circuit>
         <ol className="cascade">
           {[
             {
@@ -201,6 +203,7 @@ export function Learn() {
             </li>
           ))}
         </ol>
+        </Circuit>
       </section>
       <section className="section panel funding-model">
         <div>
@@ -245,7 +248,7 @@ export function Learn() {
           </li>
         </ol>
       </section>
-      <section className="section" id="roadmap" data-mind="timeline">
+      <section className="section" id="roadmap">
         <div className="section-heading">
           <p className="eyebrow">VISION & ROADMAP</p>
           <h2>
@@ -254,7 +257,8 @@ export function Learn() {
             We Change The World.
           </h2>
         </div>
-        {/* Each stage holds as much as it has built: the further along, the fuller. */}
+        {/* Three stages in a row, joined by a circuit: what one builds flows into the next. */}
+        <Circuit>
         <div className="roadmap">
           <article className="panel">
             <span className="status-chip live">NOW</span>
@@ -284,6 +288,7 @@ export function Learn() {
             </p>
           </article>
         </div>
+        </Circuit>
       </section>
       <section className="section questions" aria-labelledby="questions-title">
         <div className="section-heading">

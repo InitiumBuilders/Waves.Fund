@@ -71,8 +71,26 @@ words, so clearings follow a ragged right edge and never open up empty space.
 `src/mind/energy.ts`, on its own canvas above the page and below the header, tab bar and sheets.
 Since 2026-10-04 a vessel appears only where its level is a real quantity: a Wave card (learner
 signals toward eleven) and the Grow page's counts. The decorative vessels on the Learn, Guide,
-Library, Teachback and Give cards are gone, and with them the channels that ran between those
-cards. Fewer things move; what moves means something.
+Library, Teachback and Give cards are gone. Fewer things move; what moves means something.
+
+## The circuit
+
+`src/circuit.tsx`. The channels between step cards came back the same day as a circuit, at August's
+ask ("the flow of energy moving in a pipe to the next card ... do it right"). Wrap a list in
+`<Circuit>` and every card is joined to the next by a trace: out of its foot at the centre, across,
+and into the top of the next, with two rounded corners where the cards are offset (side to side in a
+row). A trace is a hairline until the next card comes into view. Then, on the next beat, one pulse
+leaves the lit card, travels the trace in whole beats (one beat per 300 px) and lands: the pad lights,
+the card's rim lights once, and the trace stays live. A card reached before its pulse has landed waits
+its turn, so energy always moves forward, one light at a time. The pulse is an HTML element on a CSS
+motion path; the traces are SVG hairlines measured with the scroll arrivals switched off. Motion off:
+cards light as they are reached, no pulse. Where: Learn's four practices and its roadmap, the Guide
+library's four steps.
+
+| Element | Statement |
+| --- | --- |
+| A pulse arriving | Energy flows on from one step to the next. |
+| A live trace | The path, once travelled, stays lit. |
 
 | Element | What happens | Statement |
 | --- | --- | --- |
