@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { ButtonLink, CONTACT, External, Intro, Semble, DONATE } from "./ui";
 import { download } from "./community";
-import { Stock } from "./mind/WaveMind";
 import { Growing, Guided, Pair, Travel } from "./symbols";
 import { SeaHero } from "./sea-hero";
 import { BEAT } from "./cadence";
@@ -199,7 +198,6 @@ export function Learn() {
               </div>
               <h3>{title}</h3>
               <p>{body}</p>
-              <Stock level={0.14 + i * 0.1} />
             </li>
           ))}
         </ol>
@@ -265,7 +263,6 @@ export function Learn() {
               Project submissions, Wave Guide applications, team review, public
               project pages, and direct giving to Green Reef.
             </p>
-            <Stock level={0.66} />
           </article>
           <article className="panel">
             <span className="status-chip">PROPOSED PILOT</span>
@@ -277,7 +274,6 @@ export function Learn() {
             <Link to="/guide/partners/green-reef/proposal">
               Read The Proposal <ArrowRight size={16} />
             </Link>
-            <Stock level={0.34} />
           </article>
           <article className="panel">
             <span className="status-chip">NEXT</span>
@@ -286,7 +282,6 @@ export function Learn() {
               Formal voting rounds, verified participation, partner reporting,
               and consent-based project connections with <Semble />.
             </p>
-            <Stock level={0.1} />
           </article>
         </div>
       </section>

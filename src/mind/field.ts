@@ -466,8 +466,9 @@ export class Field {
     // Back to front: a deep, dense matrix far behind, an offset middle, and the front dots that carry the field.
     this.layers = [
       { spacing: s * 0.62, parallax: 0.08, base: 1.0, grow: 1.1, alpha: 0.3, disp: 0.35, act: 0.6, depth: -340, cols: 0, rows: 0 },
-      { spacing: s, parallax: 0.16, base: 1.2, grow: 1.6, alpha: 0.42, disp: 0.6, act: 0.8, depth: -220, cols: 0, rows: 0 },
-      { spacing: s, parallax: 0.3, base: mobile ? 2.2 : 2.1, grow: mobile ? 3.8 : 4.6, alpha: 0.9, disp: 1, act: 1, depth: 0, cols: 0, rows: 0 },
+      { spacing: s, parallax: 0.16, base: 1.2, grow: 1.3, alpha: 0.42, disp: 0.6, act: 0.8, depth: -220, cols: 0, rows: 0 },
+      // A dot at a mass grows to about five times its rest size, not seven: a cluster is a lean of the lattice, not a lump.
+      { spacing: s, parallax: 0.3, base: mobile ? 2.2 : 2.1, grow: mobile ? 2.8 : 3.2, alpha: 0.9, disp: 1, act: 1, depth: 0, cols: 0, rows: 0 },
     ];
     this.resize();
   }

@@ -429,15 +429,8 @@ export function WaveMind() {
     let t: ReturnType<typeof setTimeout> | null = null;
     const mo = new MutationObserver(() => { if (t) clearTimeout(t); t = setTimeout(scan, 120); });
     if (main) mo.observe(main, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-mind"] });
-    // Now and then, while someone reads, a network forms in whatever open space is in view.
-    const ambient = setInterval(() => {
-      if (!engine || !engine.motion || document.hidden || engine.networks) return;
-      const region = engine.openRegion();
-      if (!region) return;
-      const kinds: Topology[] = region.h < 170 ? ["chain"] : ["web", "layers", "star", "hubs"];
-      engine.emerge(region, kinds[Math.floor(Math.random() * kinds.length)]);
-    }, 12000);
-    return () => { io.disconnect(); ro.disconnect(); mo.disconnect(); clearInterval(ambient); if (t) clearTimeout(t); if (pending) clearTimeout(pending); if (later) clearTimeout(later); };
+    // Networks form only where a page asks for one (an anchor) and at the closing bond. Open space stays open.
+    return () => { io.disconnect(); ro.disconnect(); mo.disconnect(); if (t) clearTimeout(t); if (pending) clearTimeout(pending); if (later) clearTimeout(later); };
   }, [pathname]);
 
   return failed

@@ -46,13 +46,14 @@ crossfade as you scroll from one anchor to the next. Source: `src/mind/field.ts`
 
 ## Networks that organise themselves
 
-As you reach a chapter, and now and then while you read, some dots of the lattice become
-nodes: they light, grow and rise, their neighbours lean in, and connections grow between them
-with signals travelling along them. After a few seconds the network lets go. Nothing flies in:
-the network is made of dots that were already there. Each mode has its shape: layers for
-Learn, hubs for Guide and Partners, a star around a vision or seed, a chain for paths and
-timelines. Networks only form in open space, and every connection is masked per pixel so it
-never crosses a line of text.
+As you reach a chapter, some dots of the lattice become nodes: they light, grow and rise, their
+neighbours lean in, and connections grow between them with signals travelling along them. After
+a few seconds the network lets go. Nothing flies in: the network is made of dots that were
+already there. Each mode has its shape: hubs for Guide and Partners, a star around a vision or
+seed, a chain for paths and timelines. A network forms only where a page asks for one (an anchor)
+and at the closing bond; since 2026-10-04 none forms on its own in open space, so a screen has
+one moving subject at a time. Every connection is masked per pixel so it never crosses a line
+of text.
 
 | Element | Statement |
 | --- | --- |
@@ -68,6 +69,10 @@ words, so clearings follow a ragged right edge and never open up empty space.
 ## Energy: vessels and guides
 
 `src/mind/energy.ts`, on its own canvas above the page and below the header, tab bar and sheets.
+Since 2026-10-04 a vessel appears only where its level is a real quantity: a Wave card (learner
+signals toward eleven) and the Grow page's counts. The decorative vessels on the Learn, Guide,
+Library, Teachback and Give cards are gone, and with them the channels that ran between those
+cards. Fewer things move; what moves means something.
 
 | Element | What happens | Statement |
 | --- | --- | --- |

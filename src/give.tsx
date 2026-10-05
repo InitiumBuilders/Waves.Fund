@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, BadgeCheck, Lock, MapPin, ShieldCheck, UserCheck, Users } from "lucide-react";
 import { DONATE, External } from "./ui";
-import { Stock } from "./mind/WaveMind";
 import { StandingString, WaveList } from "./symbols";
 import { useStateStore } from "./state";
 import type { RippleHandle } from "./together/ripple";
@@ -93,7 +92,6 @@ export function Give() {
               You will continue to Benevity. The Foundation and its giving provider handle your donation and receipt.
               This supports the Foundation’s mission; project-specific awards require a separate agreement.
             </p>
-            <Stock level={0.34} />
           </div>
         </section>
 

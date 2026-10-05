@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useStateStore } from "./state";
-import { Stock } from "./mind/WaveMind";
 import { Echo, Pair, Resonance, Travel } from "./symbols";
 import { StringScene } from "./teachback-string";
 import { BEAT } from "./cadence";
@@ -94,7 +93,6 @@ export default function Teachback() {
           <h2 id="tb-commit-title">When You Organize<br /><span>A Teachback</span></h2>
           <ol className="tb-commit-list">{COMMIT.map((c) => <li key={c}>{c}</li>)}</ol>
           <Link className="glow-button" to="/give/opportunities/new?kind=teachback">Organize A Teachback<ArrowRight size={18} /></Link>
-          <Stock level={0.24} />
         </div>
       </section>
 

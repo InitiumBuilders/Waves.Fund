@@ -228,7 +228,6 @@ function Projects() {
             <div className="wave-card-foot">
               <ButtonLink to="/apply">Bring Your Vision</ButtonLink>
             </div>
-            <Stock level={0.04} />
           </article>
         </div>
       )}
