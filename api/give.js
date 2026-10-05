@@ -1,6 +1,7 @@
 import { createClerkClient } from "@clerk/backend";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createGive, fault } from "./_give/core.js";
+import { notify } from "./_notify.js";
 
 // Give Together. Accounts are the site's existing Clerk accounts; data lives in the existing Neon database.
 let service;
@@ -68,6 +69,15 @@ function where(req) {
   return { place: [city, region || country].filter(Boolean).join(", ") || null, lat: num(h["x-vercel-ip-latitude"]), lng: num(h["x-vercel-ip-longitude"]) };
 }
 
+// The team hears about the moments that matter, never who: a report, a new opportunity, a mutual yes, a proposed Wave.
+async function told(action, result) {
+  const review = "Open Team Review: https://www.waves.fund/team/review";
+  if (action === "report") return notify("A report in Give Together", ["Someone sent a report. Please look at it today.", review]);
+  if (action === "opportunity.create") return notify("A new opportunity", ["Someone posted an opportunity in Give Together.", "See it: https://www.waves.fund/give/opportunities", review]);
+  if ((action === "connect.respond" || action === "connect.request") && result?.status === "accepted") return notify("A mutual yes", ["Two people in Give Together both said yes. A first cycle may be starting.", review]);
+  if (action === "wave.propose") return notify("A Shared Wave was proposed", ["Someone proposed a Shared Wave in Give Together.", review]);
+  return false;
+}
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -110,7 +120,9 @@ export default async function handler(req, res) {
       "wave.complete": s.completeWave, "session.log": s.logSession, "gratus.send": s.sendGratus,
     };
     if (!actions[action]) throw fault(400, "Unknown action.");
-    return res.status(200).json(await actions[action](actor, b));
+    const result = await actions[action](actor, b);
+    await told(action, result);
+    return res.status(200).json(result);
   } catch (error) {
     const status = Number.isInteger(error.status) ? error.status : 503;
     if (status >= 500) console.error("Give Together unavailable:", error.name || "Error", error.code || "");

@@ -84,3 +84,7 @@ storage). The server accepts stand-ins only when `GIVE_DEV_ACTORS=on` and not on
 Team Review (/team/review) has a Give Together section: open reports (dismiss, pause the profile,
 hide the listing), paused profiles (restore), and listings waiting for a check (mark verified,
 hide).
+
+## The team is told
+
+With `RESEND_API_KEY` set (see the README), the team is emailed when someone posts an opportunity, sends a report, when two people both say yes, and when a Shared Wave is proposed (`api/_notify.js`, called from `api/give.js`). The mail says what happened and where to look, never who. Without the key nothing is sent and nothing else changes.

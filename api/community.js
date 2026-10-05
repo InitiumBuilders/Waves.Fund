@@ -1,4 +1,5 @@
 import { put, get, list, del } from "@vercel/blob";
+import { notify } from "./_notify.js";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 const key = () => process.env.WAVES_ADMIN_KEY;
 const dataKey = () => process.env.WAVES_DATA_KEY;
@@ -252,6 +253,11 @@ export default async function handler(req, res) {
       };
       await write(path, application);
       await recordSubmission(application);
+      // The team hears that something arrived, never who: names and emails stay in the inbox.
+      await notify(`A new ${application.kind} application`, [
+        `A new ${application.kind} application arrived${application.kind === "project" && title ? `: "${title}"` : ""}.`,
+        "Open Team Review: https://www.waves.fund/team/review",
+      ]);
       return res.status(201).json({ id, status: "Received" });
     }
     if (action === "status") {
