@@ -48,7 +48,8 @@ main .grow-content > * + * { margin-top: clamp(40px, 6vw, 64px); }
 
 /* ---------- The menu: four groups ---------- */
 /* One primary action, then each page under the practice it belongs to. Two columns where there is room. */
-.menu-sheet .menu-primary { width: 100%; justify-content: center; margin: 2px 0 30px; }
+.menu-sheet .menu-primary { width: 100%; justify-content: center; margin: 2px 0 14px; }
+.menu-sheet .menu-tour { justify-self: start; display: inline-flex; align-items: center; gap: 10px; margin: 0 0 26px; font-size: 15px; }
 .menu-groups { display: grid; gap: 28px; }
 .menu-group { display: grid; align-content: start; }
 .menu-group .menu-pillar { margin: 0 0 4px; }

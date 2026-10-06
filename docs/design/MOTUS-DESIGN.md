@@ -301,6 +301,29 @@ The menu follows the four practices, the same as the tab bar: one primary action
 Learn, Guide, Give and Grow, each with the pages that belong to it. Every label is the menu's own; only the
 order changed. Two columns on a wide screen, so it fits without scrolling.
 
+## The tour
+
+`src/tour-launch.tsx` (main bundle, small) and `src/tour.tsx` (loaded when the tour starts). It starts from the
+menu (Take The Tour), from Learn's first screen, from a link with `?tour` (or `?tour=vision|guide|give|waves|all`),
+or from a quiet offer shown once on a first visit (never inside the Give app, team or workspace pages).
+
+It asks one question first, with four paths named by the site's own buttons (What’s Your Vision?, Become A Wave
+Guide, Give Together, Explore Waves) and Show me everything. A path is suggested when this device already says
+something: a draft vision suggests the vision path, Give Together membership the Give path, saved receipts the
+Waves path. Each step goes to its page the way any link does (the page dissolves into the next and a wave leaves
+from the card), waits for that page's transition to finish, brings its part into view above the card, lights it
+with a ring (the rest of the page dims), and sends a wave through the dots from it on the next beat. On Give the
+tour flies through the sea's three chapters by itself for nine seconds; any wheel or touch hands the scroll back.
+
+The card says only what the page does not: when the lit part already shows the step's title, the card leads with
+its line instead. It shows live facts where they are real (Waves in community review, accepted Wave Guides, a
+Wave's learner signals) and the visitor's own (their draft vision, quoted; their saved receipts). The card moves
+to the other corner if it would cover what it points at. Escape ends it; the arrow keys move it while focus is in
+the card. The ring costs nothing measurable while scrolling (same frame times as without it, 6x CPU on a phone).
+
+Wording: titles are the site's own headings and August's lines. The connecting lines are placeholders, marked
+`PLACEHOLDER` in `src/tour.tsx`, for August to replace.
+
 ## Rules
 
 - No particle swarms. Dots never fly in to form a shape (August, 2026-09-23).

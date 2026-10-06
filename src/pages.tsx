@@ -15,6 +15,7 @@ import { download } from "./community";
 import { Growing, Guided, Pair, Travel } from "./symbols";
 import { SeaHero } from "./sea-hero";
 import { Circuit } from "./circuit";
+import { startTour } from "./tour-launch";
 import { BEAT } from "./cadence";
 import type { RippleModel } from "./together/ripple";
 const reefURL = "https://www.greenreef.org/";
@@ -85,6 +86,7 @@ export function Learn() {
       <SeaHero
         eyebrow="THE WAVES FUND"
         model={model}
+        actions={<button type="button" className="text-button" onClick={() => startTour()}>Take The Tour <ArrowRight size={17} /></button>}
         title={
           <>
             Raise Capital

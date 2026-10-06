@@ -1,0 +1,100 @@
+/* The tour: a ring that lights one part of the page, a veil for the first question and the last card, and a glass
+   card in the corner (a sheet above the tab bar on a phone). Everything that moves uses transform and opacity. */
+
+.tour { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+.tour::before {
+  content: ""; position: absolute; inset: 0; background: rgba(1, 5, 19, 0.62);
+  opacity: 0; transition: opacity 0.5s var(--ease);
+}
+.tour[data-veil="on"]::before { opacity: 1; }
+
+/* The ring: the page outside it dims, its rim holds light. It follows its part of the page as you scroll. */
+.tour-ring {
+  position: fixed; left: 0; top: 0; width: 0; height: 0;
+  border-radius: 24px; corner-shape: superellipse(2.15);
+  box-shadow: 0 0 0 200vmax rgba(1, 5, 19, 0.5), inset 0 0 0 1.5px rgba(160, 240, 255, 0.85), 0 0 34px rgba(94, 233, 255, 0.28);
+  opacity: 0; transition: opacity 0.45s var(--ease); will-change: transform;
+}
+.tour-ring[data-on="on"] { opacity: 1; }
+
+/* The card. */
+.tour-card {
+  position: absolute; right: 28px; bottom: 28px; width: min(420px, calc(100vw - 56px));
+  pointer-events: auto;
+  background: linear-gradient(180deg, rgba(14, 36, 78, 0.94), rgba(5, 14, 34, 0.96) 55%, rgba(3, 10, 26, 0.97));
+  border-radius: 28px; corner-shape: superellipse(2.15);
+  box-shadow: inset 0 0 0 1px rgba(130, 205, 255, 0.2), inset 0 1px 0 rgba(190, 245, 255, 0.16), 0 30px 80px -30px rgba(0, 0, 0, 0.9), 0 0 60px -20px rgba(47, 160, 255, 0.35);
+  padding: 30px 30px 26px;
+  animation: tour-card-in 0.6s var(--ease-out) both;
+}
+.tour-card[data-side="left"] { right: auto; left: 28px; }
+.tour-card.is-choice, .tour-card.is-end { right: 50%; bottom: 50%; transform: translate(50%, 50%); width: min(520px, calc(100vw - 40px)); animation-name: tour-card-center; }
+.tour-close { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 14px; corner-shape: superellipse(2); background: rgba(120, 200, 255, 0.08); color: var(--ink); }
+.tour-close:hover { background: rgba(120, 200, 255, 0.16); }
+
+.tour-body { display: grid; gap: 12px; animation: tour-in 0.5s var(--ease-out) both; }
+.tour-body > * { margin: 0; }
+.tour-body .eyebrow { margin-bottom: 4px; }
+.tour-body h2 { font-size: clamp(24px, 2.2vw, 30px); line-height: 1.15; font-weight: 480; letter-spacing: -0.03em; padding-right: 36px; text-wrap: balance; }
+.tour-mantra { font-size: clamp(26px, 2.6vw, 34px) !important; }
+.tour-body h2.tour-lead { font-size: clamp(20px, 1.7vw, 23px); line-height: 1.4; font-weight: 470; letter-spacing: -0.015em; }
+.tour-line { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+.tour-live { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 560; color: #cff6ff; }
+.tour-live i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #5ee9ff; box-shadow: 0 0 10px rgba(94, 233, 255, 0.9); }
+.tour-mine { font-size: 15px; line-height: 1.55; padding: 12px 14px; border-radius: 16px; corner-shape: superellipse(2); background: rgba(94, 233, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(120, 220, 255, 0.18); }
+
+.tour-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 10px; }
+.tour-dots { display: flex; gap: 8px; }
+.tour-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(150, 190, 255, 0.3); transition: background 0.4s; }
+.tour-dots i.past { background: rgba(94, 233, 255, 0.55); }
+.tour-dots i.on { background: #e6fdff; box-shadow: 0 0 10px rgba(94, 233, 255, 0.9); }
+.tour-nav { display: flex; align-items: center; gap: 14px; }
+.tour-next { min-height: 46px; padding-inline: 20px; }
+.tour-next:disabled { opacity: 0.55; }
+
+/* The first question. */
+.tour-paths { display: grid; gap: 10px; margin-top: 8px; }
+.tour-path {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; text-align: left;
+  min-height: 64px; padding: 12px 18px; border-radius: 18px; corner-shape: superellipse(2);
+  background: rgba(10, 30, 66, 0.7); box-shadow: inset 0 0 0 1px rgba(120, 200, 255, 0.2); color: var(--ink);
+  transition: background 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.tour-path:hover, .tour-path:focus-visible { background: rgba(20, 60, 120, 0.75); box-shadow: inset 0 0 0 1.5px rgba(140, 236, 255, 0.7); }
+.tour-path.is-suggested { box-shadow: inset 0 0 0 1.5px rgba(140, 236, 255, 0.75), 0 0 24px rgba(47, 160, 255, 0.22); }
+.tour-path-text { display: grid; gap: 3px; }
+.tour-path-text b { font-size: 17px; font-weight: 560; letter-spacing: -0.01em; }
+.tour-path-text small { font-size: 14px; color: var(--ink-2); }
+.tour-path svg { flex: none; color: #8dddff; transition: transform 0.3s var(--ease); }
+.tour-path:hover svg { transform: translateX(4px); }
+.tour-all { justify-self: start; margin-top: 4px; }
+.tour-end { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 12px; }
+
+@keyframes tour-in { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+@keyframes tour-card-in { from { opacity: 0; transform: translate3d(0, 18px, 0); } to { opacity: 1; transform: none; } }
+@keyframes tour-card-center { from { opacity: 0; transform: translate(50%, calc(50% + 18px)); } to { opacity: 1; transform: translate(50%, 50%); } }
+
+/* The offer: once, on a first visit, quietly. */
+.tour-offer {
+  position: fixed; left: 28px; bottom: 28px; z-index: 39; display: flex; align-items: center; gap: 4px;
+  padding: 6px; border-radius: 20px; corner-shape: superellipse(2);
+  background: rgba(6, 18, 44, 0.92); box-shadow: inset 0 0 0 1px rgba(130, 220, 255, 0.3), 0 20px 50px -20px rgba(0, 0, 0, 0.9), 0 0 30px -10px rgba(47, 160, 255, 0.4);
+  animation: tour-card-in 0.7s var(--ease-out) both;
+}
+.tour-offer-go { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; border-radius: 15px; corner-shape: superellipse(2); font-size: 15px; font-weight: 560; color: var(--ink); }
+.tour-offer-go:hover { background: rgba(94, 233, 255, 0.1); }
+.tour-offer-go svg { color: #8dddff; }
+.tour-offer-close { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; corner-shape: superellipse(2); color: var(--ink-2); }
+.tour-offer-close:hover { color: var(--ink); background: rgba(120, 200, 255, 0.1); }
+
+/* A phone: the card is a sheet above the tab bar, the first question fills more of the screen. */
+@media (max-width: 799px) {
+  .tour-card { left: 12px; right: 12px; bottom: calc(98px + env(safe-area-inset-bottom)); width: auto; padding: 24px 22px 20px; border-radius: 24px; }
+  .tour-card.is-choice, .tour-card.is-end { left: 12px; right: 12px; bottom: calc(98px + env(safe-area-inset-bottom)); width: auto; transform: none; animation-name: tour-card-in; }
+  .tour-body h2 { font-size: 23px; }
+  .tour-offer { left: 12px; bottom: calc(100px + env(safe-area-inset-bottom)); }
+}
+
+html[data-motion="off"] :is(.tour-card, .tour-body, .tour-offer) { animation: none; }
+@media (prefers-reduced-motion: reduce) { :is(.tour-card, .tour-body, .tour-offer) { animation: none !important; } .tour-ring, .tour::before { transition: none; } }
+.tour-card:focus { outline: none; }

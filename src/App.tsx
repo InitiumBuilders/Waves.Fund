@@ -33,6 +33,7 @@ import { useStateStore } from "./state";
 import { Trax, TraxCollector } from "./trax";
 import { FlowNavigation } from "./flow";
 import { go, Seamless } from "./seamless";
+import { TourLauncher } from "./tour-launch";
 import { SeaHero } from "./sea-hero";
 import { BEAT } from "./cadence";
 import { hash } from "./together/ripple";
@@ -397,6 +398,7 @@ function AppContent() {
       <WaveMind />
       <TraxCollector />
       <Seamless />
+      <TourLauncher />
       <div
         className={"app-shell " + (pathname === "/" ? "route-home" : pathname === "/grow" ? "route-grow" : pathname === "/waves" || pathname === "/projects" ? "route-waves route-reading" : "route-reading")}
       >

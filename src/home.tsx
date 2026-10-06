@@ -37,6 +37,8 @@ export function Home() {
   const continueToApplication=()=>{if(done.current)return;done.current=true;if(timer.current)clearTimeout(timer.current);navigate('/apply')};
   const transferEnded=()=>{if(transferMode.current==='intro')finishIntro();else if(transferMode.current==='submit')continueToApplication()};
   useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current)},[]);
+  // The tour asks the intro to stop when it shows this box, so the visitor sees their own draft.
+  useEffect(()=>{const quiet=()=>{if(introPhaseRef.current!=='idle')finishIntro()};addEventListener('waves:quiet-intro',quiet);return()=>removeEventListener('waves:quiet-intro',quiet)},[]);
   useEffect(()=>{
     if(!motion){finishIntro();return;}
     let active=true;

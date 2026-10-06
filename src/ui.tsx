@@ -10,8 +10,10 @@ import {
   ArrowRight,
   Check,
   ArrowUpRight,
+  Compass,
 } from "lucide-react";
 import { useStateStore } from "./state";
+import { startTour } from "./tour-launch";
 import { MindAnchor, mindWave } from "./mind/WaveMind";
 import type { FieldMode } from "./mind/modes";
 export const CONTACT = "August@Outlier.Systems";
@@ -243,6 +245,9 @@ export function Header() {
           <Link className="glow-button menu-primary" to="/" onClick={() => setOpen(false)}>
             What’s Your Vision? <ArrowRight size={18} />
           </Link>
+          <button type="button" className="text-button menu-tour" onClick={() => { setOpen(false); startTour(); }}>
+            <Compass size={17} aria-hidden="true" /> Take The Tour
+          </button>
           <nav className="menu-groups" aria-label="More">
             {MENU.map((group) => (
               <section key={group.pillar} className="menu-group" aria-label={group.pillar}>
