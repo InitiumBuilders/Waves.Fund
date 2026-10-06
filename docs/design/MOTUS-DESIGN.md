@@ -287,6 +287,20 @@ gradient rim, a dark plate, and liquid rising inside on hover. No cut corners (A
 - The four nav marks and the Grow hold (it now opens Waves with a pulse through the field).
 - Every route, form and API.
 
+## Clarity: type floor, line length, room
+
+`src/clarity.css`, loaded last. Reading text is never under 14px (fine print 13.5px, form labels 15px), labels
+never under 11px, and a paragraph stops at about 70 characters (a zero-weight cap, so anything that sets its
+own width keeps it; centred blocks keep their centre). Page rules carry `main` so they win over a page's own
+stylesheet, which can load after this one. Measured before and after with the session's density probe: Apply
+went from 12px to 15px typical text and from 103 to 76 characters at its widest; the Guide Library's templates
+from 13px to 15px. The two old `!important` sizes (fine print 11px, the form contact line 10px) were raised at
+the source. Forms stay calm: the `seed` anchor (Apply, the Give Profile) grows its mass but forms no network.
+
+The menu follows the four practices, the same as the tab bar: one primary action (What’s Your Vision?), then
+Learn, Guide, Give and Grow, each with the pages that belong to it. Every label is the menu's own; only the
+order changed. Two columns on a wide screen, so it fits without scrolling.
+
 ## Rules
 
 - No particle swarms. Dots never fly in to form a shape (August, 2026-09-23).

@@ -196,6 +196,13 @@ export function TabLinks() {
     </>
   );
 }
+// The menu, grouped under the four practices. The labels are the menu's own; only their order changed.
+const MENU: { pillar: string; links: [string, string][] }[] = [
+  { pillar: "Learn", links: [["Our Vision", "/learn"], ["Now, Let’s Begin", "/now-lets-begin"]] },
+  { pillar: "Guide", links: [["Wave Guides", "/guide"], ["Guide Library", "/guide/library"], ["The Teachback", "/guide/teachback"], ["The Waves Fund Team", "/guide/team"]] },
+  { pillar: "Give", links: [["Give Together", "/give"], ["Partners", "/guide/partners"], ["Partnerships & Impact Investment", `mailto:${CONTACT}`]] },
+  { pillar: "Grow", links: [["Waves", "/waves"], ["Your Workspace", "/workspace"], ["Submit A Project", "/apply"]] },
+];
 export function Header() {
   const [open, setOpen] = useState(false);
   const { motion, setMotion } = useStateStore();
@@ -232,55 +239,21 @@ export function Header() {
           onClose={() => setOpen(false)}
           className="menu-sheet"
         >
-          <p className="menu-route" aria-label="Learn, Guide, Give, Grow">
-            <Link to="/learn" onClick={() => setOpen(false)}>Learn</Link>
-            <i aria-hidden="true" />
-            <Link to="/guide" onClick={() => setOpen(false)}>Guide</Link>
-            <i aria-hidden="true" />
-            <Link to="/give" onClick={() => setOpen(false)}>Give</Link>
-            <i aria-hidden="true" />
-            <Link to="/grow" onClick={() => setOpen(false)}>Grow</Link>
-          </p>
-          <nav className="menu-links" aria-label="More">
-            <Link to="/" onClick={() => setOpen(false)}>
-              What’s Your Vision? <ArrowRight />
-            </Link>
-            <Link to="/learn" onClick={() => setOpen(false)}>
-              Our Vision <ArrowRight />
-            </Link>
-            <Link to="/now-lets-begin" onClick={() => setOpen(false)}>
-              Now, Let’s Begin <ArrowRight />
-            </Link>
-            <Link to="/waves" onClick={() => setOpen(false)}>
-              Waves <ArrowRight />
-            </Link>
-            <Link to="/guide" onClick={() => setOpen(false)}>
-              Wave Guides <ArrowRight />
-            </Link>
-            <Link to="/guide/library" onClick={() => setOpen(false)}>
-              Guide Library <ArrowRight />
-            </Link>
-            <Link to="/guide/teachback" onClick={() => setOpen(false)}>
-              The Teachback <ArrowRight />
-            </Link>
-            <Link to="/give" onClick={() => setOpen(false)}>
-              Give Together <ArrowRight />
-            </Link>
-            <Link to="/workspace" onClick={() => setOpen(false)}>
-              Your Workspace <ArrowRight />
-            </Link>
-            <Link to="/guide/partners" onClick={() => setOpen(false)}>
-              Partners <ArrowRight />
-            </Link>
-            <Link to="/guide/team" onClick={() => setOpen(false)}>
-              The Waves Fund Team <ArrowRight />
-            </Link>
-            <Link to="/apply" onClick={() => setOpen(false)}>
-              Submit A Project <ArrowRight />
-            </Link>
-            <a href={`mailto:${CONTACT}`}>
-              Partnerships & Impact Investment <ArrowUpRight />
-            </a>
+          {/* The menu follows the four practices, the same as the tab bar: each page sits under the one it belongs to. */}
+          <Link className="glow-button menu-primary" to="/" onClick={() => setOpen(false)}>
+            What’s Your Vision? <ArrowRight size={18} />
+          </Link>
+          <nav className="menu-groups" aria-label="More">
+            {MENU.map((group) => (
+              <section key={group.pillar} className="menu-group" aria-label={group.pillar}>
+                <p className="eyebrow menu-pillar">{group.pillar}</p>
+                {group.links.map(([label, to]) =>
+                  to.startsWith("mailto:")
+                    ? <a key={label} href={to}>{label} <ArrowUpRight /></a>
+                    : <Link key={label} to={to} onClick={() => setOpen(false)}>{label} <ArrowRight /></Link>,
+                )}
+              </section>
+            ))}
           </nav>
           <p className="menu-mantra">
             Trust People.

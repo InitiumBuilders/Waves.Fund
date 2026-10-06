@@ -853,8 +853,8 @@ main {
   line-height: 1.35;
 }
 .fine-print {
-  font-size: 11px !important;
-  line-height: 1.8 !important;
+  font-size: 13.5px !important;
+  line-height: 1.7 !important;
   color: #a5bbd5 !important;
   margin-top: 20px !important;
 }
@@ -1326,7 +1326,7 @@ label small {
   margin-top: 15px;
 }
 .form-contact {
-  font-size: 10px !important;
+  font-size: 14px !important;
   text-align: center;
   margin-top: 20px !important;
 }

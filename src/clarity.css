@@ -1,0 +1,62 @@
+/* Clarity: one floor for reading text and one comfortable line length, for the whole site.
+   Reading text is never under 14px (fine print 13.5px), labels never under 11px, and a paragraph never runs
+   past about 70 characters. Loaded last (src/main.tsx). */
+
+/* ---------- Line length ---------- */
+/* Zero specificity: anything that sets its own width keeps it. Centred blocks keep their centre. */
+:where(main) :where(p:not(.eyebrow), li, dd, .checkbox > span) { max-width: 70ch; }
+:where(main) :where([style*="center"], .closing, .mantra-panel, .gt-principle, .empty-state, .gt-moment-words, .guide-closing-mantra, .tb-vision, .section-center, .home-identity, .vision-heading, .desktop-invitation) :where(p) { margin-inline: auto; }
+
+/* Page rules below carry `main` so they outweigh a page's own stylesheet, which can load after this one. */
+/* ---------- Labels ---------- */
+main .status-chip { font-size: 11px; }
+main .guide-example-note .eyebrow, main .guide-case-strip .eyebrow { font-size: 11px; }
+main .guide-practice-options button > span, main .guide-lesson-aside nav a > span { font-size: 12px; }
+main .guide-lesson-card-top > span:last-child { font-size: 13px; }
+
+/* ---------- Forms: the application ---------- */
+main .application-form label, main .application-form .checkbox, main .form-pair label { font-size: 15px; line-height: 1.55; }
+main .application-form .checkbox > span { line-height: 1.6; }
+main .application-form a { font-size: inherit; }
+main .form-contact, main .form-contact a { font-size: 14px; }
+/* A helper line sits with the field above it and leaves room before the next label. */
+main .application-form .fine-print { margin-bottom: 28px; }
+
+/* ---------- Links and small lines ---------- */
+main .roadmap a, main .guide-lesson-open, main .guide-case-strip .text-button { font-size: 14px; }
+main .guide-actions .text-button, main .guide-team-card .text-button, main .guide-inline-link, main .guide-lesson-next > a { font-size: 15px; }
+main .guide-back { font-size: 14px; }
+main .intro-description .hashtags { font-size: 14px; }
+main .mantra-panel p:last-child { font-size: 15px; }
+
+/* ---------- The Guide Library ---------- */
+main .guide-service-steps p, main .guide-lesson-card p, main .guide-worksheet > p, main .guide-team-card p, main .guide-partner-list a { font-size: 15px; }
+main .guide-example-note p, main .guide-case-strip p, main .guide-readiness > p { font-size: 15px; line-height: 1.7; }
+main .guide-worksheet summary { font-size: 15px; padding: 12px 0; }
+main .guide-worksheet .guide-markdown :is(p, li) { font-size: 15px; line-height: 1.75; }
+main .guide-readiness-count { font-size: 14px; }
+main .guide-checklist label { font-size: 15px; }
+main .guide-lesson-aside figcaption { font-size: 13px; }
+
+/* ---------- The Wave Praxis page ---------- */
+main .begin-guide-action p, main .wave-examples-hint, main .begin-jump a { font-size: 15px; }
+main .wave-examples-note, main .wave-examples-hint, main .begin-note, main .begin-pass-copy > p, main .wave-one-ownership { max-width: 70ch; }
+
+/* ---------- Room to breathe ---------- */
+main .guide-section + .guide-section { margin-top: clamp(96px, 11vw, 150px); }
+main .grow-content > * + * { margin-top: clamp(40px, 6vw, 64px); }
+
+/* ---------- The menu: four groups ---------- */
+/* One primary action, then each page under the practice it belongs to. Two columns where there is room. */
+.menu-sheet .menu-primary { width: 100%; justify-content: center; margin: 2px 0 30px; }
+.menu-groups { display: grid; gap: 28px; }
+.menu-group { display: grid; align-content: start; }
+.menu-group .menu-pillar { margin: 0 0 4px; }
+.menu-group a { display: flex; justify-content: space-between; align-items: center; gap: 14px; min-height: 46px; font-size: 18px; font-weight: 470; letter-spacing: -0.015em; border-bottom: 1px solid rgba(97, 150, 207, 0.13); }
+.menu-group a svg { width: 16px; flex: none; color: #8dbde9; transition: transform 0.3s var(--ease); }
+.menu-group a:hover svg { transform: translateX(4px); }
+.menu-sheet .menu-footer { font-size: 13px; flex-wrap: wrap; gap: 4px 20px; justify-content: flex-start; }
+@media (min-width: 800px) {
+  .menu-sheet { max-width: 680px; }
+  .menu-groups { grid-template-columns: 1fr 1fr; gap: 30px 44px; }
+}

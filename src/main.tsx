@@ -7,6 +7,7 @@ import "@fontsource-variable/inter";
 import "./style.css";
 import "./refine.css";
 import "./motus.css";
+import "./clarity.css";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
@@ -16,4 +17,3 @@ createRoot(document.getElementById("root")!).render(
     </BrowserRouter>
   </StrictMode>,
 );
-import "./refine.css";

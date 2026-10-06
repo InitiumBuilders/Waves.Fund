@@ -237,9 +237,11 @@ function measureNow() {
   engine.docHeight = document.documentElement.scrollHeight;
 }
 
+// Seed has no network: it marks forms (Apply, the Give Profile), and a form stays calm while someone types. Its
+// mass still grows as the form fills in.
 const TOPOLOGY: Partial<Record<FieldMode, Topology>> = {
   vision: "star", layers: "layers", orbit: "hubs", rise: "chain", gather: "hubs", hubs: "hubs",
-  ocean: "chain", path: "chain", timeline: "chain", seed: "star", bond: "web",
+  ocean: "chain", path: "chain", timeline: "chain", bond: "web",
 };
 
 export function WaveMind() {
