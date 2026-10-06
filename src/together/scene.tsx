@@ -93,7 +93,9 @@ function momentModel(): RippleModel {
     const lock = ease(t / 2);
     const ringP = (t - 1.6) / 2.8;
     return {
-      lambda, speed: lambda / BEAT, gain: 1.2, dots: 15, ground: 0.95,
+      // The bands brighten as the two fall into step; the in-step crest line burns at a third, so where crests
+      // meet they glow instead of turning white.
+      lambda, speed: lambda / BEAT, gain: 1, ridge: 0.35, dots: 15, ground: 0.95,
       sources: [
         { ...a, a: 1, phase: 0, hue: 0.05, size: 4.8, born: -100, reach: 0.62 },
         { ...b, a: mix(0.5, 1, lock), phase: mix(Math.PI, 0, lock), hue: 0.3, size: 4.8, born: 0, reach: mix(0.3, 0.62, lock) },

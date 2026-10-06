@@ -1259,7 +1259,8 @@ label {
   color: #c3d8ef;
   line-height: 1.7;
 }
-input:not([type="checkbox"]):not([type="range"]):not([type="file"]),
+/* :where() keeps the file-input exclusion weightless, so a page's own input rule (two classes) still wins. */
+input:not([type="checkbox"]):not([type="range"]):where(:not([type="file"])),
 textarea,
 select {
   width: 100%;

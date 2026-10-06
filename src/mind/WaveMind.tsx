@@ -375,6 +375,9 @@ export function WaveMind() {
       // The closing mantra is a line of text with open ground above it: the network forms in that band, across
       // the whole width, and where the band is short (phones) a chain forms instead of a web.
       if (name === "bond") {
+        // Only once the reader has scrolled to the end. While a page is still loading it is short and the footer
+        // sits in view; a network formed then would stay over the heading once the page fills in.
+        if (scrollY < innerHeight * 0.25 || document.querySelector("main .route-loading")) return;
         const above = Math.min(380, innerHeight * 0.5);
         const region = engine.openRegion({ x: 0, y: r.top - above, w: innerWidth, h: above + r.height + 24 });
         if (region && !engine.emerge(region, topo)) engine.emerge(region, "chain");

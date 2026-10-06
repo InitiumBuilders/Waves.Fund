@@ -48,6 +48,7 @@ export function StandingString({ halves = 3, className = "", label }: { halves?:
   return (
     <Box kind="string" className={className} label={label}>
       <Draw>
+        <line className="sym-rest" x1={0} y1={H / 2} x2={W} y2={H / 2} />
         <path className="sym-envelope" d={sine(W, H, halves, amp)} />
         <path className="sym-envelope" d={sine(W, H, halves, -amp)} />
       </Draw>
@@ -94,6 +95,7 @@ export function Echo({ className = "" }: { className?: string }) {
 export function Resonance({ className = "" }: { className?: string }) {
   return (
     <Box kind="resonance" className={className}>
+      <Draw><line className="sym-rest" x1={0} y1={22} x2={W} y2={22} /><line className="sym-rest" x1={0} y1={50} x2={W} y2={50} /></Draw>
       <Move className="sym-swing is-first"><g transform="translate(0 -14)"><path className="sym-line" d={sine(W, H, 2, 12)} /></g></Move>
       <Move className="sym-swing is-late"><g transform="translate(0 14)"><path className="sym-line is-second" d={sine(W, H, 2, 12)} /></g></Move>
     </Box>

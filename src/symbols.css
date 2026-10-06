@@ -9,6 +9,8 @@
 .sym-line { fill: none; stroke: #86f1ff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .sym-line.is-second { stroke: #b6a8ff; }
 .sym-envelope { fill: none; stroke: rgba(154, 134, 255, 0.34); stroke-width: 1; stroke-dasharray: 2 5; }
+/* The string at rest: what a standing wave looks like at the instant it swings through flat. */
+.sym-rest { stroke: rgba(134, 241, 255, 0.38); stroke-width: 1.2; }
 .sym-end { fill: #eafdff; filter: drop-shadow(0 0 6px rgba(94, 233, 255, 0.9)); }
 .sym-node { fill: rgba(170, 160, 255, 0.8); }
 .sym-rail { stroke: rgba(120, 200, 255, 0.28); stroke-width: 1; stroke-dasharray: 2 6; }

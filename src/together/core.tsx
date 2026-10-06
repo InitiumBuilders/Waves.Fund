@@ -90,6 +90,13 @@ export function commonLines(c: Common, name: string): string[] {
   else if (c.distance === "far") out.push("You live a few hours apart.");
   return out;
 }
+// The two that matter most when two people first meet: what they care about, and when they are both free.
+export function briefLines(c: Common, name: string): string[] {
+  const out: string[] = [];
+  if (c.causes.length) out.push(`You both want to help with ${words(c.causes.map((x) => CAUSE_PHRASE[x] || x))}.`);
+  if (c.times.length) out.push(`You can both give ${words(c.times.map((t) => TIME_PHRASE[t] || t))}.`);
+  return out.length ? out : commonLines(c, name).slice(0, 2);
+}
 
 // ---- Dates -------------------------------------------------------------------------------------------
 export const localDay = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;

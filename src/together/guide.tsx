@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Check, Copy, MessageCircle, X } from "lucide-react";
-import { DISTANCE, Loading, PageHead, Problem, commonLines, useCall, useLoad, useMe } from "./core";
+import { DISTANCE, Loading, PageHead, Problem, briefLines, commonLines, useCall, useLoad, useMe } from "./core";
 import type { Connection, Match, Person, Profile } from "./core";
 import { GiveScene } from "./scene";
 import type { SceneNode } from "./scene";
@@ -253,7 +253,7 @@ function Moment({ c, onClose }: { c: Connection; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   const navigate = useNavigate();
   const { motion } = useStateStore();
-  const lines = commonLines(c.common, c.person.name);
+  const lines = briefLines(c.common, c.person.name);
   useEffect(() => {
     const d = ref.current;
     const previous = document.activeElement as HTMLElement | null;
@@ -272,7 +272,7 @@ function Moment({ c, onClose }: { c: Connection; onClose: () => void }) {
         <p className="eyebrow gt-moment-name">{c.person.name}</p>
         <h2 id="gt-moment-title">Your Give Guide</h2>
         <p className="gt-moment-line">You both want to make a difference.</p>
-        {lines.length > 0 && <ul className="gt-moment-common">{lines.slice(0, 4).map((l) => <li key={l}>{l}</li>)}</ul>}
+        {lines.length > 0 && <ul className="gt-moment-common">{lines.map((l) => <li key={l}>{l}</li>)}</ul>}
         <div className="gt-actions">
           <button className="glow-button" onClick={() => go(`/give/opportunities?with=${c.id}`)}>Explore Opportunities Together<ArrowRight size={18} /></button>
           <button className="text-button" onClick={() => go(`/give/with/${c.id}`)}>Say Hello<MessageCircle size={16} /></button>

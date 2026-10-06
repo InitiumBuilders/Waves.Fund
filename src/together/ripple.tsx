@@ -24,6 +24,7 @@ export type RippleFrame = {
   select?: [number, number, number];   // a ring around the chosen light: x, y, strength
   ring?: [number, number, number];     // one expanding ring of light: x, y, progress 0..1
   front?: [number, number, number, number]; // a line the wave moves forward from: x, y, direction (radians), strength 0..1
+  ridge?: number;            // how bright the line along crests that are exactly in step burns (default 1)
   roll?: [number, number];  // the sea only: a wave that rises from the horizon and comes to you; its period in seconds, its height 0..1
 };
 export type RippleModel = (t: number, w: number, h: number) => RippleFrame;
@@ -35,7 +36,7 @@ in vec2 aPos; void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
 const FS = `#version 300 es
 precision highp float;
 uniform vec2 uRes;
-uniform float uDpr, uTime, uWave, uK, uW, uGain, uDots, uGround;
+uniform float uDpr, uTime, uWave, uK, uW, uGain, uDots, uGround, uRidge;
 uniform int uCount;
 uniform vec4 uA[${MAX}];   // x, y, amplitude, phase
 uniform vec4 uB[${MAX}];   // born, hue, size, reach (how far its ripples carry, as a share of the scene)
@@ -82,7 +83,7 @@ void main() {
   float crest = max(A, 0.0), trough = max(-A, 0.0);
   float band = 1.0 - exp(-crest * crest * uGain * 2.4);
   float low = (1.0 - exp(-trough * trough * uGain * 2.4)) * 0.4;
-  float ridge = smoothstep(0.9, 1.0, A / max(E, 0.0005)) * min(E * 1.8, 1.3);
+  float ridge = smoothstep(0.9, 1.0, A / max(E, 0.0005)) * min(E * 1.8, 1.3) * uRidge;
   vec3 tint = mix(mix(BLUE, CYAN, 0.7), VIOLET, hm);
   // The ground is a lattice of points, and the water lights them.
   float dots = 0.0;
@@ -152,7 +153,7 @@ export function Ripple({ model, className = "", handle, tappable = false, maxDpr
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const U = (n: string) => gl.getUniformLocation(prog, n);
-    const loc = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), wave: U("uWave"), k: U("uK"), w: U("uW"), gain: U("uGain"), dots: U("uDots"), ground: U("uGround"), count: U("uCount"), a: U("uA"), b: U("uB"), sel: U("uSel"), ring: U("uRing"), front: U("uFront") };
+    const loc = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), wave: U("uWave"), k: U("uK"), w: U("uW"), gain: U("uGain"), ridge: U("uRidge"), dots: U("uDots"), ground: U("uGround"), count: U("uCount"), a: U("uA"), b: U("uB"), sel: U("uSel"), ring: U("uRing"), front: U("uFront") };
     const A = new Float32Array(MAX * 4), B = new Float32Array(MAX * 4);
     let w = 1, h = 1, dpr = 1, raf = 0, visible = true;
     const t0 = performance.now();
@@ -175,7 +176,7 @@ export function Ripple({ model, className = "", handle, tappable = false, maxDpr
       gl.uniform2f(loc.res, w, h); gl.uniform1f(loc.dpr, dpr); gl.uniform1f(loc.time, t);
       // Crests pass once a beat on the clock the whole page shares, so every scene ripples in step.
       gl.uniform1f(loc.wave, motion ? shared() % BEAT : t);
-      gl.uniform1f(loc.k, k); gl.uniform1f(loc.w, k * f.speed); gl.uniform1f(loc.gain, f.gain ?? 1); gl.uniform1f(loc.dots, f.dots ?? 0); gl.uniform1f(loc.ground, f.ground ?? 0);
+      gl.uniform1f(loc.k, k); gl.uniform1f(loc.w, k * f.speed); gl.uniform1f(loc.gain, f.gain ?? 1); gl.uniform1f(loc.ridge, f.ridge ?? 1); gl.uniform1f(loc.dots, f.dots ?? 0); gl.uniform1f(loc.ground, f.ground ?? 0);
       gl.uniform1i(loc.count, Math.min(MAX, list.length));
       gl.uniform4fv(loc.a, A); gl.uniform4fv(loc.b, B);
       gl.uniform3f(loc.sel, ...(f.select || [0, 0, 0] as [number, number, number]));

@@ -168,6 +168,9 @@ The footer's mantra is an anchor (`data-mind="bond"`). When it comes into view, 
 neighbours around it and a network forms in the open band above it, across the whole width (a chain where
 the band is short, on phones). An anchor that leaves the screen
 is let go after 0.7 s, so the mantra is found fresh on every page, including pages that load lazily.
+The network forms only once the reader has scrolled to the end (a quarter screen or more): while a page is
+still loading it is short and the footer sits in view, and a network formed then stayed over the heading for
+ten seconds once the page filled in (found on the Give app's screens on 2026-10-05).
 Statement: trust is the links between people.
 
 ## Seeds
@@ -229,7 +232,7 @@ Its physics is interference.
 | Landing, first scene (`together/tank.tsx`, drawn by the sea) | A sticky scene over three scroll chapters, August's lines "Find Your People." "Give Together." "Build a Wave.": you, one light, with faint lights around you not yet in step; one comes near and falls into step, and the bands between you rise twice as high; then everyone lines up in step and the rings join into one straight wavefront (Huygens) | Two in step add up; many in step make one wave. |
 | Landing, A Give Guide (`PairScene`, the sea) | Two lights side by side across the water; as the section scrolls into view the second one arrives and falls into step with the first, and the bands between them brighten. Scrolling back reverses it | Meeting someone to give with. |
 | /give/guide (`together/scene.tsx`, field) | You at the centre. Give Guides ripple in step with you; people who share something are faint lights whose rings stay close; choose one and their rings reach toward yours and fall into step | A preview of giving together. |
-| The moment | Two lights fall into step over two seconds, then a ring spreads from where they meet, and "Your Give Guide" appears | You both said yes. |
+| The moment | Two lights fall into step over two seconds, then a ring spreads from where they meet, and "Your Give Guide" appears with two shared reasons: what they both care about and when they are both free. Its in-step crest line burns at a third (`ridge: 0.35` in the frame), so where crests meet they glow instead of turning white | You both said yes. |
 | Shared Wave (`together/wave.tsx`) | Two lights out of step while proposed, in step once active | The Wave is underway. |
 | Opportunities | Each kind has its wave symbol (Teachback: standing wave; volunteering: a pair in step; event: a travelling wave) | Kind at a glance. |
 
