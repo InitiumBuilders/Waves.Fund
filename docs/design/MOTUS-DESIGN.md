@@ -84,8 +84,10 @@ leaves the lit card, travels the trace in whole beats (one beat per 300 px) and 
 the card's rim lights once, and the trace stays live. A card reached before its pulse has landed waits
 its turn, so energy always moves forward, one light at a time. The pulse is an HTML element on a CSS
 motion path; the traces are SVG hairlines measured with the scroll arrivals switched off. Motion off:
-cards light as they are reached, no pulse. Where: Learn's four practices and its roadmap, the Guide
-library's four steps.
+cards light as they are reached, no pulse. Where: Learn's four practices and its roadmap, the four steps on
+the Guide page, and the Guide Library's six lessons ("one complete journey"; in a grid the trace from the end of
+one row runs through the row gap to the start of the next). The Teachback steps are not cards, so a trace there
+would cross their text; they keep their symbols alone.
 
 | Element | Statement |
 | --- | --- |

@@ -16,6 +16,7 @@
 
 /* Room for a trace to be seen between the cards. */
 .circuit .cascade { gap: 84px; }
+.circuit .guide-lesson-grid { gap: 72px 40px; }
 @media (min-width: 900px) {
   .circuit .cascade { gap: 96px; }
   .circuit .roadmap { gap: 48px; }

@@ -12,7 +12,7 @@ export const SHARE_PAGES = [
   { route: "/give", file: "share/give.html", image: "give", title: "Give Together | Waves.Fund", description: "Find Your People. Give Together. Build a Wave." },
   { route: "/guide/teachback", file: "share/teachback.html", image: "teachback", title: "The Teachback | Waves.Fund", description: "Give Together. Teach Together. Organize a teachback." },
   { route: "/grow", file: "share/grow.html", title: "When Humanity Builds Together, We Change The World. | Waves.Fund", description: "Measure what moves." },
-  { route: "/waves", file: "share/waves.html", title: "Waves In Motion | Waves.Fund", description: "Explore approved Wave projects in community review. Learn about the work and add your voice." },
+  { route: "/waves", file: "share/waves.html", image: "waves", title: "Waves In Motion | Waves.Fund", description: "Explore approved Wave projects in community review. Learn about the work and add your voice." },
   { route: "/apply", file: "share/apply.html", title: "What’s Your Vision? | Waves.Fund", description: "Funding For Lifelong Learners And Leaders. Bring your vision to Waves.Fund." },
   { route: "/guide/partners/green-reef/proposal", file: "share/green-reef-proposal.html", title: "Students Funding Aquatic Futures. | Waves.Fund", description: "A proposed 90-day pilot between Waves.Fund and The Green Reef Foundation." },
 ];
