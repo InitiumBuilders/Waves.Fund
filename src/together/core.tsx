@@ -90,6 +90,12 @@ export function commonLines(c: Common, name: string): string[] {
   else if (c.distance === "far") out.push("You live a few hours apart.");
   return out;
 }
+// The same reasons as one short paragraph: the "You both" lines become one sentence, so it does not repeat itself.
+export function commonText(lines: string[]): string {
+  const both = lines.filter((l) => l.startsWith("You both ")).map((l) => l.slice(9).replace(/\.$/, ""));
+  const rest = lines.filter((l) => !l.startsWith("You both "));
+  return [both.length ? `You both ${words(both)}.` : "", ...rest].filter(Boolean).join(" ");
+}
 // The two that matter most when two people first meet: what they care about, and when they are both free.
 export function briefLines(c: Common, name: string): string[] {
   const out: string[] = [];
@@ -184,16 +190,17 @@ export function Choices({ legend, hint, options, value, onChange, single = false
   legend: ReactNode; hint?: ReactNode; options: [string, string, string?][]; value: string[]; onChange: (v: string[]) => void; single?: boolean; id?: string;
 }) {
   return (
-    <fieldset className="gt-choices" id={id}>
+    <fieldset className={"gt-choices" + (single ? " is-single" : "")} id={id}>
       <legend>{legend}</legend>
       {hint && <p className="gt-hint">{hint}</p>}
-      <div className="gt-chips">
+      {/* One answer reads as one: round marks and radio semantics. Several answers keep square checks. */}
+      <div className="gt-chips" role={single ? "radiogroup" : undefined}>
         {options.map(([key, text, sub]) => {
           const on = value.includes(key);
           return (
-            <button type="button" key={key} className={"gt-chip" + (on ? " on" : "")} aria-pressed={on}
+            <button type="button" key={key} className={"gt-chip" + (on ? " on" : "")} role={single ? "radio" : undefined} aria-checked={single ? on : undefined} aria-pressed={single ? undefined : on}
               onClick={() => onChange(single ? [key] : on ? value.filter((v) => v !== key) : [...value, key])}>
-              <span className="gt-chip-mark" aria-hidden="true">{on && <Check size={14} strokeWidth={2.6} />}</span>
+              <span className="gt-chip-mark" aria-hidden="true">{on && (single ? <i className="gt-chip-dot" /> : <Check size={14} strokeWidth={2.6} />)}</span>
               <span className="gt-chip-text">{text}{sub && <small>{sub}</small>}</span>
             </button>
           );

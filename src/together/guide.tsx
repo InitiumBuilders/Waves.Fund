@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Check, Copy, MessageCircle, X } from "lucide-react";
-import { DISTANCE, Loading, PageHead, Problem, briefLines, commonLines, useCall, useLoad, useMe } from "./core";
+import { DISTANCE, Loading, PageHead, Problem, briefLines, commonLines, commonText, useCall, useLoad, useMe } from "./core";
 import type { Connection, Match, Person, Profile } from "./core";
 import { GiveScene } from "./scene";
 import type { SceneNode } from "./scene";
@@ -174,7 +174,7 @@ function Candidate({ m, open, onOpen, onInvited }: { m: Match; open: boolean; on
           <small>{[m.person.place, m.common.distance ? DISTANCE[m.common.distance] : null].filter(Boolean).join(" · ") || "Place not shared"}</small>
         </span>
       </button>
-      <p className="gt-intro">{lines.slice(0, open ? 6 : 2).join(" ")}</p>
+      <p className="gt-intro">{commonText(lines.slice(0, open ? 6 : 2))}</p>
       {open && (
         <>
           {m.person.statement && <blockquote className="gt-quote">{m.person.statement}</blockquote>}
@@ -214,7 +214,7 @@ function Invitation({ c, onDone }: { c: Connection; onDone: (accepted: boolean) 
         <span className="gt-row-text"><b>{c.person.name} invited you</b><small>{[c.person.place, c.common.distance ? DISTANCE[c.common.distance] : null].filter(Boolean).join(" · ") || "Place not shared"}</small></span>
       </div>
       {c.note && <blockquote className="gt-quote">{c.note}</blockquote>}
-      <p className="gt-intro">{commonLines(c.common, c.person.name).slice(0, 4).join(" ")}</p>
+      <p className="gt-intro">{commonText(commonLines(c.common, c.person.name).slice(0, 4))}</p>
       <Tags person={c.person} />
       <Problem>{error}</Problem>
       <div className="gt-actions">

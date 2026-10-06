@@ -77,7 +77,8 @@ function fieldModel(live: { current: { nodes: SceneNode[]; selected: string | nu
     });
     placed.current = spots;
     const chosen = spots.find((s) => s.key === selected);
-    return { sources, lambda, speed: lambda / BEAT, gain: 1.1, dots: 14, ground: 0.86, select: chosen ? [chosen.x, chosen.y, 1] : undefined };
+    // The in-step crest line at half: every ring of every light reads, none of them flares.
+    return { sources, lambda, speed: lambda / BEAT, gain: 1.1, ridge: 0.5, dots: 14, ground: 0.86, select: chosen ? [chosen.x, chosen.y, 1] : undefined };
   };
 }
 

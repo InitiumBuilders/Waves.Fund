@@ -88,3 +88,7 @@ hide).
 ## The team is told
 
 With `RESEND_API_KEY` set (see the README), the team is emailed when someone posts an opportunity, sends a report, when two people both say yes, and when a Shared Wave is proposed (`api/_notify.js`, called from `api/give.js`). The mail says what happened and where to look, never who. Without the key nothing is sent and nothing else changes.
+
+## Reading the reasons
+
+What two people share is listed one reason per line where there is room for a list (a Give Guide's page), and merged into one sentence where it is a paragraph (invitations and the people you could invite), so the "You both" clauses do not repeat. The moment shows only two: what you both care about and when you are both free. A question with one answer (an opportunity's kind) shows round marks and is a radio group; questions with several answers keep square checks.

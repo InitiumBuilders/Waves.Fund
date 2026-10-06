@@ -234,6 +234,10 @@ Its physics is interference.
 | /give/guide (`together/scene.tsx`, field) | You at the centre. Give Guides ripple in step with you; people who share something are faint lights whose rings stay close; choose one and their rings reach toward yours and fall into step | A preview of giving together. |
 | The moment | Two lights fall into step over two seconds, then a ring spreads from where they meet, and "Your Give Guide" appears with two shared reasons: what they both care about and when they are both free. Its in-step crest line burns at a third (`ridge: 0.35` in the frame), so where crests meet they glow instead of turning white | You both said yes. |
 | Shared Wave (`together/wave.tsx`) | Two lights out of step while proposed, in step once active | The Wave is underway. |
+
+Every top-down ripple scene sets how bright its in-step crest line burns (`ridge` in the frame): the moment and a
+Shared Wave at 0.35, the Give Guide map at 0.5. At full strength the line ignores gain, and wherever two crests met
+in step it printed white spots.
 | Opportunities | Each kind has its wave symbol (Teachback: standing wave; volunteering: a pair in step; event: a travelling wave) | Kind at a glance. |
 
 ## The Teachback
