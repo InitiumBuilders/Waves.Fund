@@ -13,6 +13,8 @@ const PRIVATE = [
   /^VERIFICATION\.md$/,
   /^docs\/RELEASE-/,
   /^scripts\/inspect-workspace-services\.mjs$/,
+  /^docs\/NEXT-MOVES\.md$/,
+  /^scripts\/qa\/inventory\.mjs$/,
 ];
 // Files under public-repo/ exist only in the public repo and land at its root.
 const OVERLAY = 'public-repo/';

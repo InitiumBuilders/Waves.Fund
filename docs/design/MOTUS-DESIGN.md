@@ -296,7 +296,7 @@ stylesheet, which can load after this one. Measured before and after with the se
 went from 12px to 15px typical text and from 103 to 76 characters at its widest; the Guide Library's templates
 from 13px to 15px. The two old `!important` sizes (fine print 11px, the form contact line 10px) were raised at
 the source. Forms stay calm: the `seed` anchor (Apply, the Give Profile) grows its mass but forms no network.
-Since 2026-10-08 the floor covers every page: the partner pages, the Proposal (targets, timeline, budget terms),
+Since 2026-10-06 the floor covers every page: the partner pages, the Proposal (targets, timeline, budget terms),
 breadcrumbs and source links, the lesson side links, the Wave One card on the Praxis page (its sizes step up by two,
 so the phone-sized card keeps its layout), and the default label size (12px to 14px at the source). The home page
 keeps its own line widths. Checked with axe-core (WCAG 2.2 AA): zero violations on 18 pages at two sizes, the open

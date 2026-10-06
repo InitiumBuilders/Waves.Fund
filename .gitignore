@@ -10,3 +10,5 @@ dist
 # Real values live in Vercel project settings. Never commit them.
 .env*
 !.env.example
+scripts/qa/.a11y/
+scripts/qa/vt/
