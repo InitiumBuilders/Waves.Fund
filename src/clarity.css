@@ -5,6 +5,8 @@
 /* ---------- Line length ---------- */
 /* Zero specificity: anything that sets its own width keeps it. Centred blocks keep their centre. */
 :where(main) :where(p:not(.eyebrow), li, dd, .checkbox > span) { max-width: 70ch; }
+/* The home page's lines are short and set by design; they keep their own width. */
+main .immersive-home p { max-width: none; }
 :where(main) :where([style*="center"], .closing, .mantra-panel, .gt-principle, .empty-state, .gt-moment-words, .guide-closing-mantra, .tb-vision, .section-center, .home-identity, .vision-heading, .desktop-invitation) :where(p) { margin-inline: auto; }
 
 /* Page rules below carry `main` so they outweigh a page's own stylesheet, which can load after this one. */
@@ -41,6 +43,23 @@ main .guide-lesson-aside figcaption { font-size: 13px; }
 /* ---------- The Wave Praxis page ---------- */
 main .begin-guide-action p, main .wave-examples-hint, main .begin-jump a { font-size: 15px; }
 main .wave-examples-note, main .wave-examples-hint, main .begin-note, main .begin-pass-copy > p, main .wave-one-ownership { max-width: 70ch; }
+
+/* ---------- Partner pages, the Team, the Proposal ---------- */
+main .breadcrumb { font-size: 13px; }
+main .sources a, main .partner-tile > span { font-size: 13px; }
+main .prose a.external { font-size: inherit; }
+main .person-card a.external, main .button-row a.external, main .wave-example-copy a, main .wave-examples a { font-size: 14px; }
+main .pilot-targets span, main .budget-lines, main .budget-total dt, main .budget-note dd, main .agreement p:not(.eyebrow) { font-size: 14px; }
+main .timeline li > span { font-size: 13px; }
+main .guide-lesson-aside nav a { font-size: 14px; }
+
+/* ---------- The Wave One card (the Praxis page): a phone-sized card, so its sizes step up by two ---------- */
+main .wave-one .wave-one-kicker, main .wave-one-guide div > span, main .wave-one-record { font-size: 11px; }
+main .wave-one-number, main .wave-one-next-links small { font-size: 12px; }
+main .wave-one-home, main .wave-one-caption, main .wave-one-guide p, main .wave-one-contact, main .wave-one-share-state,
+main .wave-one-copy, main .wave-one .wave-one-detail, main .wave-one-journey p, main .wave-one .wave-one-ownership { font-size: 13px; }
+main .wave-one .wave-one-guide-mantra { font-size: 14px; }
+main .begin-hero-foot span { font-size: 14px; }
 
 /* ---------- Room to breathe ---------- */
 main .guide-section + .guide-section { margin-top: clamp(96px, 11vw, 150px); }
