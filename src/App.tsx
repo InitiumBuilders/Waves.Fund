@@ -140,7 +140,8 @@ function wavesModel(list: MutableRefObject<Project[]>): RippleModel {
       if (!r.rang) { r.rang = true; sound("light", i); }
       sources.push({ x: s.x, y: s.y, a: r.a * (1 - age / 4), phase: 0, hue: s.hue, size: 2, born: r.at, reach: 0.7 });
     }
-    sources.push({ x: w * 0.5, y: h * 0.82, a: 0.28, phase: 0, hue: 0.2, size: 2.6, born: -100, reach: 0.3 });
+    // Yours, still to come. While no Wave is published it is the one light on the sea, so it carries further.
+    sources.push({ x: w * 0.5, y: h * 0.82, a: n ? 0.28 : 0.55, phase: 0, hue: 0.2, size: n ? 2.6 : 3.2, born: -100, reach: n ? 0.3 : 0.5 });
     return { sources, lambda, speed: lambda / BEAT, gain: 1.1, dots: 14, ground: 0.92, roll: [8 * BEAT, 0.5] };
   };
 }
@@ -178,10 +179,13 @@ function Projects() {
             <span>In Motion</span>
           </>
         }
+        actions={<ButtonLink to="/apply">Bring Your Vision</ButtonLink>}
       >
+        {/* While no Wave is published, the first screen says so, in the empty state's own words. */}
         <p>
-          Explore approved Wave projects in community review. Learn about the
-          work and add your voice.
+          {!loading && !error && !projects.length
+            ? "Project submissions are open. The first reviewed projects will appear here."
+            : "Explore approved Wave projects in community review. Learn about the work and add your voice."}
         </p>
       </SeaHero>
       <div className="document-page sea-after">
@@ -211,11 +215,7 @@ function Projects() {
           <h2>
             {query ? "No Matching Projects" : "Raise Waves."}
           </h2>
-          <p>
-            {query
-              ? "Try a different project or focus area."
-              : "Project submissions are open. The first reviewed projects will appear here, with their budgets, milestones, and support signals."}
-          </p>
+          {query && <p>Try a different project or focus area.</p>}
           {query ? (
             <button className="text-button" onClick={() => setQuery("")}>
               Clear Search

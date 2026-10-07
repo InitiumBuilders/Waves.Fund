@@ -7,6 +7,7 @@ import { SeaHero } from "./sea-hero";
 import { Circuit } from "./circuit";
 import { Echo, Growing, Guided, Pair, Resonance, StandingString, Travel } from "./symbols";
 import { startTour } from "./tour-launch";
+import { sound } from "./sound";
 import { BEAT } from "./cadence";
 import type { RippleModel, Source } from "./together/ripple";
 import "./manifest.css";
@@ -19,11 +20,14 @@ import "./manifest.css";
 
 /* One light far out on the water, the vision. Then, a beat or two apart, others come up beside it, all in step, so
    the water between them adds up and the swell grows: people joining one vision. Every eight beats a wave rises
-   from the horizon and comes all the way to you. */
+   from the horizon and comes all the way to you. With sound on, each light rings as it comes up (one D major
+   chord, a note a light). */
 const together = (): RippleModel => {
   let t0: number | null = null;
+  const rung = new Set<number>();
   return (t, w, h) => {
     if (t0 === null) t0 = t;
+    for (let k = 0; k < 5; k++) if (!rung.has(k) && t >= t0 + (k ? k * 2 * BEAT : BEAT)) { rung.add(k); sound("land", k); }
     const lambda = Math.max(46, Math.min(116, Math.min(w, h) * 0.17));
     const at = (u: number, v: number, k: number, a: number): Source => ({ x: w * u, y: h * v, a, phase: 0, hue: 0.1 + 0.07 * k, size: 2.6 + a, born: k ? (t0 as number) + k * 2 * BEAT : -100, reach: 0.4 + 0.3 * a });
     return {

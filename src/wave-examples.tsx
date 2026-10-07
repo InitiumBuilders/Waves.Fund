@@ -51,7 +51,7 @@ export function WaveExamples() {
 
   return <section id="wave-examples" className="wave-examples" aria-labelledby="wave-examples-title" aria-roledescription="carousel" data-no-swipe>
     <header className="begin-section-heading">
-      <span className="begin-label">Eight starting models. Your own Wave.</span>
+      <span className="begin-label">Starting models. Your own Wave.</span>
       <h2 id="wave-examples-title">What could your Wave become?</h2>
       <p>Explore the mockups, one Wave at a time. Each starts with a different need and can evolve with your mission.</p>
     </header>
@@ -64,7 +64,7 @@ export function WaveExamples() {
       </label>
       <div className="wave-examples-arrows">
         <button type="button" onClick={() => goTo(active - 1)} disabled={active === 0} aria-label="Previous Wave" aria-controls="wave-examples-track"><ArrowLeft size={21} /></button>
-        <span className="wave-examples-count" role="status" aria-atomic="true"><span className="wave-examples-sr">{waveExamples[active].name}, </span>{String(active + 1).padStart(2, "0")} <span aria-hidden="true">/</span><span className="wave-examples-sr">of</span> 08</span>
+        <span className="wave-examples-count" role="status" aria-atomic="true"><span className="wave-examples-sr">{waveExamples[active].name}, </span>{String(active + 1).padStart(2, "0")} <span aria-hidden="true">/</span><span className="wave-examples-sr">of</span> {String(waveExamples.length).padStart(2, "0")}</span>
         <button type="button" onClick={() => goTo(active + 1)} disabled={active === waveExamples.length - 1} aria-label="Next Wave" aria-controls="wave-examples-track"><ArrowRight size={21} /></button>
       </div>
     </div>

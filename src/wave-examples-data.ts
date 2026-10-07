@@ -26,18 +26,6 @@ export const waveExamples: WaveExample[] = [
     alt: 'Growth Wave concept with luminous branches connecting builders, hosts, and mentors to a community workshop.',
   },
   {
-    id: 'funding',
-    name: 'Funding Wave',
-    project: 'Student Field Lab',
-    description: 'Make a funding need, its recipient, and the planned use of resources clear.',
-    nextMove: 'Fund the first field kit.',
-    structure: ['Purpose and recipient', 'Budget and funding route', 'Pledged versus received', 'Use and reporting'],
-    outcome: 'Confirmed receipts, purchase records, and a field report show what the funding made possible.',
-    guide: 'The Guide clarifies the budget and funding route, prepares evidence, and coordinates updates; Guide fees stay separate.',
-    image: '/media/wave-examples/funding-wave.webp',
-    alt: 'Funding Wave concept with a glowing reservoir and separate equipment, fieldwork, and reporting budget paths.',
-  },
-  {
     id: 'innovation',
     name: 'Innovation Wave',
     project: 'Open River Sensor',

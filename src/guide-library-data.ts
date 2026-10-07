@@ -33,7 +33,7 @@ export const guideWorksheets = [
 
 export const guideLessons = [
   { slug: "listen", title: "Listen", subtitle: "Begin with the person.", description: "Understand the mission and return a brief the builder recognizes as their own.", minutes: 8, image: "growth", caseName: "Growth Wave", markdown: listen, worksheets: ["discovery"] },
-  { slug: "shape", title: "Shape", subtitle: "Give the next move a clear form.", description: "Agree on a paid scope, a useful first build, and what completion means.", minutes: 9, image: "funding", caseName: "Funding Wave", markdown: shape, worksheets: ["engagement", "next-move"] },
+  { slug: "shape", title: "Shape", subtitle: "Give the next move a clear form.", description: "Agree on a paid scope, a useful first build, and what completion means.", minutes: 9, image: "brave", caseName: "Brave Wave", markdown: shape, worksheets: ["engagement", "next-move"] },
   { slug: "build", title: "Build", subtitle: "Make something people can use.", description: "Build a custom, accessible Wave with a participation path that works.", minutes: 10, image: "maker", caseName: "Maker Wave", markdown: build, worksheets: ["maintenance"] },
   { slug: "coordinate", title: "Coordinate", subtitle: "Turn an offer into shared work.", description: "Acknowledge help, agree responsibilities, and care for commitments.", minutes: 9, image: "work", caseName: "Work Wave", markdown: coordinate, worksheets: ["contribution"] },
   { slug: "carry-and-report", title: "Carry & Report", subtitle: "Pass the Wave. Bring the outcome back.", description: "Prepare a clear handoff, document the action, and return the result.", minutes: 10, image: "story", caseName: "Story Wave", markdown: carry, worksheets: ["handoff", "outcome"] },

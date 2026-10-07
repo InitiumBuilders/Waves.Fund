@@ -17,11 +17,11 @@ Agree on a paid engagement for an external builder: a defined build, weekly enga
 
 ## An Annotated Example
 
-**Funding Wave — Student Field Lab.** This is an illustrative teaching case.
+**Brave Wave: The Community Readiness Brief.** This is an illustrative teaching case.
 
-The first move is **fund the first field kit**. The Wave needs a purpose, a named recipient, an itemized kit budget, the actual giving route, and a place for purchase and fieldwork updates. The Guide's service fee is recorded separately from project funding.
+The first move is **review the access plan before the workshop opens**. The Wave needs the known facts with their sources, the open questions, one named owner for the decision, and the date of the next review. The Guide keeps facts, open questions, and decisions apart, so no one mistakes a guess for a confirmation.
 
-**Why this matters:** someone can understand where support goes. A pledge, a donation received, and equipment purchased describe different stages; the Wave should never combine them into one number.
+**Why this matters:** a next move with one owner and a visible finish is one people can help with. They can see what is decided, what is still open, and when it will be checked again.
 
 ## Choose A Shape, Then Adapt It
 

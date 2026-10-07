@@ -41,7 +41,7 @@ const S: Record<string, Step> = {
   practices: { route: "/learn", target: ".cascade", practice: "Learn", title: "Futures, Founded, Forged And Funded Together", line: "How a project moves through Waves.Fund, one step into the next." }, // line: PLACEHOLDER
   waves: {
     route: "/waves", target: ".sea-hero", practice: "Grow", title: "Waves In Motion",
-    line: "Every light on the water is a Wave. Tap one to open it.", // PLACEHOLDER
+    line: (c) => (c.projects.length ? "Every light on the water is a Wave. Tap one to open it." : "The light near the shore is yours, still to come. Tap it to bring your vision."), // PLACEHOLDER
     live: (c) => (c.projects.length ? `${plural(c.projects.length, "Wave", "Waves")} in community review right now` : null), // PLACEHOLDER
   },
   firstWave: {

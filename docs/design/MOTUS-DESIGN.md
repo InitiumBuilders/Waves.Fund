@@ -395,7 +395,12 @@ The public feed now carries, for each Wave, when its latest support signals arri
 stay anonymous). When the Waves page opens, each Wave's signals rise from its light as ripples, oldest first, one a
 beat, stronger for the past week; a signal that arrives while the page is open rises at once (the page reads the
 feed each minute while visible). With sound on, each one rings. A finished move rolling to shore waits on a record
-of moves, which does not exist yet; the regular rising wave stays until it does.
+of moves, which does not exist yet; the regular rising wave stays until it does. While no Wave is published (since
+2026-10-07), the light near the shore, yours, is the one light on the sea and carries further, the hero says
+submissions are open, and its first screen offers Bring Your Vision.
+
+On the Manifest, with sound on, each light that comes up in the hero rings one note of a D major chord, so the chord
+builds as the lights join.
 
 ## Rules
 
