@@ -3,6 +3,7 @@ import type { HTMLAttributes, MutableRefObject, PointerEvent, ReactNode } from "
 import { useStateStore } from "../state";
 import { BEAT, clock as shared } from "../cadence";
 import type { RippleHandle, RippleModel, Source } from "./ripple";
+import { sound } from "../sound";
 import "./ripple.css";
 
 /* The sea: the same waves as ripple.tsx (each light sends out circular waves, and where they arrive in step
@@ -367,12 +368,13 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
         const d = q ? Math.hypot(q[0] - sx, q[1] - sy) : Infinity;
         if (d < best) { best = d; hit = i; }
       });
-      if (hit >= 0) { onLight(hit, { x: e.clientX, y: e.clientY }); return; }
+      if (hit >= 0) { sound("light", hit); onLight(hit, { x: e.clientX, y: e.clientY }); return; }
     }
     if (!tappable || !motion) return;
     const at = unproject.current(sx, sy);
     if (!at) return;
     taps.current.push({ x: at[0], y: at[1], born: clockRef.current() });
+    sound("tap", Math.round((sx / r.width) * 100));
     if (taps.current.length > 4) taps.current.shift();
   };
   return (

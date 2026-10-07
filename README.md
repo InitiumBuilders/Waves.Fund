@@ -2,7 +2,7 @@
 
 **Trust People. And They Become Trustworthy.**
 
-The source for [waves.fund](https://www.waves.fund). Students Funding The Future. An Impact Fund. Funding For Futures.
+The source for [waves.fund](https://www.waves.fund). Funding The Future Together. An Impact Fund. Funding For Futures.
 
 > A Wave is a custom home for something you are building, shaped with a real Guide, that people can help and pass along.
 
@@ -49,7 +49,7 @@ node --test scripts/workspace.test.mjs
 
 ```
 src/            pages and components
-api/            community.js   applications, review, public feed, learner support
+api/            community.js   applications, review, public feed, support signals
                 trax.js        analytics
                 workspace.js, waves.js, _workspace/   the workspace pilot
 docs/           the Wave Praxis and the Guide Library lessons

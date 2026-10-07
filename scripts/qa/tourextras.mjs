@@ -3,11 +3,12 @@
 const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
 const base = process.argv[2] || "http://127.0.0.1:5197";
 const b = await chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
-// 1. A first visit to Learn: the offer appears after a few seconds; Take The Tour opens the first question.
+// 1. A first visit to the Guide page: the offer appears after a few seconds; Take The Tour opens the first question.
+//    (Learn and the Manifest never show it: their first screen already offers the tour.)
 {
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await ctx.newPage();
-  await p.goto(base + "/learn", { waitUntil: "load" });
+  await p.goto(base + "/guide", { waitUntil: "load" });
   const shown = await p.waitForSelector(".tour-offer", { timeout: 20000 }).then(() => true).catch(() => false);
   await p.screenshot({ path: "vt/tour_offer_d.jpg", type: "jpeg", quality: 80 });
   if (shown) { await p.click(".tour-offer-go"); await p.waitForSelector(".tour-card.is-choice", { timeout: 15000 }); }

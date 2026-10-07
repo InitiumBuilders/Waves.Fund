@@ -7,7 +7,7 @@ const [base, dir = "tour", only] = process.argv.slice(2);
 const ROUTES = (only ? only.split(",") : ["/", "/now-lets-begin", "/learn", "/guide", "/guide/library", "/guide/library/discovery", "/guide/apply", "/guide/team", "/guide/partners", "/guide/partners/green-reef", "/guide/partners/green-reef/proposal", "/guide/partners/semble", "/guide/partners/ocean97", "/give", "/give/guide", "/guide/teachback", "/grow", "/apply", "/projects", "/privacy", "/trax", "/nope"]);
 await mkdir(dir, { recursive: true });
 const b = await chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
-const sizes = [{ tag: "d", w: 1440, h: 900, max: 9, mobile: false }, { tag: "m", w: 390, h: 844, max: 12, mobile: true }];
+const sizes = [{ tag: "d", w: 1440, h: 900, max: +(process.env.TOUR_MAX || 9), mobile: false }, { tag: "m", w: 390, h: 844, max: +(process.env.TOUR_MAX || 12), mobile: true }];
 for (const s of sizes) {
   const ctx = await b.newContext({ viewport: { width: s.w, height: s.h }, deviceScaleFactor: 1, isMobile: s.mobile, hasTouch: s.mobile });
   for (const r of ROUTES) {

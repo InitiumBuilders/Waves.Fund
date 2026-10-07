@@ -1,3 +1,4 @@
+@layer base {
 .trax-page { width: min(1208px, 100%); margin: 0 auto; padding: 36px 24px 28px; }
 .trax-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 22px; margin-bottom: 42px; }
 .trax-heading .eyebrow { display: flex; gap: 9px; align-items: center; color: #85e7ff; }
@@ -73,6 +74,7 @@
 .trax-login .glow-button { width: 100%; }
 .trax-error { padding: 14px 18px; border-radius: 12px; border: 1px solid #c699df44; color: #eacbff; background: #25123766; font-size: 13px; }
 .trax-loading { padding: 100px 0; text-align: center; color: #a7d7ed; }
+.trax-loading p { margin-inline: auto; }
 .trax-refreshing { animation: trax-turn 1.5s linear infinite; }
 @keyframes trax-turn { to { transform: rotate(360deg); } }
 @media (max-width: 900px) {
@@ -126,3 +128,4 @@
   .trax-mobile-label { display: block; font-size: 9px; font-weight: 400; color: #91adc3; margin-bottom: 7px; }
 }
 @media (prefers-reduced-motion: reduce) { .trax-refreshing { animation: none; } .trax-period, .trax-period::before { transition: none; } }
+}

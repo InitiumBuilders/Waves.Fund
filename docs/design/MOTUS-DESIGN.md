@@ -289,7 +289,7 @@ gradient rim, a dark plate, and liquid rising inside on hover. No cut corners (A
 
 ## Clarity: type floor, line length, room
 
-`src/clarity.css`, loaded last. Reading text is never under 14px (fine print 13.5px, form labels 15px), labels
+`src/clarity.css`, the last layer (see Stylesheet layers below). Reading text is never under 14px (fine print 13.5px, form labels 15px), labels
 never under 11px, and a paragraph stops at about 70 characters (a zero-weight cap, so anything that sets its
 own width keeps it; centred blocks keep their centre). Page rules carry `main` so they win over a page's own
 stylesheet, which can load after this one. Measured before and after with the session's density probe: Apply
@@ -305,6 +305,30 @@ menu, and the tour.
 The menu follows the four practices, the same as the tab bar: one primary action (What’s Your Vision?), then
 Learn, Guide, Give and Grow, each with the pages that belong to it. Every label is the menu's own; only the
 order changed. Two columns on a wide screen, so it fits without scrolling.
+
+## Stylesheet layers (2026-10-07)
+
+`src/layers.css`, imported first from `main.tsx`, names the order: `base, pages, overrides, clarity`. A later
+layer wins over an earlier one whatever the selector weight.
+
+- `base`: every stylesheet in the main bundle, in the order `main.tsx` imports them. The shared components come first
+  (the field, symbols, the Give landing, Trax, the sea hero, the ripple box, the circuit), then style.css,
+  refine.css and motus.css. They share one layer because they were written against each other's selector weights:
+  a component's rule beats a bare `svg` or `h1`, and a page rule sizes the component. Splitting them flipped 543
+  groups of computed styles; one layer keeps them exactly as they were.
+- `pages`: the stylesheets that load with a lazy page (the Praxis page, the Guide Library, the Teachback, the Give
+  app, the workspace) and the tour. Before, these won or lost by when their chunk loaded.
+- `overrides`: the shared rules that restyle a lazy page: motus.css's block for the Praxis page, Wave One and the
+  examples (it used an `html` prefix to win before), and the circuit's spacing and landing flash.
+- `clarity`: the reading floors, last. Its zero-weight line-length default lives in `base`.
+
+Checked with `scripts/qa/styles.mjs`, which records the computed style of every element on 22 routes, the open menu
+and the tour at two sizes. Against the build before the change, the only differences are the two places where the
+reading floor now wins as intended (the example captions' "View full-size graphic" link 12px to 14px, the Library's
+back link 13px to 14px). `scripts/qa/whywin.mjs` names the rules behind any difference, in cascade order, with their
+layer. The same pass found the Teachback page 560px wide on a phone: the echo symbol's moving layer is as wide as the
+symbol and travels most of it. The symbol now clips it (`overflow: clip` with a 16px clip margin), and
+`scripts/qa/overflow.mjs` checks every page for this.
 
 ## The tour
 
@@ -328,6 +352,50 @@ the card. The ring costs nothing measurable while scrolling (same frame times as
 
 Wording: titles are the site's own headings and August's lines. The connecting lines are placeholders, marked
 `PLACEHOLDER` in `src/tour.tsx`, for August to replace.
+
+The first-visit offer is drawn by `tour-launch.tsx`, so its styles live beside it in `src/tour-offer.css`. Until
+2026-10-07 they were in the tour's lazy stylesheet, and the offer showed as bare text in the top-left corner.
+
+## The Manifest (2026-10-07)
+
+`/manifest` (`src/manifest.tsx`, a lazy page) is all of Waves.Fund on one page, about five minutes to read. It opens
+on the sea with his mantra; one light is out on the water and four more come up beside it, two beats apart, all in
+step, so the swell grows as people join one vision. Ten chapters follow in one reading column with wide room between
+them, each headed by a wave symbol whose behaviour is the chapter's meaning: a standing string for the idea that
+waits, a travelling wave for the Wave, resonance for energy handed on, light carried between two walls for the Wave
+Guide, two sources in step for Give Together, an echo for the trust loop, a string held at both ends for the
+principles. The practice and the loop use the circuit. It closes on "When Humanity Builds Together, We Change The
+World." with three doors.
+
+Words: his lines are exact (the mantra, the practice names, the Give Together lines, the eight Praxis principles,
+the closing lines and every button label). Every other sentence was written at his request on 2026-10-07 and is
+marked `mine` in the source so he can strike or replace it. The page is in the menu under Learn, linked from Learn's
+first screen, in the sitemap, and has its own share card (`public/media/share/manifest.jpg`, from its own sea).
+
+## Sound (2026-10-07)
+
+Off until someone presses the speaker in the header; the choice is kept on the device, and a browser lets sound
+start only from a tap or a key, so a visitor who left it on hears it from their first tap. `src/sound.tsx` is the
+button and a `sound(kind, i)` call that does nothing while sound is off; `src/sound-engine.ts` loads only when it is
+turned on and synthesizes everything with the Web Audio API, so there are no audio files.
+
+- The sea: a low bed of soft noise, and a swell on the site's clock that rises with the visual sea's wave every
+  eight beats and breaks as it reaches the shore (about -40 dBFS between waves, -26 at the break).
+- Bells: sine partials in a singing bowl's ratios in a generated hall, every note from one D major pentatonic scale.
+  The circuit's pulse landing rings a bell that climbs card by card; so does a tour step, a tapped light, and a tap
+  on the water (its note follows where you touched). Never more than one bell in 90 ms.
+- A page change is a soft wave of filtered noise.
+- The context suspends while the tab is hidden.
+
+`scripts/qa/soundshot.mjs` renders 24 seconds of it offline from the real engine to a WAV file, with its levels.
+
+## The sea shows real events (2026-10-07)
+
+The public feed now carries, for each Wave, when its latest support signals arrived (up to 11, to the hour; signals
+stay anonymous). When the Waves page opens, each Wave's signals rise from its light as ripples, oldest first, one a
+beat, stronger for the past week; a signal that arrives while the page is open rises at once (the page reads the
+feed each minute while visible). With sound on, each one rings. A finished move rolling to shore waits on a record
+of moves, which does not exist yet; the regular rising wave stays until it does.
 
 ## Rules
 

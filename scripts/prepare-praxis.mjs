@@ -6,6 +6,7 @@ import { readFile, writeFile, copyFile, mkdir } from "node:fs/promises";
 // Titles and descriptions reuse lines already on the site.
 export const SHARE_PAGES = [
   { route: "/now-lets-begin", file: "now-lets-begin.html", title: "Now, Let’s Begin — The Wave Praxis | Waves.Fund", description: "Build your custom Wave with a real Wave Guide. Explore Wave One, the complete Wave Praxis, and a new way to bring people and funding around your mission." },
+  { route: "/manifest", file: "share/manifest.html", image: "manifest", title: "The Manifest | Waves.Fund", description: "Trust People. And They Become Trustworthy. Waves.Fund on one page." },
   { route: "/learn", file: "share/learn.html", image: "learn", title: "Raise Capital In A Whole New Way. Raise Waves. | Waves.Fund", description: "Welcome To The Frontier Of Funding. #BuildDifferent #BuildAWave" },
   { route: "/guide", file: "share/guide.html", image: "guide", title: "Your vision. Your Wave. A Guide beside you. | Waves.Fund", description: "A Wave Guide works with you to design, build, and evolve a custom home for your mission: its story, its people, and its next move." },
   { route: "/guide/library", file: "share/guide-library.html", image: "guide", title: "The Wave Guide Library | Waves.Fund", description: "Learn the practice. Build it together. Six lessons and seven working templates for the human in the loop." },

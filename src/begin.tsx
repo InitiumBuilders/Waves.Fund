@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowDown, ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, Check, Compass, Heart, Layers, Network, Users } from "lucide-react";
+import { ArrowDown, ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, Check, ChevronDown, Compass, Heart, Layers, Network, Users } from "lucide-react";
 import { CONTACT, WaveMark } from "./ui";
 import { WaveOne } from "./wave-one";
 import { WaveExamples } from "./wave-examples";
@@ -13,7 +13,7 @@ const DOWNLOAD = "/media/wave-praxis.md";
 const pieces = praxis.split(/(?=^## )/m);
 const preface = pieces[0];
 const chapters = pieces.slice(1).map((text, index) => ({
-  text,
+  body: text.split("\n").slice(1).join("\n"),
   title: text.split("\n")[0].replace(/^## /, "").trim(),
   id: `praxis-${index + 1}`,
 }));
@@ -56,9 +56,14 @@ function PassIllustration() {
   </aside>;
 }
 
+/* The whole Praxis, every word, with each chapter folded under its title. A link to a chapter opens it, and so does
+   the browser's find in page. */
 function DocumentReader() {
   const [active, setActive] = useState("praxis-1");
+  const [all, setAll] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const openChapter = (id: string) => { const d = document.getElementById(id); if (d instanceof HTMLDetailsElement) d.open = true; };
+  const toggleAll = () => { const next = !all; ref.current?.querySelectorAll<HTMLDetailsElement>(".begin-chapter").forEach(d => (d.open = next)); setAll(next); };
   useEffect(() => {
     const intersections = new Set<Element>();
     const observer = new IntersectionObserver(entries => {
@@ -69,18 +74,19 @@ function DocumentReader() {
     ref.current?.querySelectorAll(".begin-chapter").forEach(section => observer.observe(section));
     return () => observer.disconnect();
   }, []);
-  const contents = <>{chapters.map((chapter, i) => <a key={chapter.id} href={`#${chapter.id}`} aria-current={active === chapter.id ? "location" : undefined}><span>{String(i + 1).padStart(2, "0")}</span>{chapter.title}</a>)}</>;
+  const contents = <>{chapters.map((chapter, i) => <a key={chapter.id} href={`#${chapter.id}`} onClick={() => openChapter(chapter.id)} aria-current={active === chapter.id ? "location" : undefined}><span>{String(i + 1).padStart(2, "0")}</span>{chapter.title}</a>)}</>;
   return <section id="praxis" className="begin-reader" aria-labelledby="praxis-title">
-    <header className="begin-reader-title"><span className="begin-label">The complete document · Version 0.3</span><h2 id="praxis-title">The Wave Praxis</h2><p>The whole vision. Every word. An open foundation for what comes next.</p><a href={DOWNLOAD} download="WAVE-PRAXIS.md" className="begin-download"><ArrowDownToLine size={18} />Download the full MD file</a></header>
+    <header className="begin-reader-title"><span className="begin-label">The complete document · Version 0.4</span><h2 id="praxis-title">The Wave Praxis</h2><p>The whole vision. Every word. An open foundation for what comes next.</p><a href={DOWNLOAD} download="WAVE-PRAXIS.md" className="begin-download"><ArrowDownToLine size={18} />Download the full MD file</a></header>
     <div className="begin-reading-layout">
       <aside className="begin-contents"><details open><summary>Inside the praxis <ArrowDown size={15} /></summary><nav aria-label="Praxis chapters">{contents}</nav></details></aside>
       <div className="begin-essay" ref={ref}>
         <div className="begin-preface begin-markdown"><Markdown remarkPlugins={[remarkGfm]} components={{ h1: ({children}) => <h3>{children}</h3> }}>{preface}</Markdown></div>
-        {chapters.map((chapter, index) => <section key={chapter.id} id={chapter.id} className="begin-chapter">
-          <div className="begin-chapter-number" aria-hidden="true"><span>{String(index + 1).padStart(2, "0")}</span><i /></div>
-          <div className="begin-markdown"><Markdown remarkPlugins={[remarkGfm]} components={{ table: ({children}) => <div className="begin-table" role="region" aria-label={`${chapter.title} table`} tabIndex={0}><table>{children}</table></div>, a: ({href, children}) => <a href={href} target={href?.startsWith("https:") ? "_blank" : undefined} rel={href?.startsWith("https:") ? "noreferrer" : undefined}>{children}</a> }}>{chapter.text}</Markdown></div>
+        <button type="button" className="begin-text-link begin-open-all" aria-expanded={all} onClick={toggleAll}>{all ? "Close every chapter" : "Open every chapter"}<ChevronDown size={17} /></button>
+        {chapters.map((chapter, index) => <details key={chapter.id} id={chapter.id} className="begin-chapter">
+          <summary><span className="begin-chapter-number" aria-hidden="true"><span>{String(index + 1).padStart(2, "0")}</span><i /></span><h2>{chapter.title}</h2><ChevronDown className="begin-chapter-chevron" size={22} aria-hidden="true" /></summary>
+          <div className="begin-markdown"><Markdown remarkPlugins={[remarkGfm]} components={{ table: ({children}) => <div className="begin-table" role="region" aria-label={`${chapter.title} table`} tabIndex={0}><table>{children}</table></div>, a: ({href, children}) => <a href={href} target={href?.startsWith("https:") ? "_blank" : undefined} rel={href?.startsWith("https:") ? "noreferrer" : undefined}>{children}</a> }}>{chapter.body}</Markdown></div>
           {chapter.title === "Pass the Wave" && <PassIllustration />}
-        </section>)}
+        </details>)}
       </div>
     </div>
   </section>;
@@ -90,7 +96,7 @@ export default function Begin() {
   const { hash } = useLocation();
   useEffect(() => {
     if (!hash) return;
-    const frame = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "instant" }));
+    const frame = requestAnimationFrame(() => { const el = document.getElementById(hash.slice(1)); if (el instanceof HTMLDetailsElement) el.open = true; el?.scrollIntoView({ behavior: "instant" }); });
     return () => cancelAnimationFrame(frame);
   }, [hash]);
   return <div className="begin-page">

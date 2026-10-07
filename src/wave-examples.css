@@ -1,3 +1,4 @@
+@layer pages {
 .wave-examples { padding-top:80px; min-width:0; color:#fff; }
 #wave-examples { scroll-margin-top:0; }
 .wave-examples .begin-section-heading { margin-bottom:26px; }
@@ -47,3 +48,4 @@
 @media(min-width:900px) { .wave-examples { padding-top:105px; }.wave-example { grid-template-columns:minmax(0,.95fr) minmax(0,1fr); gap:42px; align-items:center; }.wave-example-art { width:min(100%,440px); }.wave-example-copy { align-self:center; padding:32px; }.wave-examples-toolbar { margin-bottom:14px; }.wave-examples-picker select { min-width:215px; }.wave-examples-arrows { gap:18px; }.wave-examples-arrows button { width:48px; }.wave-examples-count { font-size:14px; }.wave-examples-hint { margin-bottom:26px; } }
 @media(max-width:360px) { .wave-examples-picker select { min-width:137px; font-size:14px; }.wave-examples-arrows { gap:3px; }.wave-example-copy { padding:23px 17px; } }
 @media print { .wave-examples-toolbar,.wave-examples-hint { display:none; }.wave-examples-track { display:block; overflow:visible; }.wave-example { display:block; break-inside:avoid; margin-bottom:35px; }.wave-example-copy { background:none; }.wave-example-art { max-width:250px; } }
+}

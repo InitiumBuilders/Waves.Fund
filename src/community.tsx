@@ -20,6 +20,8 @@ export type Project = {
   budget: number;
   milestone: string;
   signals: number;
+  /** When its latest signals arrived (up to 11, to the hour, oldest first). */
+  pulses?: string[];
   supported?: boolean;
   waveType?: WaveType;
 };

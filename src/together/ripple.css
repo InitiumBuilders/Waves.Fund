@@ -1,5 +1,7 @@
+@layer base {
 /* The box a ripple scene or the sea draws in. The canvas fills it; without WebGL one still light stands in.
-   Zero specificity, so a page's own rule for the box always wins whatever order the stylesheets load in. */
+   Zero specificity, so a page's own rule for the box always wins. */
 :where(.ripple) { position: relative; }
 .ripple canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .ripple[data-still]::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: #e8fdff; box-shadow: 0 0 0 6px rgba(94, 233, 255, 0.12), 0 0 40px 10px rgba(94, 233, 255, 0.4); }
+}

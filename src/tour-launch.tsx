@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Compass, X } from "lucide-react";
+import "./tour-offer.css";
 
 /* The tour's front door. It lives in the main bundle and stays tiny: it starts the tour when asked (the menu, a
    link with ?tour, or the offer below) and loads the tour itself only then. The tour sits outside the page, so it
@@ -36,9 +37,9 @@ export function TourLauncher() {
   }, [search]);
 
   // A first visit is offered the tour once, quietly, after the page has had time to show itself. Never inside the
-  // Give app or team pages, where people come to do something.
+  // Give app or team pages, where people come to do something, and never where the first screen already offers it.
   useEffect(() => {
-    if (run || offered() || /^\/(give\/|team|workspace|sign-)/.test(pathname)) return;
+    if (run || offered() || /^\/(give\/|team|workspace|sign-)/.test(pathname) || /^\/(learn|manifest)\/?$/.test(pathname)) return;
     const t = setTimeout(() => setOffer(true), pathname === "/" ? 13000 : 7000);
     return () => clearTimeout(t);
   }, [pathname, run]);

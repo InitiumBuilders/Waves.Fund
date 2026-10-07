@@ -10,3 +10,6 @@ VERIFICATION.md
 .open-source
 public-repo
 .agents
+dist-old/
+dist-new/
+scripts/qa/.a11y/

@@ -1,3 +1,4 @@
+@layer base {
 /* Wave symbols (src/symbols.tsx). The moving parts are HTML layers, animated with transform and opacity
    only, so the compositor runs them. Every loop is a whole number of beats (1.5 s, src/cadence.ts), so the
    symbols move in step with the field and the ripples. */
@@ -38,6 +39,9 @@
 
 /* An echo: out along the rail, flipped by the fixed end, and home again. */
 .sym-pulse { transform-origin: 0 50%; animation: sym-echo 3s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+/* The pulse layer is the full width of the symbol and travels most of it, so the symbol clips it; otherwise a phone
+   page grows sideways. The margin keeps the pulse's tail visible at the fixed end. */
+.sym-echo { overflow: clip; overflow-clip-margin: 16px; }
 @keyframes sym-echo {
   0% { transform: translate3d(3.75%, 0, 0) scaleY(1); }
   46% { transform: translate3d(88.125%, 0, 0) scaleY(1); }
@@ -68,4 +72,5 @@ html[data-motion="off"] .sym-ring { opacity: 0.5; transform: scale(0.8); }
   :is(.sym-swing, .sym-grow, .sym-slide, .sym-ring, .sym-pulse, .sym-far) { animation: none !important; }
   .sym-ring { opacity: 0.5; transform: scale(0.8); }
   .wave-list li > * { transition: none !important; }
+}
 }

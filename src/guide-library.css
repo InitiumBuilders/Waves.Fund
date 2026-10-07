@@ -1,3 +1,4 @@
+@layer pages {
 .guide-public { color: #fff; }
 .guide-public p { line-height: 1.85; }
 .guide-public :is(h1,h2,h3,h4,h5) { text-wrap: balance; }
@@ -162,3 +163,4 @@
 }
 @media (prefers-reduced-motion: reduce) { .guide-human-orbit > i { animation: none; } }
 @media print { .guide-public .panel, .guide-lesson-text { background: white; color: black !important; } .guide-human-orbit, .guide-actions, .guide-download, .guide-lesson-aside, .guide-lesson-next { display: none; } .guide-lesson-layout { display: block; } }
+}

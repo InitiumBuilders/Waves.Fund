@@ -35,6 +35,7 @@ import { FlowNavigation } from "./flow";
 import { go, Seamless } from "./seamless";
 import { TourLauncher } from "./tour-launch";
 import { SeaHero } from "./sea-hero";
+import { sound } from "./sound";
 import { BEAT } from "./cadence";
 import { hash } from "./together/ripple";
 import type { RippleModel, Source } from "./together/ripple";
@@ -51,6 +52,7 @@ import {
   Team,
 } from "./pages";
 const Begin = lazy(() => import("./begin"));
+const Manifest = lazy(() => import("./manifest"));
 const GuidePitch = lazy(() => import("./guide-library").then(m => ({ default: m.GuidePitch })));
 const GuideLibrary = lazy(() => import("./guide-library").then(m => ({ default: m.GuideLibrary })));
 const GuideLesson = lazy(() => import("./guide-library").then(m => ({ default: m.GuideLesson })));
@@ -63,6 +65,7 @@ const MindLab = import.meta.env.DEV ? lazy(() => import("./mind/MindLab")) : nul
 const TITLES: Record<string, string> = {
   "/": "Trust People. And They Become Trustworthy.",
   "/learn": "Raise Capital In A Whole New Way.",
+  "/manifest": "The Manifest",
   "/guide": "Wave Guides",
   "/guide/library": "The Wave Guide Library",
   "/give": "Give Together",
@@ -105,9 +108,15 @@ function ScreenPosition() {
   return null;
 }
 /* Waves In Motion: every published Wave is a light on the water, all in step, so the water between them adds
-   up. A Wave's ripples reach as far as its learner signals. Near the shore, a faint light: yours, still to come. */
+   up. A Wave's ripples reach as far as its support signals. Near the shore, a faint light: yours, still to come.
+   The sea shows what really happened: when the page opens, each Wave's latest signals rise from its light as
+   ripples, oldest first, one a beat, stronger for the past week; a signal that arrives while you watch rises at once.
+   With sound on, each one rings. */
+const WEEK = 7 * 86400 * 1000;
 function wavesModel(list: MutableRefObject<Project[]>): RippleModel {
   const born = new Map<string, number>();
+  let replay: { id: string; at: number; a: number; rang?: boolean }[] | null = null;
+  const seen = new Map<string, number>();
   return (t, w, h) => {
     const lambda = Math.max(44, Math.min(110, Math.min(w, h) * 0.17));
     const ps = list.current.slice(0, 10), n = ps.length;
@@ -117,6 +126,20 @@ function wavesModel(list: MutableRefObject<Project[]>): RippleModel {
       const u = n === 1 ? 0.62 : 0.22 + 0.62 * (i + 0.5) / n + (hash(p.id) - 0.5) * 0.08;
       return { x: w * u, y: h * (0.3 + 0.28 * hash("y" + p.id)), a: strength, phase: 0, hue: 0.1 + 0.5 * hash(p.category), size: 3 + strength * 1.2, born: born.get(p.id), reach: 0.45 + 0.2 * strength };
     });
+    if (replay === null && n) {
+      const now = Date.now();
+      replay = ps.flatMap((p) => (p.pulses || []).map((x) => ({ id: p.id, when: Date.parse(x) })))
+        .filter((r) => Number.isFinite(r.when)).sort((a, b) => a.when - b.when)
+        .map((r, k) => ({ id: r.id, at: t + 2 * BEAT + k * BEAT, a: now - r.when < WEEK ? 0.9 : 0.55 }));
+      for (const p of ps) seen.set(p.id, p.signals);
+    }
+    if (replay) for (const p of ps) { const was = seen.get(p.id); if (was !== undefined && p.signals > was) replay.push({ id: p.id, at: t, a: 0.95 }); seen.set(p.id, p.signals); }
+    for (const r of replay || []) {
+      const age = t - r.at, i = ps.findIndex((p) => p.id === r.id), s = sources[i];
+      if (age < 0 || age > 4 || !s) continue;
+      if (!r.rang) { r.rang = true; sound("light", i); }
+      sources.push({ x: s.x, y: s.y, a: r.a * (1 - age / 4), phase: 0, hue: s.hue, size: 2, born: r.at, reach: 0.7 });
+    }
     sources.push({ x: w * 0.5, y: h * 0.82, a: 0.28, phase: 0, hue: 0.2, size: 2.6, born: -100, reach: 0.3 });
     return { sources, lambda, speed: lambda / BEAT, gain: 1.1, dots: 14, ground: 0.92, roll: [8 * BEAT, 0.5] };
   };
@@ -124,6 +147,11 @@ function wavesModel(list: MutableRefObject<Project[]>): RippleModel {
 function Projects() {
   const { projects, loading, error, refresh } = useCommunity();
   const navigate = useNavigate();
+  // While the page is open and in view, the feed is read again each minute, so a new signal rises on the sea.
+  useEffect(() => {
+    const id = window.setInterval(() => { if (!document.hidden) refresh(); }, 60000);
+    return () => clearInterval(id);
+  }, [refresh]);
   const [query, setQuery] = useState(""),
     [selected, setSelected] = useState<Project | null>(null);
   const filtered = projects.filter((p) =>
@@ -137,7 +165,7 @@ function Projects() {
   return (
     <div className="waves-page">
       <SeaHero
-        eyebrow="STUDENT DRIVEN PROJECTS"
+        eyebrow="COMMUNITY REVIEW"
         model={model}
         onLight={(i, at) => {
           const p = list.current[i];
@@ -186,7 +214,7 @@ function Projects() {
           <p>
             {query
               ? "Try a different project or focus area."
-              : "Project submissions are open. The first reviewed projects will appear here, with their budgets, milestones, and learner support."}
+              : "Project submissions are open. The first reviewed projects will appear here, with their budgets, milestones, and support signals."}
           </p>
           {query ? (
             <button className="text-button" onClick={() => setQuery("")}>
@@ -205,11 +233,11 @@ function Projects() {
               <p className="eyebrow">{p.category}</p>
               <h2>{p.title}</h2>
               <p className="wave-card-story">{p.description}</p>
-              <div className="wave-card-signals" aria-label={`${p.signals} learner support signals`}>
+              <div className="wave-card-signals" aria-label={`${p.signals} support signals`}>
                 <span className="signal-dots" aria-hidden="true">
                   {Array.from({ length: 11 }, (_, i) => <i key={i} className={i < p.signals ? "lit" : ""} />)}
                 </span>
-                <span>{p.signals} Learner Signals</span>
+                <span>{p.signals} Support Signals</span>
               </div>
               <div className="wave-card-foot">
                 <span><strong>${p.budget.toLocaleString()}</strong> Requested</span>
@@ -217,7 +245,7 @@ function Projects() {
                   Explore This Wave <ArrowRight size={17} />
                 </button>
               </div>
-              {/* The Wave's stock: as full as its learner signals are toward the next milestone of 11. */}
+              {/* The Wave's stock: as full as its support signals are toward the next milestone of 11. */}
               <Stock level={Math.min(0.92, 0.06 + (Math.min(p.signals, 11) / 11) * 0.86)} />
             </article>
           ))}
@@ -234,8 +262,7 @@ function Projects() {
       )}
       <p className="fine-print">
         Published projects are in community review. Funding is not guaranteed.
-        Student support signals inform the team’s work; they are not grant
-        awards.
+        Support signals inform the team’s work; they are not grant awards.
       </p>
       {selected && (
         <ProjectDetail
@@ -255,8 +282,7 @@ function ProjectDetail({
   onClose: () => void;
 }) {
   const { refresh } = useCommunity();
-  const [learner, setLearner] = useState(false),
-    [busy, setBusy] = useState(false),
+  const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const [supported, setSupported] = useState(project.supported || false);
   return (
@@ -277,7 +303,6 @@ function ProjectDetail({
           try {
             const r = await api("vote", {
               id: project.id,
-              learner: true,
               withdraw: supported,
             });
             setSupported(r.supported);
@@ -289,17 +314,6 @@ function ProjectDetail({
           }
         }}
       >
-        {!supported && (
-          <label className="checkbox">
-            <input
-              required
-              type="checkbox"
-              checked={learner}
-              onChange={(e) => setLearner(e.target.checked)}
-            />
-            <span>I Am A Student Or Lifelong Learner.</span>
-          </label>
-        )}
         <ActionButton type="submit" disabled={busy}>
           {busy
             ? "Saving…"
@@ -346,7 +360,7 @@ function Grow() {
         <div className="growth-stats">
           <Vessel label="Projects In Community Review" value={loading || error ? null : projects.length} hue="cy" still={!motion} />
           <Vessel label="Accepted Wave Guides" value={loading || error ? null : guides} hue="bl" still={!motion} />
-          <Vessel label="Learner Support Signals" value={loading || error ? null : projects.reduce((a, p) => a + p.signals, 0)} hue="vi" still={!motion} />
+          <Vessel label="Support Signals" value={loading || error ? null : projects.reduce((a, p) => a + p.signals, 0)} hue="vi" still={!motion} />
         </div>
         {error && (
           <p className="error-message" role="alert">
@@ -360,7 +374,7 @@ function Grow() {
         </p>
         <ReceiptTracker />
         <section className="panel next-round">
-          <p className="eyebrow">THE NEXT CHAPTER</p>
+          <p className="eyebrow">PROPOSED PILOT</p>
           <h2>Students Funding The Future</h2>
           <p>
             The first Green Reef pilot is a proposal for discussion. No grant
@@ -408,6 +422,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/now-lets-begin" element={<Suspense fallback={<div className="narrow-page" role="status">Opening the Wave Praxis…</div>}><Begin /></Suspense>} />
             <Route path="/learn" element={<Learn />} />
+            <Route path="/manifest" element={<Suspense fallback={<div className="narrow-page route-loading" role="status">Opening the Manifest…</div>}><Manifest /></Suspense>} />
             <Route path="/guide" element={<GuidePitch />} />
             <Route path="/guide/library" element={<GuideLibrary />} />
             <Route path="/guide/library/:slug" element={<GuideLesson />} />

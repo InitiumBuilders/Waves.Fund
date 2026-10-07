@@ -1,0 +1,11 @@
+/* The order of the site's stylesheets. A later layer wins over an earlier one whatever the selector weight, so a
+   lazily loaded stylesheet no longer wins or loses by when its chunk happened to load.
+   base: every stylesheet in the main bundle, in the order main.tsx imports them: the shared components first, then
+     style.css, refine.css and motus.css. They share one layer because they were written against each other's
+     selector weights (a component's rule beats a bare `svg` or `h1`; a page rule sizes the component).
+   pages: the stylesheets that load with a lazy page (the Praxis page, the Guide Library, the Teachback, the Give app,
+     the workspace) and the tour, which draws over the page like one.
+   overrides: the few shared rules that restyle a lazy page (motus.css on the Praxis page, the circuit's spacing).
+   clarity: the reading floor, last.
+   Imported first from main.tsx. */
+@layer base, pages, overrides, clarity;

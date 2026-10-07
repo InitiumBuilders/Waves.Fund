@@ -8,6 +8,7 @@ import type { Project } from "./community";
 import { go } from "./seamless";
 import { mindWave } from "./mind/WaveMind";
 import { BEAT, clock } from "./cadence";
+import { sound } from "./sound";
 import "./tour.css";
 
 /* The tour. One question first (what brings you here), then a path through the pages that answer it. Each step
@@ -46,7 +47,7 @@ const S: Record<string, Step> = {
   firstWave: {
     route: "/waves", target: ".wave-card", practice: "Grow",
     title: (c) => c.projects[0]?.title || "Waves In Motion", line: (c) => c.projects[0]?.category || null,
-    live: (c) => (c.projects[0] ? plural(c.projects[0].signals, "learner support signal", "learner support signals") : null),
+    live: (c) => (c.projects[0] ? plural(c.projects[0].signals, "support signal", "support signals") : null),
   },
   apply: {
     route: "/apply", target: ".application-form", practice: "Your Vision", title: "Submit A Project",
@@ -67,7 +68,7 @@ const S: Record<string, Step> = {
   partner: { route: "/give", target: ".gt-partner-card", practice: "Give", title: "Wave Partner of the month", line: "This month’s partner. You can give to them directly through Benevity." }, // line: PLACEHOLDER
   safe: { route: "/give", target: ".gt-safe", practice: "Give", title: "How We Keep It Safe", line: "Six rules that keep giving together safe." }, // line: PLACEHOLDER
   grow: {
-    route: "/grow", target: ".growth-stats", practice: "Grow", title: "Measure what moves.", line: "Live counts for the whole fund: Waves, Wave Guides and learner signals.", // PLACEHOLDER
+    route: "/grow", target: ".growth-stats", practice: "Grow", title: "Measure what moves.", line: "Live counts for the whole fund: Waves, Wave Guides and support signals.", // PLACEHOLDER
     mine: (c) => (c.receipts ? `You have ${plural(c.receipts, "application receipt", "application receipts")} saved on this device.` : null), // PLACEHOLDER
   },
   begin: { route: "/now-lets-begin", target: ".begin-hero", practice: "Learn", title: "Now, Let’s Begin.", line: "Meet Wave One and read the full Wave Praxis." }, // line: PLACEHOLDER
@@ -198,6 +199,7 @@ export default function Tour({ path: initial, onEnd }: { path?: string; onEnd: (
       if (step.fly) { setReady(true); await flyThrough(el, step.fly, motion, () => cancelled, flight); }
       else await bring(el, motion);
       if (cancelled) return;
+      sound("tour", i);
       setReady(true);
       setLit(place());
       // The card never covers what it points at: if it would, it moves to the other corner.

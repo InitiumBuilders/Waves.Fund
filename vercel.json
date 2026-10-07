@@ -12,6 +12,10 @@
       "destination": "/share/learn.html"
     },
     {
+      "source": "/manifest",
+      "destination": "/share/manifest.html"
+    },
+    {
       "source": "/guide",
       "destination": "/share/guide.html"
     },

@@ -5,7 +5,7 @@ const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Use
 import { readFileSync } from "node:fs";
 const base = process.argv[2] || "http://127.0.0.1:5197";
 const AXE = readFileSync(process.env.AXE_CORE || new URL("./.a11y/node_modules/axe-core/axe.min.js", import.meta.url), "utf8");
-const routes = ["/", "/learn", "/guide", "/guide/library", "/guide/library/listen", "/guide/teachback", "/guide/apply", "/guide/team", "/guide/partners", "/guide/partners/green-reef", "/guide/partners/green-reef/proposal", "/give", "/grow", "/waves", "/apply", "/now-lets-begin", "/privacy", "/nope"];
+const routes = ["/", "/manifest", "/learn", "/guide", "/guide/library", "/guide/library/listen", "/guide/teachback", "/guide/apply", "/guide/team", "/guide/partners", "/guide/partners/green-reef", "/guide/partners/green-reef/proposal", "/give", "/grow", "/waves", "/apply", "/now-lets-begin", "/privacy", "/nope"];
 const b = await chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
 const run = async (p) => {
   await p.addScriptTag({ content: AXE });

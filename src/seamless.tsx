@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { NavigateFunction } from "react-router-dom";
 import { arriveOnScroll, startCadence, still, waveOnArrival } from "./cadence";
 import { mindWave } from "./mind/WaveMind";
+import { sound } from "./sound";
 
 type Transitioning = Document & { startViewTransition?: (update: () => Promise<void>) => unknown };
 
@@ -10,6 +11,7 @@ type Transitioning = Document & { startViewTransition?: (update: () => Promise<v
 export function go(navigate: NavigateFunction, to: string, point?: { x: number; y: number }) {
   const doc = document as Transitioning;
   if (point) mindWave(point, 0.9);
+  sound("page");
   if (typeof doc.startViewTransition !== "function" || still()) { navigate(to); return; }
   const from = document.getElementById("content");
   const hash = to.includes("#");

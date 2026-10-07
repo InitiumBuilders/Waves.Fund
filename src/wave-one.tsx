@@ -85,7 +85,7 @@ export function WaveOne() {
             <div className="wave-one-view" key="story">
               <p className="wave-one-kicker">WELCOME TO THE FRONTIER OF FUNDING</p>
               <h4>Raise Capital<br />In A Whole New Way.</h4>
-              <p>A student driven home for lifelong learners and leaders building Waves for humanity. Bring your vision. Find the people to help it move.</p>
+              <p>A home for lifelong learners and leaders building Waves for humanity. Bring your vision. Find the people to help it move.</p>
               <div className="wave-one-guide">
                 <span className="wave-one-guide-mark" aria-hidden="true">AJD</span>
                 <div><span>Founder &amp; First Wave Guide</span><strong>August James Domanchuk</strong><p>Emergent Strategist. Life long learner and teacher.</p></div>

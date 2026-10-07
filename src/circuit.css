@@ -1,3 +1,4 @@
+@layer base {
 /* The circuit between cards: hairline traces, a pad at each port, one pulse at a time. */
 .circuit { position: relative; }
 .circuit-layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
@@ -11,6 +12,10 @@
   background: #eafdff; box-shadow: 0 0 8px 3px rgba(94, 233, 255, 0.8), 0 0 26px 9px rgba(94, 233, 255, 0.28);
   pointer-events: none; z-index: 2; offset-rotate: 0deg;
 }
+}
+
+/* These restyle the cards and lists the circuit wraps, which belong to the pages, so they sit in the overrides layer. */
+@layer overrides {
 /* The pulse lands: the card's rim answers with light, once. */
 .circuit .panel.is-fed::after { animation: stock-landed 1.1s var(--ease-out); }
 
@@ -20,4 +25,5 @@
 @media (min-width: 900px) {
   .circuit .cascade { gap: 96px; }
   .circuit .roadmap { gap: 48px; }
+}
 }

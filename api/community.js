@@ -131,9 +131,18 @@ export default async function handler(req, res) {
       const projects = await Promise.all(
         rows.filter(Boolean).map(async (p) => {
           const votes = await files(`votes/${p.id}/`);
+          // When the latest signals arrived, to the hour, so the Waves page can replay them on the sea. Signals are
+          // anonymous; the hour is all that is shared.
+          const pulses = votes
+            .map((v) => { const d = new Date(v.uploadedAt); d.setUTCMinutes(0, 0, 0); return d.getTime(); })
+            .filter(Number.isFinite)
+            .sort((a, b) => a - b)
+            .slice(-11)
+            .map((ms) => new Date(ms).toISOString());
           return {
             ...p,
             signals: votes.length,
+            pulses,
             supported:
               !!voter &&
               votes.some((v) =>
@@ -192,12 +201,8 @@ export default async function handler(req, res) {
     }
     if (action === "submit") {
       if (b.website) throw fail(400, "Unable to submit.");
-      if (
-        !["project", "guide", "support"].includes(b.kind) ||
-        b.consent !== true ||
-        b.learner !== true
-      )
-        throw fail(400, "Confirm your learning and privacy choices.");
+      if (!["project", "guide", "support"].includes(b.kind) || b.consent !== true)
+        throw fail(400, "Confirm your privacy choices.");
       const name = text(b.name, 100),
         email = text(b.email, 254).toLowerCase(),
         title = text(b.title, 120),
@@ -244,7 +249,6 @@ export default async function handler(req, res) {
         milestone: text(b.milestone, 700),
         availability: text(b.availability, 300),
         publicConsent: b.publicConsent === true,
-        learner: true,
         consent: true,
         created: new Date().toISOString(),
         status: "Received",
@@ -325,11 +329,6 @@ export default async function handler(req, res) {
       return res.json({ ok: true });
     }
     if (action === "vote") {
-      if (b.learner !== true)
-        throw fail(
-          400,
-          "Self-identify as a student or lifelong learner to participate.",
-        );
       if (
         !/^[a-f0-9-]{36}$/.test(b.id || "") ||
         !(await read(`published/${b.id}.json`))

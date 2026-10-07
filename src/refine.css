@@ -1,3 +1,4 @@
+@layer base {
 /* The artwork and controls share one continuous surface. */
 .app-header { background:transparent; backdrop-filter:none; border:0; position:relative; height:68px; }
 .app-header::before { content:''; position:absolute; inset:-30px 0 -38px; z-index:-1; pointer-events:none; background:linear-gradient(#020817b3,transparent); }
@@ -277,3 +278,4 @@ body * {
 @media(min-width:800px){.desktop-nav .nav-logo{width:30px;height:30px}.desktop-nav .nav-grow .nav-logo{width:37px;height:31px}}
 @media(prefers-reduced-motion:reduce){.nav-learn .nav-logo,.nav-grow.holding .nav-logo,.nav-grow.waves-opening .nav-logo,.route-waves::after{animation:none!important}}
 html[data-motion="off"] .nav-learn .nav-logo,html[data-motion="off"] .nav-grow.holding .nav-logo,html[data-motion="off"] .nav-grow.waves-opening .nav-logo,html[data-motion="off"] .route-waves::after{animation:none!important}
+}

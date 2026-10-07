@@ -1,0 +1,64 @@
+@layer pages {
+/* The Manifest (/manifest). One reading column, wide room between chapters, one wave symbol at the head of each.
+   Mobile first. */
+.manifest-body { padding-bottom: clamp(60px, 10vw, 120px); }
+/* On a phone the hero's words are taller than on Learn: a smaller title and a taller floor keep them off the water. */
+@media (max-width: 899px) {
+  .manifest-page .sea-hero-copy h1 { font-size: clamp(38px, 10.6vw, 64px); }
+  .manifest-page .sea-hero-copy::after { height: 86%; }
+}
+.mf-chapter, .mf-close { max-width: 680px; margin-inline: auto; padding-top: clamp(104px, 15vw, 190px); }
+.mf-chapter.mf-wide { max-width: 1180px; }
+.mf-chapter.mf-wide > :is(.mf-mark, .eyebrow, h2) { max-width: 680px; margin-inline: auto; }
+
+/* The chapter's mark: its wave, and its number on the same line. */
+.mf-mark { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; color: var(--cyan); }
+.mf-mark .mf-symbol { width: min(48%, 190px); flex: none; }
+.mf-number { font-size: 13px; font-weight: 600; letter-spacing: 0.16em; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.mf-chapter h2 { font-size: clamp(32px, 4.6vw, 58px); font-weight: 460; letter-spacing: -0.045em; line-height: 1.04; margin: 0 0 26px; text-wrap: balance; }
+.mf-chapter h2 span, .mf-close h2 span { background: linear-gradient(100deg, #d8fbff 0%, #6fe3ff 38%, #8da2ff 72%, #b69cff 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #7fe4ff; text-shadow: none; }
+.mf-chapter > p { font-size: clamp(17px, 1.35vw, 19px); line-height: 1.75; margin: 0 0 18px; }
+.mf-chapter > .text-button { margin-top: 14px; }
+
+/* Three lines a Wave holds, each a point of light. */
+.mf-three { list-style: none; padding: 0; margin: 30px 0 34px; display: grid; gap: 18px; }
+.mf-three li { position: relative; padding-left: 30px; font-size: clamp(21px, 2.2vw, 28px); line-height: 1.3; letter-spacing: -0.02em; color: var(--ink); }
+.mf-three li::before, .mf-principles li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 9px; height: 9px; border-radius: 50%; background: #eafdff; box-shadow: 0 0 8px 2px rgba(94, 233, 255, 0.7); }
+
+/* His line, set as a statement. */
+.mf-his { font-size: clamp(22px, 2.4vw, 30px); line-height: 1.3; letter-spacing: -0.02em; color: var(--ink); margin: 30px 0; }
+
+/* The four practices in a row on a wide screen, joined by the circuit. */
+.mf-practices { list-style: none; padding: 0; margin: 46px 0 0; display: grid; gap: 64px; }
+.mf-practices li { display: flex; flex-direction: column; min-width: 0; padding: 26px 24px 28px; }
+.mf-practices .practice-symbol { width: min(70%, 200px); margin-bottom: 20px; color: var(--cyan); }
+.mf-practices h3 { font-size: clamp(22px, 2vw, 28px); margin: 0 0 10px; }
+.mf-practices h3 a { color: inherit; text-decoration: none; }
+.mf-practices h3 a:hover { color: #c9f6ff; }
+.mf-practices p { margin: 0; }
+@media (min-width: 1000px) { .mf-practices { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 44px; } }
+
+/* The loop: four cards down the page, one pulse running through them. */
+.mf-loop { list-style: none; padding: 0; margin: 40px 0 0; display: grid; gap: 64px; max-width: 520px; }
+.mf-loop li { padding: 22px 24px 24px; }
+.mf-loop .step-number { position: static; display: block; margin-bottom: 10px; }
+.mf-loop p { margin: 0; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; color: var(--ink); }
+.mf-after { margin-top: 48px; }
+
+/* Eight principles, his words, in two columns where there is room. */
+.mf-principles { list-style: none; padding: 0; margin: 32px 0 30px; display: grid; gap: 16px 40px; }
+.mf-principles li { position: relative; padding-left: 26px; font-size: clamp(17px, 1.35vw, 19px); line-height: 1.5; color: var(--ink); }
+.mf-principles li::before { top: 0.6em; width: 7px; height: 7px; }
+@media (min-width: 760px) { .mf-principles { grid-template-columns: 1fr 1fr; } }
+
+/* First moves, numbered. */
+.mf-moves { list-style: none; padding: 0; margin: 30px 0 0; display: grid; gap: 20px; counter-reset: move; }
+.mf-moves li { counter-increment: move; display: grid; grid-template-columns: 34px 1fr; align-items: baseline; font-size: clamp(19px, 1.8vw, 23px); line-height: 1.4; letter-spacing: -0.015em; color: var(--ink); }
+.mf-moves li::before { content: counter(move, decimal-leading-zero); font-size: 13px; font-weight: 600; letter-spacing: 0.16em; color: var(--cyan); font-variant-numeric: tabular-nums; }
+
+/* The close: his two lines and three doors, centred. */
+.mf-close { text-align: center; max-width: 900px; }
+.mf-close h2 { font-size: clamp(34px, 5.4vw, 72px); font-weight: 460; letter-spacing: -0.05em; line-height: 1.02; margin: 0 0 24px; text-wrap: balance; }
+.mf-close > p { font-size: clamp(17px, 1.4vw, 20px); margin: 0 auto 34px; max-width: 34ch; }
+.mf-close .button-row { justify-content: center; }
+}

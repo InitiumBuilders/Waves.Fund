@@ -39,7 +39,6 @@ export function Application({
     [category, setCategory] = useState("Aquatic Food Systems"),
     [milestone, setMilestone] = useState(""),
     [availability, setAvailability] = useState(""),
-    [learner, setLearner] = useState(false),
     [consent, setConsent] = useState(false),
     [publicConsent, setPublicConsent] = useState(false),
     [busy, setBusy] = useState(false),
@@ -51,9 +50,9 @@ export function Application({
   }));
   // The Seed grows as each required part of the application is filled in.
   useEffect(() => {
-    const parts = [name.trim(), /^\S+@\S+\.\S+$/.test(email.trim()), title.trim(), description.trim().length >= 20, kind === "project" ? milestone.trim() : availability.trim(), learner, consent];
+    const parts = [name.trim(), /^\S+@\S+\.\S+$/.test(email.trim()), title.trim(), description.trim().length >= 20, kind === "project" ? milestone.trim() : availability.trim(), consent];
     mindGrow(0.1 + (0.9 * parts.filter(Boolean).length) / parts.length);
-  }, [kind, name, email, title, description, milestone, availability, learner, consent]);
+  }, [kind, name, email, title, description, milestone, availability, consent]);
   useEffect(() => () => mindGrow(1), []);
   async function submit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -72,7 +71,6 @@ export function Application({
         category,
         milestone,
         availability,
-        learner,
         consent,
         publicConsent,
         ...(kind === "project" && waveType ? { waveType } : {}),
@@ -288,15 +286,6 @@ export function Application({
             <input name="website" tabIndex={-1} autoComplete="off" />
           </label>
         </div>
-        <label className="checkbox">
-          <input
-            type="checkbox"
-            required
-            checked={learner}
-            onChange={(e) => setLearner(e.target.checked)}
-          />
-          <span>I Am A Student Or Lifelong Learner.</span>
-        </label>
         <label className="checkbox">
           <input
             type="checkbox"
@@ -706,7 +695,7 @@ export function Privacy() {
         <h2>What You Share</h2>
         <p>
           Applications include your name, email, project or experience details,
-          learner self-identification, and your consent choices. These are
+          and your consent choices. These are
           stored privately for the Waves.Fund team to review. Do not submit
           sensitive personal information or details about other people without
           permission.
@@ -727,7 +716,7 @@ export function Privacy() {
         </p>
         <h2>Community Participation</h2>
         <p>
-          Students and lifelong learners self-identify. Current project support
+          Anyone can take part. Current project support
           signals are advisory, with one active signal per project per browser.
           They are not identity-verified ballots and do not determine grant
           awards. Formal voting rounds will require published rules and

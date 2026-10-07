@@ -1,3 +1,4 @@
+@layer base {
 /* The Give landing page (/give). Mobile first. */
 
 /* ---------- The ripple chapters: a stage that holds still while three chapters pass ---------- */
@@ -54,7 +55,7 @@ html[data-motion="off"] .gt-tank-copy > * { animation: none; }
 /* ---------- A Give Guide, and the physics of two in step ---------- */
 .gt-pair { display: grid; gap: 30px; align-items: center; }
 .gt-pair-text { display: grid; gap: 16px; justify-items: start; }
-.gt-pair-text > * { margin: 0; }
+.gt-pair-text > :not(.eyebrow) { margin: 0; }
 .gt-pair-text a:not(.glow-button), .gt-safe a { text-decoration: underline; text-decoration-color: rgba(94, 233, 255, 0.45); text-underline-offset: 3px; }
 .gt-study { margin: 0; display: grid; gap: 16px; }
 .gt-study-scene { position: relative; height: clamp(320px, 92vw, 540px); touch-action: pan-y; }
@@ -70,7 +71,8 @@ html[data-motion="off"] .gt-tank-copy > * { animation: none; }
 
 /* ---------- Wave Partner ---------- */
 .gt-partner-card { max-width: 780px; display: grid; gap: 16px; justify-items: start; }
-.gt-partner-card > * { margin: 0; }
+.gt-partner-card > :not(p, .button-row) { margin: 0; }
+.gt-partner-card > p:not(.eyebrow) { margin-bottom: 0; }
 .gt-partner-label { text-transform: uppercase; }
 .gt-partner-card .giving-logo { margin: 4px 0; }
 .gt-partner-card .button-row { display: flex; flex-wrap: wrap; }
@@ -98,3 +100,4 @@ html[data-motion="off"] .gt-front i { animation: none; }
 
 /* Gradient words: the site's dark text-shadow would show through the transparent fill and dull them. */
 .give-together h2 span, .teachback-page h2 span { text-shadow: none; }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { BEAT, clock, still } from "./cadence";
+import { sound } from "./sound";
 import "./circuit.css";
 
 /* The circuit. Energy flows from one card to the next along a trace, the way current runs along a printed
@@ -73,7 +74,7 @@ export function Circuit({ children, className = "" }: { children: ReactNode; cla
       if (lit[k]) return;
       lit[k] = true;
       cards[k].classList.add("is-lit");
-      if (fed) { cards[k].classList.add("is-fed"); timers.add(window.setTimeout(() => cards[k].classList.remove("is-fed"), 1300)); }
+      if (fed) { cards[k].classList.add("is-fed"); timers.add(window.setTimeout(() => cards[k].classList.remove("is-fed"), 1300)); sound("land", k); }
       if (k < traces.length) traces[k].from.classList.add("is-lit");
       if (k > 0) { traces[k - 1].to.classList.add("is-lit"); traces[k - 1].live.classList.add("is-live"); }
       if (pending.has(k)) { pending.delete(k); send(k); }

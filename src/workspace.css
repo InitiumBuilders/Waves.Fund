@@ -1,3 +1,4 @@
+@layer pages {
 .workspace-page{max-width:1120px;margin:auto;padding:40px 20px 70px;color:#fff}
 .workspace-page .page-intro{margin-bottom:32px}
 .workspace-page .page-intro h1{font-size:clamp(2.25rem,7vw,4.4rem);line-height:1.08}
@@ -63,3 +64,4 @@
 @media(prefers-reduced-motion:reduce){.workspace-button,.workspace-card-link{transition:none}}
 
 .workspace-permission{min-width:0;margin:0;padding:0;border:0}.workspace-permission:disabled .workspace-button{cursor:default}.workspace-permission:disabled input,.workspace-permission:disabled textarea{opacity:1;color:#fff}
+}

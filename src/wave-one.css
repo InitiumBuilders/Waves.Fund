@@ -1,3 +1,4 @@
+@layer pages {
 .wave-one {
   isolation: isolate;
   position: relative;
@@ -102,3 +103,4 @@
   .wave-one button,.wave-one a { transition:none; }
 }
 html[data-motion="off"] .wave-one-symbol img,html[data-motion="off"] .wave-one-view { animation:none; }
+}

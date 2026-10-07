@@ -2,7 +2,7 @@
 // Playwright: set PLAYWRIGHT_CORE to a playwright-core index.mjs (a file:// URL); see scripts/qa/README.md.
 const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
 const base = process.argv[2] || "http://127.0.0.1:5197";
-const routes = ["/", "/learn", "/guide", "/guide/library", "/guide/library/listen", "/guide/teachback", "/give", "/grow", "/waves", "/apply", "/guide/apply", "/guide/team", "/guide/partners", "/guide/partners/green-reef", "/guide/partners/green-reef/proposal", "/guide/partners/semble", "/guide/partners/ocean97", "/now-lets-begin", "/privacy", "/trax", "/nope"];
+const routes = ["/", "/manifest", "/learn", "/guide", "/guide/library", "/guide/library/listen", "/guide/teachback", "/give", "/grow", "/waves", "/apply", "/guide/apply", "/guide/team", "/guide/partners", "/guide/partners/green-reef", "/guide/partners/green-reef/proposal", "/guide/partners/semble", "/guide/partners/ocean97", "/now-lets-begin", "/privacy", "/trax", "/nope"];
 const b = await chromium.launch({ channel: "chrome", headless: true });
 for (const vp of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
   const ctx = await b.newContext({ viewport: vp, isMobile: vp.width < 500 });

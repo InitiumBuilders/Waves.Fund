@@ -1,3 +1,4 @@
+@layer pages {
 /* Give Together, the signed-in pages. Mobile first; the Motus Design language (rim-lit cards, squircles,
    points of light for labels). Motion is transform and opacity only, and nothing here blurs what scrolls. */
 
@@ -301,3 +302,4 @@ a.gt-row:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 3px; }
 
 /* The seed the Give Profile grows in (src/mind, mode "seed"). */
 .gt-seed { height: clamp(120px, 26vw, 160px); margin: -6px 0 6px; }
+}

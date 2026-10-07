@@ -1,3 +1,4 @@
+@layer base {
 /* The Wave Mind: one canvas under the whole app. Content always sits above it. */
 .mind-canvas,
 .mind-fallback {
@@ -31,4 +32,5 @@
   z-index: 20;
   pointer-events: none;
   display: block;
+}
 }

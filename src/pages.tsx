@@ -86,7 +86,7 @@ export function Learn() {
       <SeaHero
         eyebrow="THE WAVES FUND"
         model={model}
-        actions={<button type="button" className="text-button" onClick={() => startTour()}>Take The Tour <ArrowRight size={17} /></button>}
+        actions={<><Link className="text-button" to="/manifest">Read The Manifest <ArrowRight size={17} /></Link><button type="button" className="text-button" onClick={() => startTour()}>Take The Tour <ArrowRight size={17} /></button></>}
         title={
           <>
             Raise Capital
@@ -139,7 +139,7 @@ export function Learn() {
       </section>
       <section className="section two-columns">
         <div>
-          <p className="eyebrow">THE STUDENT DRIVEN MODEL</p>
+          <p className="eyebrow">OPEN TO EVERYONE</p>
           <h2>
             Funding For Lifelong
             <br />
@@ -148,15 +148,10 @@ export function Learn() {
         </div>
         <div className="prose">
           <p>
-            The Waves Fund is a social impact crowdfunding platform that is 100%
-            student driven. People bring a vision. Students and lifelong
-            learners help decide what deserves support. Partners help turn that
-            support into work with visible outcomes.
-          </p>
-          <p>
-            You are a student if you are learning in a school, in a program, or
-            independently. Participation begins with self-identification.
-            Learning belongs to everyone.
+            The Waves Fund is a social impact crowdfunding platform, open to
+            everyone. Bring a vision, become a Wave Guide, give your time, or
+            add your voice to a Wave you believe in. Partners help turn that
+            support into work you can see.
           </p>
           <ButtonLink to="/apply">Submit A Project</ButtonLink>
         </div>
@@ -187,12 +182,12 @@ export function Learn() {
             {
               Icon: GivePair,
               title: "Give",
-              body: "Learners signal support. Donors, partners, and guides contribute funding, time, and knowledge.",
+              body: "Anyone can signal support. Donors, partners, and guides bring funding, time, and knowledge.",
             },
             {
               Icon: Growing,
               title: "Grow",
-              body: "Project teams share evidence, learning, and progress for the community to see.",
+              body: "Project teams share evidence, learning, and progress for everyone to see.",
             },
           ].map(({ Icon, title, body }, i) => (
             <li className="panel" key={title}>
@@ -206,49 +201,6 @@ export function Learn() {
           ))}
         </ol>
         </Circuit>
-      </section>
-      <section className="section panel funding-model">
-        <div>
-          <p className="eyebrow">FROM SUPPORT TO DELIVERY</p>
-          <h2>
-            The Future
-            <br />
-            Funded Together
-          </h2>
-          <p>
-            Community voice informs project review. Funds go through the
-            receiving foundation’s approved giving channels. A vote is a voice,
-            not a payment or a promise of an award.
-          </p>
-        </div>
-        <ol className="flow-list">
-          <li>
-            <strong>Submit</strong>
-            <span>
-              A project, a budget, a community, and a measurable next step.
-            </span>
-          </li>
-          <li>
-            <strong>Review</strong>
-            <span>
-              The team checks readiness, mission alignment, consent, and
-              feasibility.
-            </span>
-          </li>
-          <li>
-            <strong>Support</strong>
-            <span>
-              Published projects receive learner signals and partner attention.
-            </span>
-          </li>
-          <li>
-            <strong>Deliver</strong>
-            <span>
-              Agreed funding, milestones, and reporting turn a proposal into
-              action.
-            </span>
-          </li>
-        </ol>
       </section>
       <section className="section" id="roadmap">
         <div className="section-heading">
@@ -274,7 +226,7 @@ export function Learn() {
             <span className="status-chip">PROPOSED PILOT</span>
             <h3>Students Funding The Future</h3>
             <p>
-              A first cohort with Green Reef: agreed project criteria, learner
+              A first cohort with Green Reef: agreed project criteria, community
               participation, guide support, and milestone-based grants.
             </p>
             <Link to="/guide/partners/green-reef/proposal">
@@ -299,8 +251,8 @@ export function Learn() {
         </div>
         <div className="question-list">
           {[
-            ["Is funding guaranteed?", "No. Published projects are in community review. Funding is not guaranteed. Student support signals inform the team’s work; they are not grant awards."],
-            ["Who counts as a student?", "You are a student if you are learning in a school, in a program, or independently. Participation begins with self-identification."],
+            ["Is funding guaranteed?", "No. Published projects are in community review, and funding is not guaranteed. Support signals inform the team’s work. A signal is a voice, not a payment or a promise of an award."],
+            ["Who can take part?", "Everyone. Bring a vision, apply to be a Wave Guide, give your time, or support a Wave you believe in. There is no membership and no fee to take part."],
             ["What happens after I apply?", "Your application is saved privately for the Waves.Fund team to review. Keep your receipt to check its status. A submission is not an award or acceptance."],
             ["Is my information public?", "Your name and email are never published. A project appears publicly only with your permission and after team review."],
             ["What does a Wave Guide cost?", "Scope, fees, timing, and ownership are agreed with your Guide before work begins."],
@@ -469,7 +421,7 @@ export function Team() {
           </p>
           <blockquote>“Move The Mindset”</blockquote>
           <p>
-            His work on Waves.Fund brings that practice into a student driven
+            His work on Waves.Fund brings that practice into an open
             model for building, learning, and funding the future together.
           </p>
           <a className="text-button" href={`mailto:${CONTACT}`}>
@@ -576,7 +528,7 @@ export function GreenReef() {
           }
         >
           <p>
-            Connecting student driven project support with aquatic food systems,
+            Connecting open project support with aquatic food systems,
             community opportunity, and ecological well-being.
           </p>
         </Intro>

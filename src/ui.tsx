@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useStateStore } from "./state";
 import { startTour } from "./tour-launch";
+import { SoundButton } from "./sound";
 import { MindAnchor, mindWave } from "./mind/WaveMind";
 import type { FieldMode } from "./mind/modes";
 export const CONTACT = "August@Outlier.Systems";
@@ -198,9 +199,9 @@ export function TabLinks() {
     </>
   );
 }
-// The menu, grouped under the four practices. The labels are the menu's own; only their order changed.
+// The menu, grouped under the four practices. The labels are the menu's own; "The Manifest" (2026-10-07) is new.
 const MENU: { pillar: string; links: [string, string][] }[] = [
-  { pillar: "Learn", links: [["Our Vision", "/learn"], ["Now, Let’s Begin", "/now-lets-begin"]] },
+  { pillar: "Learn", links: [["The Manifest", "/manifest"], ["Our Vision", "/learn"], ["Now, Let’s Begin", "/now-lets-begin"]] },
   { pillar: "Guide", links: [["Wave Guides", "/guide"], ["Guide Library", "/guide/library"], ["The Teachback", "/guide/teachback"], ["The Waves Fund Team", "/guide/team"]] },
   { pillar: "Give", links: [["Give Together", "/give"], ["Partners", "/guide/partners"], ["Partnerships & Impact Investment", `mailto:${CONTACT}`]] },
   { pillar: "Grow", links: [["Waves", "/waves"], ["Your Workspace", "/workspace"], ["Submit A Project", "/apply"]] },
@@ -218,6 +219,7 @@ export function Header() {
           <TabLinks />
         </nav>
         <div className="header-actions">
+          <SoundButton />
           <button
             className="icon-button"
             aria-label={motion ? "Pause Animation" : "Play Animation"}

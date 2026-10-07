@@ -2,7 +2,7 @@
 
 ### An open working specification for Waves as adaptive building blocks
 
-**Version:** 0.3 - Guide service and Wave One edition  
+**Version:** 0.4 - Guide service and Wave One edition, open to everyone  
 **Status:** A proposed direction for Waves.Fund, not a description of features or partnerships already launched  
 **Core practice:** Trust People. And They Become Trustworthy.
 
@@ -131,7 +131,7 @@ The Journey is a readable timeline and branching map of the Wave in motion. Even
 
 A creator's feature might show its published link and date, its tracked visits to the Wave, and funds received through a distinct route. That is **path attribution**, not proof that the creator alone caused every gift. On-platform impressions need authorized platform data; private donor identities do not become public Journey entries. The public view may celebrate a carrier's contribution while private analytics preserve more detail for the builder.
 
-**Example:** A student team builds a Wave with a Guide. A YouTuber accepts a feature pass and publishes a video. Viewers follow the video's Wave link; some mentor, some suggest a design change, and some give through the approved funding route. The Journey shows the confirmed feature, the proposed change and the team's decision, and the verified funds received through that route. The team then publishes what it built. The Wave has become a record of collective work, not merely a counter of views.
+**Example:** A team builds a Wave with a Guide. A YouTuber accepts a feature pass and publishes a video. Viewers follow the video's Wave link; some mentor, some suggest a design change, and some give through the approved funding route. The Journey shows the confirmed feature, the proposed change and the team's decision, and the verified funds received through that route. The team then publishes what it built. The Wave has become a record of collective work, not merely a counter of views.
 
 ### The experience should make care visible
 
@@ -157,7 +157,7 @@ These routes have different promises and records. A Guide fee pays for agreed wo
 
 A **Wave Pool** is a proposed optional module for people or organizations supporting a shared goal. The first, simplest pool may coordinate **nonfinancial resources**: mentor hours, space, equipment, or expertise. Several Waves might need the same resource; a shared offer could help them together and reduce what each needs to raise. Each team must accept its allocation, and finite resources must not be promised twice. A donation or grant pool would need an identified legal recipient, eligibility rules, allocation process, records, and an approved payment/disbursement provider. A pooled investment structure would be a separate, later product with qualified legal and regulated partners. The name “pool” must never imply that Waves.Fund already holds, invests, or allocates money.
 
-Every financial pool proposal should define: who can contribute; who controls the funds; who decides allocation; eligibility and conflicts; how funds are received and released; fees; reporting and appeals; what happens if the goal fails; and what evidence is public. A student support signal may help inform a decision, but it is not automatically a verified ballot or legal authorization to disburse funds.
+Every financial pool proposal should define: who can contribute; who controls the funds; who decides allocation; eligibility and conflicts; how funds are received and released; fees; reporting and appeals; what happens if the goal fails; and what evidence is public. A support signal may help inform a decision, but it is not automatically a verified ballot or legal authorization to disburse funds.
 
 The future investment layer can explore opportunities, research, introductions, and collective diligence, but it must be designed separately from charitable giving. Securities solicitation, transaction-based compensation, investment advice, and custody can require registration and specialized controls. Waves.Fund should work with qualified partners before offering those functions. No Wave promises funding or returns.
 
@@ -197,11 +197,11 @@ Creator sponsorships and paid placements require clear disclosure. Funding recei
 
 ### Wave One: Waves.Fund
 
-**Story:** Students Funding The Future. An Impact Fund. Funding For Futures. A place for lifelong learners and leaders to bring a vision, find human guidance, and build together.
+**Story:** Funding The Future Together. An Impact Fund. Funding For Futures. A place for lifelong learners and leaders to bring a vision, find human guidance, and build together.
 
 **Founder and first Wave Guide:** August James Domanchuk, founder of Outlier.Systems and Semble.CC; an Emergent Strategist, a life long learner and teacher, musician, and regenerative systems researcher. His core mantra is **Move The Mindset**. The Waves.Fund core practice is **Trust People. And They Become Trustworthy.**
 
-**Home:** [Waves.Fund](https://waves.fund/). Its existing application, team review, consented public project feed, advisory learner support, and external giving route provide the starting point. This example presents the platform itself as the first Wave; it does not imply a newly funded project or an executed Guide agreement.
+**Home:** [Waves.Fund](https://waves.fund/). Its existing application, team review, consented public project feed, advisory community support, and external giving route provide the starting point. This example presents the platform itself as the first Wave; it does not imply a newly funded project or an executed Guide agreement.
 
 **Proposed current focus:** Build and test the first complete Guide-led Wave pilot. August would help a builder shape one useful next move, agree the engagement, create the custom experience, and invite one consenting carrier to help it travel.
 
@@ -239,7 +239,7 @@ A completed Wave should state what was achieved, what remains unresolved, and ho
 
 The first pilot needs a working Wave, a human Guide, a simple participation path, and evidence of the result. Broad platform partnerships, automated allocation, a public-chain record, and investment pools are later hypotheses. Expand when an observed need and qualified partners justify the work.
 
-**Current product boundary:** The present Waves.Fund application provides private submissions, team review, consented public project publication, advisory learner support, and an external donation route. The adaptive Wave workspace, holding roles, Journey attribution, pools, and protocol described here are proposed capabilities.
+**Current product boundary:** The present Waves.Fund application provides private submissions, team review, consented public project publication, advisory community support, and an external donation route. The adaptive Wave workspace, holding roles, Journey attribution, pools, and protocol described here are proposed capabilities.
 
 ## The statement
 

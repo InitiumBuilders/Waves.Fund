@@ -1,3 +1,4 @@
+@layer base {
 /* A page that opens on the sea. Mobile first: the stage is the first screen, the words stand at its foot on
    a dark floor; on a wide screen they stand at its left and the water runs out to the right. */
 .sea-hero { --head: 72px; position: relative; }
@@ -39,4 +40,5 @@ html[data-motion="off"] .sea-hero-copy > * { animation: none; }
   .sea-hero-copy { justify-content: center; max-width: 760px; padding: 40px 0 60px var(--gutter); }
   .sea-hero-copy::before { top: 0; bottom: 0; left: 0; right: auto; width: 780px; height: auto; background: linear-gradient(90deg, rgba(1, 5, 19, 0.92) 0%, rgba(1, 5, 19, 0.82) 58%, rgba(1, 5, 19, 0)); }
   .sea-hero-copy::after { display: none; }
+}
 }
