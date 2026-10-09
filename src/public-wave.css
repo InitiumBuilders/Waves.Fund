@@ -1,0 +1,39 @@
+@layer pages {
+/* A public Wave (/waves/:slug). It opens on its own sea, then one reading column: the story, the current move (the
+   one lit panel), the way to help, its people, its journey. Mobile first. */
+.pw-body { padding-bottom: clamp(60px, 10vw, 120px); }
+.pw-chapter, .pw-close { max-width: 720px; margin-inline: auto; padding-top: clamp(80px, 12vw, 150px); }
+.pw-chapter > h2, .pw-move h2 { font-size: clamp(30px, 4.2vw, 52px); font-weight: 460; letter-spacing: -0.045em; line-height: 1.05; margin: 0 0 22px; text-wrap: balance; }
+.pw-chapter > p { font-size: clamp(17px, 1.35vw, 19px); line-height: 1.75; }
+.pw-story { font-size: clamp(19px, 1.7vw, 23px) !important; line-height: 1.6 !important; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.pw-guide { margin-top: 36px; }
+.pw-guide h3 { margin: 10px 0 4px; font-size: clamp(20px, 1.8vw, 24px); }
+.pw-guide p { margin: 0; }
+
+/* The current move is the one lit panel on the page. */
+.pw-move { padding: clamp(24px, 3vw, 36px); box-shadow: inset 0 1px 0 rgba(160, 238, 255, 0.35), 0 0 60px -24px rgba(94, 233, 255, 0.45); }
+.pw-move .workspace-badge { margin-bottom: 18px; }
+.pw-move h2 { margin-top: 0; }
+#offer-help { scroll-margin-top: 100px; }
+
+/* The journey: finished moves, oldest at the top, each a point of light on one line. */
+.pw-journey { list-style: none; padding: 0; margin: 30px 0 0; display: grid; gap: 30px; position: relative; }
+.pw-journey::before { content: ""; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(rgba(126, 220, 255, 0.5), rgba(126, 196, 255, 0.08)); }
+.pw-journey li { position: relative; padding-left: 30px; }
+.pw-journey li::before { content: ""; position: absolute; left: 0; top: 6px; width: 9px; height: 9px; border-radius: 50%; background: #eafdff; box-shadow: 0 0 8px 2px rgba(94, 233, 255, 0.7); }
+.pw-journey time { font-size: 13px; letter-spacing: 0.08em; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.pw-journey h3 { margin: 6px 0 6px; font-size: clamp(19px, 1.7vw, 23px); }
+.pw-journey p { margin: 0 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Following a contribution is folded until someone has a receipt on this device. */
+.pw-receipt > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 17px; font-weight: 540; color: var(--ink); }
+.pw-receipt > summary::-webkit-details-marker { display: none; }
+.pw-receipt > summary::after { content: ""; width: 8px; height: 8px; border-right: 1.5px solid #8fdcff; border-bottom: 1.5px solid #8fdcff; transform: rotate(45deg) translateY(-3px); transition: transform 0.3s var(--ease); }
+.pw-receipt[open] > summary::after { transform: rotate(225deg) translateY(-1px); }
+.pw-receipt > .panel { margin-top: 18px; }
+
+.pw-close { text-align: center; }
+.pw-close h2 { font-size: clamp(32px, 4.6vw, 58px); font-weight: 460; letter-spacing: -0.045em; line-height: 1.04; margin: 0 0 20px; }
+.pw-close > p { margin: 0 auto 30px; max-width: 46ch; }
+.pw-close .button-row { justify-content: center; }
+}

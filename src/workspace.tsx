@@ -4,7 +4,7 @@ import { useAuth, UserButton } from "@clerk/react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowRight, Check, Download, LockKeyhole, Plus, RefreshCw } from "lucide-react";
 import { ButtonLink, Intro } from "./ui";
-import { saveFile, safeWebLink, workspaceRequest, WorkspaceError } from "./workspace-client";
+import { devActor, saveFile, safeWebLink, workspaceRequest, WorkspaceError } from "./workspace-client";
 import type { WorkspaceAction, WorkspaceConfig, WorkspaceDetail, WorkspaceList, WorkspaceMutationResult, WorkspaceWave, WaveOffer, WavePass } from "./workspace-types";
 import "./workspace.css";
 
@@ -28,8 +28,11 @@ export function Workspace() {
   return <AccountWorkspace />;
 }
 
+// A stand-in person on the dev server is signed in without Clerk. One function for every render, so loading runs once.
+const devToken = async () => null;
 function AccountWorkspace() {
-  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const clerk = useAuth(), dev = devActor();
+  const { isLoaded, isSignedIn, getToken } = dev ? { isLoaded: true, isSignedIn: true, getToken: devToken } : clerk;
   const { id } = useParams();
   const navigate = useNavigate();
   const [list, setList] = useState<WorkspaceList | null>(null);

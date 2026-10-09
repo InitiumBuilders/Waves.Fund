@@ -36,6 +36,8 @@ import { go, Seamless } from "./seamless";
 import { TourLauncher } from "./tour-launch";
 import { SeaHero } from "./sea-hero";
 import { sound } from "./sound";
+import { waveRequest } from "./workspace-client";
+import type { PublicWave } from "./workspace-types";
 import { BEAT } from "./cadence";
 import { hash } from "./together/ripple";
 import type { RippleModel, Source } from "./together/ripple";
@@ -155,7 +157,12 @@ function Projects() {
   }, [refresh]);
   const [query, setQuery] = useState(""),
     [selected, setSelected] = useState<Project | null>(null);
-  const filtered = projects.filter((p) =>
+  // Waves built in the workspace and published by the team join the sea and the list; each opens its own page. The
+  // request is made only while the workspace is switched on.
+  const [built, setBuilt] = useState<PublicWave[]>([]);
+  useEffect(() => { if (import.meta.env.VITE_WORKSPACE_ENABLED === "true") waveRequest<{ waves?: PublicWave[] }>("").then((r) => setBuilt(r.waves || [])).catch(() => {}); }, []);
+  const builtProjects: Project[] = built.map((w) => ({ id: w.id, slug: w.slug, title: w.title, description: w.story, category: w.template && w.template !== "custom" ? `${w.template} Wave` : "Wave", budget: 0, milestone: w.currentMove.title, signals: w.contributions.length + w.carrying.length, pulses: w.journey.map((j) => j.created) }));
+  const filtered = [...builtProjects, ...projects].filter((p) =>
     (p.title + " " + p.category + " " + p.description)
       .toLowerCase()
       .includes(query.toLowerCase()),
@@ -170,7 +177,8 @@ function Projects() {
         model={model}
         onLight={(i, at) => {
           const p = list.current[i];
-          if (p) { setSelected(p); mindWave(at, 1); } else go(navigate, "/apply", at);
+          if (p?.slug) go(navigate, `/waves/${p.slug}`, at);
+          else if (p) { setSelected(p); mindWave(at, 1); } else go(navigate, "/apply", at);
         }}
         title={
           <>
@@ -183,7 +191,7 @@ function Projects() {
       >
         {/* While no Wave is published, the first screen says so, in the empty state's own words. */}
         <p>
-          {!loading && !error && !projects.length
+          {!loading && !error && !projects.length && !built.length
             ? "Project submissions are open. The first reviewed projects will appear here."
             : "Explore approved Wave projects in community review. Learn about the work and add your voice."}
         </p>
@@ -233,17 +241,17 @@ function Projects() {
               <p className="eyebrow">{p.category}</p>
               <h2>{p.title}</h2>
               <p className="wave-card-story">{p.description}</p>
-              <div className="wave-card-signals" aria-label={`${p.signals} support signals`}>
+              {!p.slug && <div className="wave-card-signals" aria-label={`${p.signals} support signals`}>
                 <span className="signal-dots" aria-hidden="true">
                   {Array.from({ length: 11 }, (_, i) => <i key={i} className={i < p.signals ? "lit" : ""} />)}
                 </span>
                 <span>{p.signals} Support Signals</span>
-              </div>
+              </div>}
               <div className="wave-card-foot">
-                <span><strong>${p.budget.toLocaleString()}</strong> Requested</span>
-                <button className="glow-button" onClick={(e) => { setSelected(p); mindWave(e.currentTarget, 1); }}>
+                {p.slug ? <span className="wave-card-move">{p.milestone}</span> : <span><strong>${p.budget.toLocaleString()}</strong> Requested</span>}
+                {p.slug ? <ButtonLink to={`/waves/${p.slug}`}>Open This Wave</ButtonLink> : <button className="glow-button" onClick={(e) => { setSelected(p); mindWave(e.currentTarget, 1); }}>
                   Explore This Wave <ArrowRight size={17} />
-                </button>
+                </button>}
               </div>
               {/* The Wave's stock: as full as its support signals are toward the next milestone of 11. */}
               <Stock level={Math.min(0.92, 0.06 + (Math.min(p.signals, 11) / 11) * 0.86)} />

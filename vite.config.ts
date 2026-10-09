@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 export default defineConfig(({ command, mode }) => ({
-  define: { 'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': JSON.stringify(loadEnv(mode, process.cwd(), '').VITE_CLERK_PUBLISHABLE_KEY || loadEnv(mode, process.cwd(), '').NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '') },
+  define: { ...(command === "serve" ? { 'import.meta.env.VITE_WORKSPACE_ENABLED': '"true"' } : {}), 'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': JSON.stringify(loadEnv(mode, process.cwd(), '').VITE_CLERK_PUBLISHABLE_KEY || loadEnv(mode, process.cwd(), '').NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '') },
   plugins: [
     react(),
     ...(command === "serve"
@@ -15,6 +15,8 @@ export default defineConfig(({ command, mode }) => ({
               );
               // Give Together in local development: stand-in people and a throwaway schema, never the live tables.
               Object.assign(process.env, { GIVE_DEV_ACTORS: "on", GIVE_SCHEMA: "give_test" });
+              // The Wave workspace in local development: stand-in people and data held in memory (api/_workspace/dev.js).
+              Object.assign(process.env, { WAVES_WORKSPACE_DEV: "on", WAVES_WORKSPACE_ENABLED: "true", WAVES_WORKSPACE_ADMIN_EMAILS: "dev_team@dev.waves.fund", WAVES_WORKSPACE_ORIGINS: "http://127.0.0.1:5191,http://localhost:5191,http://127.0.0.1:5197" });
               const handlers = { give: (await import("./api/give.js")).default, community: (await import("./api/community.js")).default, trax: (await import("./api/trax.js")).default, workspace: (await import("./api/workspace.js")).default, waves: (await import("./api/waves.js")).default };
               for (const [name, handler] of Object.entries(handlers)) {
               server.middlewares.use(

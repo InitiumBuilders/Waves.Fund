@@ -47,6 +47,7 @@ Log long runs to a file and grep it. A crash piped through `tail` prints only th
 | `whywin.mjs <old> <new> <groups.json>` | For each style change, the rules that set it in both builds, in cascade order, with their layer |
 | `copy.mjs <base> <dir> [routes]` | The words on every page, one file per route, and a word count |
 | `scenes.mjs <base> [routes]` then `sharecards.mjs [names]` | Share cards: the hero sea captured without its words (into `share/` in the folder you run from), then the 1200x630 card with the page's line, written to `public/media/share/` |
+| `wavewalk.mjs [dev base] [slug]` | Walks a Wave workspace from setup to published as stand-in people (dev server only; data in memory) |
 | `soundshot.mjs <dev base> <out.wav> [seconds]` | Renders the site's sound offline from the real engine (dev server) to a WAV file, with its peak and loudness |
 | `axe.mjs <base>` | WCAG 2.2 AA with axe-core: 18 pages at two sizes, the open menu, the tour's question and a step |
 | `density.mjs <base> [routes]` | Typical text size, text under 14px, longest line, section gaps, words per screen |

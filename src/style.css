@@ -496,6 +496,15 @@ main {
   border-color: #42d1ec77;
   color: #9eedff;
 }
+/* Team Review: how long an application has waited; amber once it is two days or more. */
+.status-chip.waiting {
+  border-color: #8ad7ff55;
+  color: #cfeeff;
+}
+.status-chip.waiting.overdue {
+  border-color: #fdc26f88;
+  color: #ffd99c;
+}
 .closing {
   text-align: center;
   padding: 30px 0;

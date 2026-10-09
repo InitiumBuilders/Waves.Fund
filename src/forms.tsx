@@ -431,6 +431,15 @@ export function ReceiptTracker() {
     </section>
   );
 }
+// Waiting for the team: received or in review. These come first, oldest first, with how long each has waited.
+const WAITING = new Set(["Received", "In Review"]);
+const daysSince = (iso: string) => Math.max(0, Math.floor((Date.now() - Date.parse(iso)) / 86400000));
+const waitedFor = (iso: string) => { const d = daysSince(iso); return d === 0 ? "Waiting since today" : `Waiting ${d} ${d === 1 ? "day" : "days"}`; };
+const byWaiting = (a: { status: string; created: string }, b: { status: string; created: string }) => {
+  const wa = WAITING.has(a.status), wb = WAITING.has(b.status);
+  if (wa !== wb) return wa ? -1 : 1;
+  return wa ? a.created.localeCompare(b.created) : b.created.localeCompare(a.created);
+};
 type Review = {
   id: string;
   kind: string;
@@ -566,11 +575,13 @@ export function TeamReview() {
           )}
           {applications
             .filter((a) => filter === "All" || a.kind === filter)
+            .sort(byWaiting)
             .map((a) => (
               <article className="panel review-card" key={a.id}>
                 <div className="row-heading">
                   <p className="eyebrow">{a.kind}</p>
                   <span className="status-chip">{a.status}</span>
+                  {WAITING.has(a.status) && <span className={"status-chip waiting" + (daysSince(a.created) >= 2 ? " overdue" : "")}>{waitedFor(a.created)}</span>}
                 </div>
                 <h2>{a.title}</h2>
                 <p>{a.description}</p>

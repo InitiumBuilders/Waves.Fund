@@ -56,7 +56,12 @@
 .public-wave-story{white-space:pre-wrap}
 .public-wave-move{position:relative;overflow:hidden}
 .public-wave-move:before{content:"";position:absolute;top:0;left:10%;width:80%;height:2px;background:linear-gradient(90deg,transparent,#6af1ff,transparent);box-shadow:0 0 20px #42d4ff}
-.workspace-page details summary{cursor:pointer;padding:10px 0;min-height:44px;font-weight:650}
+/* A folded section's title sits on one line with its icon, and a chevron turns as it opens. */
+.workspace-page details summary{cursor:pointer;padding:10px 0;min-height:44px;font-weight:650;display:flex;align-items:center;gap:10px;list-style:none}
+.workspace-page details summary::-webkit-details-marker{display:none}
+.workspace-page details summary svg{flex:none}
+.workspace-page details summary::after{content:"";width:8px;height:8px;margin-left:auto;border-right:1.5px solid #8fdcff;border-bottom:1.5px solid #8fdcff;transform:rotate(45deg) translateY(-3px);transition:transform .3s var(--ease)}
+.workspace-page details[open] summary::after{transform:rotate(225deg) translateY(-1px)}
 .workspace-page details[open] summary{margin-bottom:16px}
 .workspace-auth-icon{width:64px;height:64px;display:grid;place-items:center;margin-bottom:24px;border:1px solid #60d8ff;border-radius:50%;background:rgba(12,71,113,.3);box-shadow:0 0 36px rgba(57,179,255,.13)}
 .workspace-loading{padding:40px 0;min-height:30vh;display:grid;place-items:center}

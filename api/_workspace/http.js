@@ -2,6 +2,7 @@ import { createClerkClient } from '@clerk/backend';
 import { createHmac } from 'node:crypto';
 import { createWorkspaceService, fault } from './core.js';
 import { createNeonStore } from './store.js';
+import { createMemoryStore, devActor, devOn } from './dev.js';
 
 const message = 'Shared workspaces are being prepared. The Guide library and project applications are available now.';
 export const configured = () => !!(process.env.DATABASE_URL && process.env.CLERK_SECRET_KEY && (process.env.VITE_CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) && process.env.WAVES_DATA_KEY && process.env.WAVES_WORKSPACE_ADMIN_EMAILS);
@@ -9,7 +10,7 @@ let cached;
 export function services() {
   if (!configured()) throw fault(503, message);
   if (!cached) {
-    const store = createNeonStore(process.env.DATABASE_URL);
+    const store = devOn() ? createMemoryStore() : createNeonStore(process.env.DATABASE_URL);
     cached = { store, service: createWorkspaceService({ store, secret: process.env.WAVES_DATA_KEY }) };
   }
   return cached;
@@ -43,6 +44,7 @@ export function bodyOf(req) {
   return body;
 }
 export async function actorOf(req) {
+  if (devOn()) { const stand = devActor(req); if (stand) return stand; }
   if (!String(req.headers.authorization || '').startsWith('Bearer ')) throw fault(401, 'Sign in to your invited account.');
   const client = createClerkClient({
     secretKey: process.env.CLERK_SECRET_KEY,

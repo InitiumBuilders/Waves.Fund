@@ -3,12 +3,21 @@ export class WorkspaceError extends Error {
   constructor(message: string, status: number) { super(message); this.status = status; }
 }
 
+/** On the dev server only, a tab opened with ?as=dev_name acts as that stand-in person (api/_workspace/dev.js). */
+export function devActor(): string | null {
+  if (!import.meta.env.DEV) return null;
+  const asked = new URLSearchParams(location.search).get("as");
+  if (asked && /^dev_[a-z0-9]{1,20}$/.test(asked)) sessionStorage.setItem("waves-dev-actor", asked);
+  return sessionStorage.getItem("waves-dev-actor");
+}
+
 export async function workspaceRequest<T>(action: string, token: string | null, body?: unknown, id?: string): Promise<T> {
   const query = new URLSearchParams({ action });
+  const dev = devActor();
   if (id) query.set("id", id);
   const response = await fetch(`/api/workspace?${query}`, {
     method: body === undefined ? "GET" : "POST",
-    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body === undefined ? {} : { "Content-Type": "application/json" }) },
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(dev ? { "x-dev-actor": dev } : {}), ...(body === undefined ? {} : { "Content-Type": "application/json" }) },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     cache: "no-store",
   });

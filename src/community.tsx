@@ -20,6 +20,8 @@ export type Project = {
   budget: number;
   milestone: string;
   signals: number;
+  /** A Wave built in the workspace has its own page at /waves/<slug>. */
+  slug?: string;
   /** When its latest signals arrived (up to 11, to the hour, oldest first). */
   pulses?: string[];
   supported?: boolean;
