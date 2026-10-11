@@ -3,7 +3,7 @@
 // Usage: node overflow.mjs <base> [routes]
 const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
 const base = process.argv[2] || "http://127.0.0.1:5192";
-const routes = (process.argv[3] || "/,/manifest,/now-lets-begin,/learn,/guide,/guide/library,/guide/library/listen,/guide/apply,/guide/team,/guide/partners,/guide/partners/green-reef,/guide/partners/green-reef/proposal,/guide/partners/semble,/guide/partners/ocean97,/give,/give/guide,/guide/teachback,/grow,/apply,/waves,/privacy,/nope").split(",");
+const routes = (process.argv[3] || "/,/manifest,/film,/now-lets-begin,/learn,/guide,/guide/library,/guide/library/listen,/guide/apply,/guide/team,/guide/partners,/guide/partners/green-reef,/guide/partners/semble,/guide/partners/ocean97,/give,/give/guide,/guide/teachback,/grow,/apply,/waves,/privacy,/nope").split(",");
 const b = await chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
 const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 await ctx.addInitScript(() => { try { localStorage.setItem("waves-tour-offered", "1"); } catch {} });

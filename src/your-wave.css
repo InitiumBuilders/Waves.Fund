@@ -1,0 +1,44 @@
+@layer pages {
+/* Your Wave: the Wave a builder is writing. Beside the form on a wide screen, held in view while they write; inside
+   the form on a phone, just before they send it; at the top of the receipt once it is sent. Its water runs to the
+   edge and the words stand on it, with no frame around either. */
+.yw { position: relative; isolation: isolate; text-align: left; }
+.yw-sea { position: relative; height: clamp(190px, 46vw, 250px); border-radius: 30px; overflow: hidden; -webkit-mask-image: radial-gradient(ellipse 72% 78% at 50% 42%, #000 58%, transparent 100%); mask-image: radial-gradient(ellipse 72% 78% at 50% 42%, #000 58%, transparent 100%); }
+.yw-scene { position: absolute; inset: 0; }
+.yw-copy { position: relative; padding: 0 6px 8px; margin-top: -26px; }
+.yw-copy .eyebrow { margin: 0 0 12px; font-size: 11px; letter-spacing: 0.2em; }
+.yw-title { margin: 0 0 10px; font-size: clamp(28px, 6.4vw, 38px); font-weight: 480; letter-spacing: -0.035em; line-height: 1.06; overflow-wrap: anywhere; }
+.yw-mantra { margin: 0 0 6px; font-size: 14px; line-height: 1.5; color: #cfeaff; }
+.yw-copy .yw-label { margin-top: 24px; }
+.yw-story, .yw-move { margin: 0; font-size: 15px; line-height: 1.6; color: #e4f3ff; white-space: pre-line; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.yw-story { -webkit-line-clamp: 6; line-clamp: 6; }
+.yw-move { -webkit-line-clamp: 4; line-clamp: 4; }
+.yw-title, .yw-story, .yw-move { animation: yw-arrive 0.6s var(--ease-out, ease-out) both; }
+@keyframes yw-arrive { from { opacity: 0; transform: translateY(6px); } }
+html[data-motion="off"] .yw-title, html[data-motion="off"] .yw-story, html[data-motion="off"] .yw-move { animation: none; }
+@media (prefers-reduced-motion: reduce) { .yw-title, .yw-story, .yw-move { animation: none; } }
+
+/* A part not yet written is a line of soft light where its words will stand. */
+.yw-bar, .yw-bars i { display: block; height: 11px; border-radius: 6px; background: linear-gradient(90deg, rgba(126, 232, 255, 0.17), rgba(141, 162, 255, 0.07)); }
+.yw-bar-title { width: 62%; height: 26px; border-radius: 9px; margin: 6px 0 14px; }
+.yw-bars { display: grid; gap: 10px; padding-top: 4px; }
+.yw-bars i:nth-child(1) { width: 92%; }
+.yw-bars i:nth-child(2) { width: 76%; }
+.yw-bars i:nth-child(3) { width: 52%; }
+
+/* On a phone the Wave stands inside the form, after the first move. */
+.application-form .yw { margin: 4px 0 28px; }
+
+/* On a wide screen the page widens and the Wave stays in view beside the form while the builder writes. */
+@media (min-width: 1100px) {
+  .yw-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 44px; align-items: start; margin-inline: calc(50% - min(590px, 50vw - var(--gutter, 40px))); }
+  .yw-layout > .yw { position: sticky; top: 108px; margin-top: clamp(24px, 6vh, 64px); }
+  /* The form is wider than its reading measure here; its centred line stays centred. */
+  .yw-layout .form-contact { margin-inline: auto; }
+  .yw-layout .yw-sea { height: 240px; }
+}
+
+/* The receipt: the Wave that was just sent, its wave coming in. */
+.receipt-panel .yw { margin: 6px 0 26px; }
+.receipt-panel .yw-sea { height: clamp(220px, 50vw, 300px); }
+}

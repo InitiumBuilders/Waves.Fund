@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -6,12 +6,8 @@ import {
   Users,
   BookOpen,
   Waves,
-  Check,
-  Download,
-  ExternalLink,
 } from "lucide-react";
 import { ButtonLink, CONTACT, External, Intro, Semble, DONATE } from "./ui";
-import { download } from "./community";
 import { Growing, Guided, Pair, Travel } from "./symbols";
 import { SeaHero } from "./sea-hero";
 import { Circuit } from "./circuit";
@@ -86,7 +82,7 @@ export function Learn() {
       <SeaHero
         eyebrow="THE WAVES FUND"
         model={model}
-        actions={<><Link className="text-button" to="/manifest">Read The Manifest <ArrowRight size={17} /></Link><button type="button" className="text-button" onClick={() => startTour()}>Take The Tour <ArrowRight size={17} /></button></>}
+        actions={<><Link className="text-button" to="/manifest">Read The Manifest <ArrowRight size={17} /></Link><Link className="text-button" to="/film">Watch The Film <ArrowRight size={17} /></Link><button type="button" className="text-button" onClick={() => startTour()}>Take The Tour <ArrowRight size={17} /></button></>}
         title={
           <>
             Raise Capital
@@ -221,17 +217,6 @@ export function Learn() {
               Project submissions, Wave Guide applications, team review, public
               project pages, and direct giving to Green Reef.
             </p>
-          </article>
-          <article className="panel">
-            <span className="status-chip">PROPOSED PILOT</span>
-            <h3>Students Funding The Future</h3>
-            <p>
-              A first cohort with Green Reef: agreed project criteria, community
-              participation, guide support, and milestone-based grants.
-            </p>
-            <Link to="/guide/partners/green-reef/proposal">
-              Read The Proposal <ArrowRight size={16} />
-            </Link>
           </article>
           <article className="panel">
             <span className="status-chip">NEXT</span>
@@ -533,9 +518,6 @@ export function GreenReef() {
           </p>
         </Intro>
         <div className="button-row">
-          <ButtonLink to="/guide/partners/green-reef/proposal">
-            Explore The Pilot Proposal
-          </ButtonLink>
           <External className="text-button" href={reefURL}>
             Visit Green Reef
           </External>
@@ -670,9 +652,6 @@ export function GreenReef() {
       <section className="section closing">
         <h2>Funding The Future Together</h2>
         <div className="button-row">
-          <ButtonLink to="/guide/partners/green-reef/proposal">
-            Read The Full Proposal
-          </ButtonLink>
           <External href={DONATE} className="glow-button">
             Give To Green Reef
           </External>
@@ -864,399 +843,6 @@ export function OceanPartner() {
         </div>
       </section>
       <PartnerCards />
-    </div>
-  );
-}
-export function Proposal() {
-  const [grants, setGrants] = useState(5),
-    [amount, setAmount] = useState(3000);
-  const grantTotal = grants * amount,
-    total = grantTotal + 10000;
-  const money = (n: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(n);
-  return (
-    <div className="document-page proposal-page">
-      <Link className="breadcrumb" to="/guide/partners/green-reef">
-        Green Reef / Pilot Proposal
-      </Link>
-      <Intro
-        eyebrow="FOR THE GREEN REEF TEAM · DISCUSSION DRAFT"
-        mind="ocean"
-        title={
-          <>
-            Students Funding
-            <br />
-            <span>Aquatic Futures.</span>
-          </>
-        }
-      >
-        <p>
-          A proposed 90-day pilot between Waves.Fund and The Green Reef
-          Foundation.
-        </p>
-      </Intro>
-      <div className="proposal-notice">
-        <Check size={19} />
-        <p>
-          For discussion and agreement. Figures are planning assumptions, not
-          funds raised, awarded grants, or an executed agreement.
-        </p>
-      </div>
-      <section className="section first-decisions" aria-labelledby="decisions-title">
-        <p className="eyebrow">THE FIRST CONVERSATION</p>
-        <h2 id="decisions-title">Five Decisions To Begin.</h2>
-        <ol className="decision-list">
-          {["The budget", "The receiving entity", "The project criteria", "Data responsibilities", "The decision makers"].map((d, i) => (
-            <li key={d}><span>0{i + 1}</span>{d}</li>
-          ))}
-        </ol>
-        <p className="fine-print">These are the first fifteen days of the proposed cadence below. Agreeing them starts the pilot.</p>
-      </section>
-      <section className="section two-columns">
-        <div>
-          <p className="eyebrow">THE PROPOSAL</p>
-          <h2>
-            One Focused Pilot.
-            <br />A Clear Next Step.
-          </h2>
-        </div>
-        <div className="prose">
-          <p>
-            Invite students and lifelong learners to propose small, achievable
-            projects aligned with Green Reef’s mission. Give each selected team
-            a guide, a published plan, and a measurable deliverable.
-          </p>
-          <p>
-            The pilot would test whether transparent project selection, student
-            participation, and guided delivery can help Green Reef attract new
-            talent and turn community priorities into action.
-          </p>
-        </div>
-      </section>
-      <section className="section pilot-targets">
-        <div>
-          <strong>90</strong>
-          <span>Days From Agreed Start</span>
-        </div>
-        <div>
-          <strong>20</strong>
-          <span>Target Applications</span>
-        </div>
-        <div>
-          <strong>100</strong>
-          <span>Target Learner Participants</span>
-        </div>
-        <div>
-          <strong>{grants}</strong>
-          <span>Proposed Funded Projects</span>
-        </div>
-      </section>
-      <section className="section panel budget-panel">
-        <div>
-          <p className="eyebrow">ILLUSTRATIVE PILOT BUDGET</p>
-          <h2>
-            Make The Numbers
-            <br />
-            Understandable.
-          </h2>
-          <p>Adjust the scope to prepare a conversation with the Foundation.</p>
-          <label>
-            Funded Projects <output>{grants}</output>
-            <input
-              aria-label="Funded Projects"
-              type="range"
-              min="2"
-              max="10"
-              value={grants}
-              onChange={(e) => setGrants(Number(e.target.value))}
-            />
-          </label>
-          <label>
-            Grant Per Project <output>{money(amount)}</output>
-            <input
-              aria-label="Grant Per Project"
-              type="range"
-              min="1000"
-              max="10000"
-              step="500"
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-            />
-          </label>
-        </div>
-        <dl className="budget-lines">
-          <div>
-            <dt>
-              {grants} Project Grants × {money(amount)}
-            </dt>
-            <dd>{money(grantTotal)}</dd>
-          </div>
-          <div>
-            <dt>Guide & Cohort Delivery</dt>
-            <dd>$5,000</dd>
-          </div>
-          <div>
-            <dt>Measurement & Reporting</dt>
-            <dd>$3,000</dd>
-          </div>
-          <div>
-            <dt>Contingency Reserve</dt>
-            <dd>$2,000</dd>
-          </div>
-          <div className="budget-total">
-            <dt>Proposed Funding Target</dt>
-            <dd>{money(total)}</dd>
-          </div>
-          <div className="budget-note">
-            <dt className="sr-only">Planning Note</dt>
-            <dd>
-              No Waves.Fund percentage fee is proposed for this pilot. External
-              donation-processing costs must be confirmed and included before
-              the budget is agreed.
-            </dd>
-          </div>
-        </dl>
-      </section>
-      <section className="section">
-        <p className="eyebrow">WHO DOES WHAT</p>
-        <h2>Clear Roles. Shared Work.</h2>
-        <div
-          className="table-scroll"
-          role="region"
-          aria-label="Partnership Responsibilities"
-          tabIndex={0}
-        >
-          <table>
-            <thead>
-              <tr>
-                <th>Responsibility</th>
-                <th>Waves.Fund</th>
-                <th>Green Reef Foundation</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>Project Intake</th>
-                <td>
-                  Application tools, project pages, and support for applicants.
-                </td>
-                <td>
-                  Mission priorities, local contacts, and project eligibility.
-                </td>
-              </tr>
-              <tr>
-                <th>Student Participation</th>
-                <td>
-                  Published round rules, accessible voting, and a transparent
-                  record.
-                </td>
-                <td>Review eligibility and conflicts before voting begins.</td>
-              </tr>
-              <tr>
-                <th>Funds & Awards</th>
-                <td>Present approved project budgets and progress.</td>
-                <td>
-                  Accept donations, approve grant agreements, control
-                  disbursement, and maintain financial records.
-                </td>
-              </tr>
-              <tr>
-                <th>Guidance & Delivery</th>
-                <td>Recruit and coordinate Wave Guides.</td>
-                <td>
-                  Confirm relevant expertise, local needs, and safe delivery
-                  conditions.
-                </td>
-              </tr>
-              <tr>
-                <th>Reporting</th>
-                <td>Publish consented milestones and a pilot summary.</td>
-                <td>
-                  Validate outcomes and financial reporting before public
-                  claims.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-      <section className="section" data-mind="timeline">
-        <p className="eyebrow">PROPOSED 90-DAY CADENCE</p>
-        <ol className="timeline">
-          {[
-            [
-              "Days 1–15",
-              "Agree The Pilot",
-              "Confirm the budget, receiving entity, project criteria, data responsibilities, and decision makers.",
-            ],
-            [
-              "Days 16–30",
-              "Invite Builders",
-              "Publish briefs, recruit guides, and open a focused application period.",
-            ],
-            [
-              "Days 31–45",
-              "Review & Participate",
-              "Check eligibility; run learner discussion and a defined voting round.",
-            ],
-            [
-              "Days 46–75",
-              "Fund & Build",
-              "Sign project agreements. A proposed 50% / 30% / 20% release follows kickoff, midpoint evidence, and accepted delivery.",
-            ],
-            [
-              "Days 76–90",
-              "Show What Changed",
-              "Review deliverables, document learning, reconcile funds, and decide whether to repeat the pilot.",
-            ],
-          ].map(([date, title, body]) => (
-            <li key={date}>
-              <span>{date}</span>
-              <div>
-                <h3>{title}</h3>
-                <p>{body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-      <section className="section two-columns">
-        <div>
-          <p className="eyebrow">STUDENT VOICE & ACCOUNTABILITY</p>
-          <h2>
-            Trust People.
-            <br />
-            And They Become Trustworthy.
-          </h2>
-        </div>
-        <div className="prose">
-          <p>
-            Proposed formal-round rule: one verified participant, one ballot,
-            with support for up to three eligible projects. Voters self-identify
-            as students or lifelong learners. No donation or paid membership
-            increases voting power.
-          </p>
-          <p>
-            Student ballots determine community preference among eligible
-            projects. Green Reef retains responsibility for legal eligibility,
-            available funds, and safe use of charitable resources. Any departure
-            from the published result requires a documented reason; ties use a
-            published student runoff.
-          </p>
-          <p>
-            The current project support signals are advisory and limited by
-            browser. Identity verification and the full formal-round rules must
-            be agreed and implemented before binding grant selection begins.
-          </p>
-        </div>
-      </section>
-      <section className="section">
-        <p className="eyebrow">OUTCOMES & EVIDENCE</p>
-        <div className="three-grid">
-          <article className="panel">
-            <h3>Participation</h3>
-            <p>
-              Target 20 complete applications, 100 learner participants, and one
-              guide for each selected project. Report actual numbers, including
-              drop-off.
-            </p>
-          </article>
-          <article className="panel">
-            <h3>Delivery</h3>
-            <p>
-              Target all selected teams completing an agreed deliverable, with
-              at least 80% of scheduled milestones on time. Record delays
-              openly.
-            </p>
-          </article>
-          <article className="panel">
-            <h3>Community Value</h3>
-            <p>
-              Set a baseline and one useful outcome per project: learning hours,
-              participants served, a tested process, or a usable resource.
-              Validate evidence with the local partner.
-            </p>
-          </article>
-        </div>
-      </section>
-      <section className="section agreement panel">
-        <p className="eyebrow">BEFORE EITHER TEAM COMMITS</p>
-        <h2>What The Written Agreement Needs</h2>
-        <ul>
-          <li>
-            Named entities, authorized signatories, an agreed start date, and
-            the approved budget.
-          </li>
-          <li>
-            Fundraising permissions, who receives money, disbursement authority,
-            and treatment of unused funds.
-          </li>
-          <li>
-            Selection rules, conflicts of interest, complaints, appeals, and
-            circumstances for pausing a project.
-          </li>
-          <li>
-            Ownership of work, agreed public-use permissions, data access,
-            retention, and participant consent.
-          </li>
-          <li>
-            Safeguarding, supervision, insurance where needed, and permitted
-            activities for each project.
-          </li>
-          <li>
-            Reporting dates, responsibility for verifying outcomes, and a
-            practical termination process.
-          </li>
-        </ul>
-        <p>
-          This page records a proposal for discussion. It does not establish a
-          legal agreement or commit either organization to funding.
-        </p>
-      </section>
-      <section className="section closing">
-        <h2>Funding The Future Together</h2>
-        <div className="button-row">
-          <a
-            className="glow-button"
-            href={`mailto:${CONTACT}?subject=Green%20Reef%20Pilot%20Proposal`}
-          >
-            Discuss The Proposal <ArrowRight size={18} />
-          </a>
-          <button className="text-button" onClick={() => window.print()}>
-            Print Proposal <ExternalLink size={17} />
-          </button>
-          <button
-            className="text-button"
-            onClick={() =>
-              download("green-reef-pilot-budget.json", {
-                status: "Discussion draft — not an agreement",
-                durationDays: 90,
-                grants,
-                grantPerProject: amount,
-                projectGrants: grantTotal,
-                guideDelivery: 5000,
-                measurement: 3000,
-                contingency: 2000,
-                total,
-                contact: CONTACT,
-              })
-            }
-          >
-            Save Budget <Download size={17} />
-          </button>
-        </div>
-        <div className="sources">
-          <External href={reefURL}>Green Reef</External>
-          <External href={briefURL}>Foundation Overview</External>
-          <External href="https://www.ocean97.com/foundation/">
-            Foundation Initiatives
-          </External>
-        </div>
-      </section>
     </div>
   );
 }

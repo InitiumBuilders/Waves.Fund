@@ -41,7 +41,8 @@ import type { PublicWave } from "./workspace-types";
 import { BEAT } from "./cadence";
 import { hash } from "./together/ripple";
 import type { RippleModel, Source } from "./together/ripple";
-import { api, CommunityProvider, useCommunity } from "./community";
+import { api, CommunityProvider, getReceipts, useCommunity } from "./community";
+import { readDraft } from "./your-wave";
 import type { Project } from "./community";
 import { Application, Privacy, ReceiptTracker, TeamReview } from "./forms";
 import {
@@ -49,12 +50,12 @@ import {
   Learn,
   OceanPartner,
   Partners,
-  Proposal,
   SemblePartner,
   Team,
 } from "./pages";
 const Begin = lazy(() => import("./begin"));
 const Manifest = lazy(() => import("./manifest"));
+const Film = lazy(() => import("./film"));
 const GuidePitch = lazy(() => import("./guide-library").then(m => ({ default: m.GuidePitch })));
 const GuideLibrary = lazy(() => import("./guide-library").then(m => ({ default: m.GuideLibrary })));
 const GuideLesson = lazy(() => import("./guide-library").then(m => ({ default: m.GuideLesson })));
@@ -68,6 +69,7 @@ const TITLES: Record<string, string> = {
   "/": "Trust People. And They Become Trustworthy.",
   "/learn": "Raise Capital In A Whole New Way.",
   "/manifest": "The Manifest",
+  "/film": "The Film",
   "/guide": "Wave Guides",
   "/guide/library": "The Wave Guide Library",
   "/give": "Give Together",
@@ -90,7 +92,6 @@ const TITLES: Record<string, string> = {
   "/guide/team": "The Waves Fund Team",
   "/guide/partners": "Partners",
   "/guide/partners/green-reef": "The Green Reef Foundation",
-  "/guide/partners/green-reef/proposal": "Students Funding Aquatic Futures",
   "/guide/partners/semble": "Semble.CC",
   "/guide/partners/ocean97": "Ocean97.Com",
   "/privacy": "Privacy & Participation",
@@ -110,13 +111,17 @@ function ScreenPosition() {
   return null;
 }
 /* Waves In Motion: every published Wave is a light on the water, all in step, so the water between them adds
-   up. A Wave's ripples reach as far as its support signals. Near the shore, a faint light: yours, still to come.
+   up. A Wave's ripples reach as far as its support signals. Near the shore, a faint light: yours, still to come. Once
+   you start writing your Wave it takes your Wave's colour (the colour its preview on the application has), and once
+   you send it, it shines and rises once as the page opens. That light is read from this browser only.
    The sea shows what really happened: when the page opens, each Wave's latest signals rise from its light as
    ripples, oldest first, one a beat, stronger for the past week; a signal that arrives while you watch rises at once.
    With sound on, each one rings. */
 const WEEK = 7 * 86400 * 1000;
-function wavesModel(list: MutableRefObject<Project[]>): RippleModel {
+type Mine = { title: string; sent: boolean } | null;
+function wavesModel(list: MutableRefObject<Project[]>, mine: MutableRefObject<Mine>): RippleModel {
   const born = new Map<string, number>();
+  let shoreAt: number | null = null, shoreRang = false;
   let replay: { id: string; at: number; a: number; rang?: boolean }[] | null = null;
   const seen = new Map<string, number>();
   return (t, w, h) => {
@@ -143,7 +148,19 @@ function wavesModel(list: MutableRefObject<Project[]>): RippleModel {
       sources.push({ x: s.x, y: s.y, a: r.a * (1 - age / 4), phase: 0, hue: s.hue, size: 2, born: r.at, reach: 0.7 });
     }
     // Yours, still to come. While no Wave is published it is the one light on the sea, so it carries further.
-    sources.push({ x: w * 0.5, y: h * 0.82, a: n ? 0.28 : 0.55, phase: 0, hue: 0.2, size: n ? 2.6 : 3.2, born: -100, reach: n ? 0.3 : 0.5 });
+    const m = mine.current;
+    const hue = m ? 0.1 + 0.5 * hash(m.title.trim().toLowerCase() || "your wave") : 0.2;
+    sources.push(m
+      ? { x: w * 0.5, y: h * 0.82, a: m.sent ? 0.72 : 0.46, phase: 0, hue, size: m.sent ? 3.4 : 3, born: -100, reach: m.sent ? 0.55 : 0.42 }
+      : { x: w * 0.5, y: h * 0.82, a: n ? 0.28 : 0.55, phase: 0, hue, size: n ? 2.6 : 3.2, born: -100, reach: n ? 0.3 : 0.5 });
+    if (m?.sent) {
+      if (shoreAt === null) shoreAt = t + 1.5 * BEAT;
+      const age = t - shoreAt;
+      if (age >= 0 && age <= 4) {
+        if (!shoreRang) { shoreRang = true; sound("light", 9); }
+        sources.push({ x: w * 0.5, y: h * 0.82, a: 0.85 * (1 - age / 4), phase: 0, hue, size: 2, born: shoreAt, reach: 0.7 });
+      }
+    }
     return { sources, lambda, speed: lambda / BEAT, gain: 1.1, dots: 14, ground: 0.92, roll: [8 * BEAT, 0.5] };
   };
 }
@@ -169,7 +186,15 @@ function Projects() {
   );
   const list = useRef<Project[]>(filtered);
   list.current = filtered;
-  const model = useRef<RippleModel>(wavesModel(list));
+  const { state } = useStateStore();
+  const mine = useRef<Mine>(null);
+  mine.current = (() => {
+    const sent = getReceipts().filter((r) => r.kind === "project").pop();
+    if (sent) return { title: sent.title, sent: true };
+    const d = readDraft();
+    return d.title.trim() || d.story.trim() || state.vision.trim() ? { title: d.title, sent: false } : null;
+  })();
+  const model = useRef<RippleModel>(wavesModel(list, mine));
   return (
     <div className="waves-page">
       <SeaHero
@@ -178,7 +203,7 @@ function Projects() {
         onLight={(i, at) => {
           const p = list.current[i];
           if (p?.slug) go(navigate, `/waves/${p.slug}`, at);
-          else if (p) { setSelected(p); mindWave(at, 1); } else go(navigate, "/apply", at);
+          else if (p) { setSelected(p); mindWave(at, 1); } else go(navigate, mine.current?.sent ? "/grow" : "/apply", at);
         }}
         title={
           <>
@@ -381,22 +406,6 @@ function Grow() {
           foundation and are not inferred from link visits.
         </p>
         <ReceiptTracker />
-        <section className="panel next-round">
-          <p className="eyebrow">PROPOSED PILOT</p>
-          <h2>Students Funding The Future</h2>
-          <p>
-            The first Green Reef pilot is a proposal for discussion. No grant
-            round or award budget has been announced.
-          </p>
-          <div className="button-row">
-            <ButtonLink to="/guide/partners/green-reef/proposal">
-              Read The Pilot Proposal
-            </ButtonLink>
-            <ButtonLink to="/waves" secondary>
-              Explore Waves
-            </ButtonLink>
-          </div>
-        </section>
       </section>
     </div>
   );
@@ -431,6 +440,7 @@ function AppContent() {
             <Route path="/now-lets-begin" element={<Suspense fallback={<div className="narrow-page" role="status">Opening the Wave Praxis…</div>}><Begin /></Suspense>} />
             <Route path="/learn" element={<Learn />} />
             <Route path="/manifest" element={<Suspense fallback={<div className="narrow-page route-loading" role="status">Opening the Manifest…</div>}><Manifest /></Suspense>} />
+            <Route path="/film" element={<Film />} />
             <Route path="/guide" element={<GuidePitch />} />
             <Route path="/guide/library" element={<GuideLibrary />} />
             <Route path="/guide/library/:slug" element={<GuideLesson />} />
@@ -444,7 +454,7 @@ function AppContent() {
             <Route path="/guide/partners/green-reef" element={<GreenReef />} />
             <Route
               path="/guide/partners/green-reef/proposal"
-              element={<Proposal />}
+              element={<Navigate to="/guide/partners/green-reef" replace />}
             />
             <Route path="/guide/partners/semble" element={<SemblePartner />} />
             <Route path="/guide/partners/ocean97" element={<OceanPartner />} />
@@ -470,7 +480,7 @@ function AppContent() {
             <Route
               path="/proposal"
               element={
-                <Navigate to="/guide/partners/green-reef/proposal" replace />
+                <Navigate to="/guide/partners/green-reef" replace />
               }
             />
             <Route

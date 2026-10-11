@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.waves.fund/</loc></url>
   <url><loc>https://www.waves.fund/manifest</loc></url>
+  <url><loc>https://www.waves.fund/film</loc></url>
   <url><loc>https://www.waves.fund/learn</loc></url>
   <url><loc>https://www.waves.fund/guide</loc></url>
   <url><loc>https://www.waves.fund/guide/library</loc></url>
@@ -16,7 +17,6 @@
   <url><loc>https://www.waves.fund/guide/team</loc></url>
   <url><loc>https://www.waves.fund/guide/partners</loc></url>
   <url><loc>https://www.waves.fund/guide/partners/green-reef</loc></url>
-  <url><loc>https://www.waves.fund/guide/partners/green-reef/proposal</loc></url>
   <url><loc>https://www.waves.fund/guide/partners/semble</loc></url>
   <url><loc>https://www.waves.fund/guide/partners/ocean97</loc></url>
   <url><loc>https://www.waves.fund/give</loc></url>

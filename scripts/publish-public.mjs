@@ -15,6 +15,7 @@ const PRIVATE = [
   /^scripts\/inspect-workspace-services\.mjs$/,
   /^docs\/NEXT-MOVES\.md$/,
   /^scripts\/qa\/inventory\.mjs$/,
+  /^public\/media\/film\//,   // the film is brand media; the site serves it, the code repo does not carry it
 ];
 // Files under public-repo/ exist only in the public repo and land at its root.
 const OVERLAY = 'public-repo/';

@@ -441,13 +441,6 @@ html:not([data-mind="on"]) .begin-core-mind { display: none; }
 .question-list details[open] summary::after { transform: scale(1.5); }
 .question-list details p { padding: 0 0 22px; max-width: 62ch; }
 .question-list summary:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 4px; }
-
-/* ---------- The proposal's first step ---------- */
-.decision-list { list-style: none; padding: 0; margin: 26px 0 14px; display: grid; gap: 12px 30px; }
-@media (min-width: 800px) { .decision-list { grid-template-columns: repeat(5, 1fr); } }
-.decision-list li { display: grid; gap: 10px; font-size: clamp(18px, 1.5vw, 21px); font-weight: 520; letter-spacing: -0.02em; padding-top: 16px; position: relative; }
-.decision-list li::before { content: ""; position: absolute; top: 0; left: 0; right: 20%; height: 1px; background: var(--edge); }
-.decision-list span { font-size: 12px; font-weight: 620; letter-spacing: 0.16em; color: var(--cyan); }
 @media (max-width: 799px) { .guide-pitch-hero .guide-human-orbit { margin-bottom: 48px; } }
 
 /* ---------- The tagline ---------- */

@@ -13,15 +13,19 @@ import { ActionButton, ButtonLink, CONTACT, Intro } from "./ui";
 import { useStateStore } from "./state";
 import { MindAnchor, mindGrow, mindWave } from "./mind/WaveMind";
 import { GiveReview } from "./together/team";
+import { YourWave, readDraft, saveDraft, useWide } from "./your-wave";
 export function Application({
   kind = "project",
 }: {
   kind?: "project" | "guide" | "support";
 }) {
-  const { state } = useStateStore();
+  const { state, setState, motion } = useStateStore();
   const [params] = useSearchParams();
+  const project = kind === "project";
+  const [draft] = useState(() => (project ? readDraft() : null));
+  const wide = useWide();
   const [waveType, setWaveType] = useState<WaveType | "">(() =>
-    kind === "project" ? WAVE_TYPES.find(type => type.id === params.get("waveType"))?.id || "" : "",
+    project ? WAVE_TYPES.find(type => type.id === (params.get("waveType") || draft?.waveType))?.id || "" : "",
   );
   const [name, setName] = useState(""),
     [email, setEmail] = useState(""),
@@ -30,14 +34,14 @@ export function Application({
         ? "Wave Guide Application"
         : kind === "support"
           ? (params.get("type") || "Time") + " Contribution"
-          : "",
+          : draft?.title || "",
     ),
-    [description, setDescription] = useState(
-      kind === "project" ? state.vision : "",
+    [description, setDescription] = useState(() =>
+      !project ? "" : draft?.story && draft.story.startsWith(state.vision) ? draft.story : state.vision || draft?.story || "",
     ),
     [budget, setBudget] = useState(""),
     [category, setCategory] = useState("Aquatic Food Systems"),
-    [milestone, setMilestone] = useState(""),
+    [milestone, setMilestone] = useState(draft?.move || ""),
     [availability, setAvailability] = useState(""),
     [consent, setConsent] = useState(false),
     [publicConsent, setPublicConsent] = useState(false),
@@ -54,6 +58,9 @@ export function Application({
     mindGrow(0.1 + (0.9 * parts.filter(Boolean).length) / parts.length);
   }, [kind, name, email, title, description, milestone, availability, consent]);
   useEffect(() => () => mindGrow(1), []);
+  useEffect(() => {
+    if (project && !receipt) saveDraft({ title, story: description, move: milestone, waveType });
+  }, [project, receipt, title, description, milestone, waveType]);
   async function submit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
@@ -78,7 +85,10 @@ export function Application({
       });
       const r: Receipt = { ...ids, title, kind, ...(kind === "project" && waveType ? { waveType } : {}) };
       saveReceipt(r);
+      if (project) saveDraft({ title: "", story: "", move: "", waveType: "" });
       setReceipt(r);
+      // The receipt opens at its top, where the Wave that was just sent comes in.
+      window.scrollTo({ top: 0, behavior: motion ? "smooth" : "instant" });
       mindGrow(1);
       mindWave(form, 1.6);
     } catch (e) {
@@ -91,14 +101,15 @@ export function Application({
     return (
       <div className="narrow-page">
         <section className="receipt-panel panel">
-          <MindAnchor name="seed" className="receipt-mind" />
-          <Check size={40} />
+          {!project && <><MindAnchor name="seed" className="receipt-mind" />
+          <Check size={40} /></>}
           <p className="eyebrow">APPLICATION RECEIVED</p>
           <h1>
             Thank You,
             <br />
             {name.split(" ")[0]}.
           </h1>
+          {project && <YourWave title={title} story={description} move={milestone} waveType={waveType} sent inPanel />}
           <p>
             Your{" "}
             {kind === "guide"
@@ -123,13 +134,16 @@ export function Application({
           <ButtonLink to="/grow" secondary>
             Track My Application
           </ButtonLink>
+          {project && <ButtonLink to="/waves" secondary>Explore Waves</ButtonLink>}
         </section>
       </div>
     );
   return (
-    <div className="narrow-page application-page">
+    <div className={"narrow-page application-page" + (project ? " yw-page" : "")}>
+      <div className={project ? "yw-layout" : undefined}>
+      <div className="yw-main">
       <Intro
-        mind="seed"
+        mind={project && wide ? undefined : "seed"}
         eyebrow={
           kind === "guide"
             ? "WAVE GUIDES"
@@ -252,11 +266,12 @@ export function Application({
             maxLength={2500}
             rows={6}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => { setDescription(e.target.value); if (project) setState((s) => ({ ...s, vision: e.target.value.slice(0, 500) })); }}
           />
           <small>{description.length}/2500</small>
         </label>
         {kind === "project" ? (
+          <>
           <label>
             Your First Milestone
             <textarea
@@ -268,6 +283,8 @@ export function Application({
               placeholder="What will you deliver, by when, and how will you show it?"
             />
           </label>
+          {!wide && <YourWave title={title} story={description} move={milestone} waveType={waveType} inPanel />}
+          </>
         ) : (
           <label>
             Availability & Areas Of Experience
@@ -339,6 +356,9 @@ export function Application({
           Questions? <a href={`mailto:${CONTACT}`}>{CONTACT}</a>
         </p>
       </form>
+      </div>
+      {project && wide && <YourWave title={title} story={description} move={milestone} waveType={waveType} />}
+      </div>
     </div>
   );
 }

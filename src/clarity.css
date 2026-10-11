@@ -38,12 +38,12 @@ main .guide-lesson-aside figcaption { font-size: 13px; }
 main .begin-guide-action p, main .wave-examples-hint, main .begin-jump a { font-size: 15px; }
 main .wave-examples-note, main .wave-examples-hint, main .begin-note, main .begin-pass-copy > p, main .wave-one-ownership { max-width: 70ch; }
 
-/* ---------- Partner pages, the Team, the Proposal ---------- */
+/* ---------- Partner pages and the Team ---------- */
 main .breadcrumb { font-size: 13px; }
 main .sources a, main .partner-tile > span { font-size: 13px; }
 main .prose a.external { font-size: inherit; }
 main .person-card a.external, main .button-row a.external, main .wave-example-copy a, main .wave-examples a { font-size: 14px; }
-main .pilot-targets span, main .budget-lines, main .budget-total dt, main .budget-note dd, main .agreement p:not(.eyebrow) { font-size: 14px; }
+main .agreement p:not(.eyebrow) { font-size: 14px; }
 main .timeline li > span { font-size: 13px; }
 main .guide-lesson-aside nav a { font-size: 14px; }
 

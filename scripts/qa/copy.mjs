@@ -4,7 +4,7 @@ const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Use
 import { mkdirSync, writeFileSync } from "node:fs";
 const base = process.argv[2] || "https://www.waves.fund";
 const out = process.argv[3] || "vt/copy";
-const routes = (process.argv[4] || "/,/manifest,/now-lets-begin,/learn,/guide,/guide/library,/guide/library/discovery,/guide/apply,/guide/team,/guide/partners,/guide/partners/green-reef,/guide/partners/green-reef/proposal,/give,/guide/teachback,/grow,/apply,/waves,/privacy").split(",");
+const routes = (process.argv[4] || "/,/manifest,/film,/now-lets-begin,/learn,/guide,/guide/library,/guide/library/discovery,/guide/apply,/guide/team,/guide/partners,/guide/partners/green-reef,/give,/guide/teachback,/grow,/apply,/waves,/privacy").split(",");
 mkdirSync(out, { recursive: true });
 const b = await chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
 const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });

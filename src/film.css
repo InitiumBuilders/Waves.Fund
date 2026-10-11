@@ -1,0 +1,16 @@
+@layer pages {
+/* The film's page: the title, the stage, the calls. The stage is the one focal point; light falls from it, no frame. */
+.fm-page { max-width: 1240px; margin: 0 auto; padding: clamp(32px, 6vw, 76px) var(--gutter, 22px) 140px; }
+.fm-head { text-align: center; margin-bottom: clamp(24px, 4vw, 44px); }
+.fm-head .eyebrow { margin: 0 0 18px; justify-content: center; }
+.fm-head h1 { margin: 0; font-size: clamp(42px, 5.8vw, 84px); font-weight: 460; letter-spacing: -0.052em; line-height: 0.98; }
+/* Gradient words carry no shadow: a dark shadow shows through the transparent fill and dulls them. */
+.fm-head h1, .fm-head h1 span { text-shadow: none; }
+.fm-head h1 span { background: linear-gradient(100deg, #d8fbff 0%, #6fe3ff 38%, #8da2ff 72%, #b69cff 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #7fe4ff; }
+/* The whole stage fits on the first screen of a laptop. */
+.fm-stage { position: relative; aspect-ratio: 16 / 9; width: min(100%, max(600px, calc((100svh - 350px) * 16 / 9))); margin-inline: auto; border-radius: clamp(16px, 2.4vw, 30px); overflow: hidden; background: #000; box-shadow: 0 34px 100px rgba(0, 0, 0, 0.55), 0 0 140px rgba(76, 230, 255, 0.09); }
+.fm-video { display: block; width: 100%; height: 100%; object-fit: contain; background: #000; }
+.fm-video::cue { font-family: "Inter Variable", Inter, sans-serif; font-size: 0.9em; line-height: 1.4; color: #f3faff; background: rgba(1, 5, 19, 0.74); }
+.fm-actions { justify-content: center; margin-top: clamp(28px, 4vw, 44px); }
+@media (max-width: 640px) { .fm-stage { width: auto; margin-inline: calc(-1 * var(--gutter, 22px)); border-radius: 0; } }
+}

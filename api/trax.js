@@ -9,7 +9,7 @@ const KNOWN_PAGES = new Set([
   "/now-lets-begin",
   "/", "/learn", "/guide", "/give", "/grow", "/waves", "/projects", "/apply",
   "/guide/apply", "/contribute", "/guide/team", "/guide/partners",
-  "/guide/partners/green-reef", "/guide/partners/green-reef/proposal",
+  "/guide/partners/green-reef",
   "/guide/partners/semble", "/guide/partners/ocean97", "/privacy",
 ]);
 const DAY = 86400000;

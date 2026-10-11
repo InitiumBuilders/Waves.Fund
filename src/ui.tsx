@@ -199,9 +199,10 @@ export function TabLinks() {
     </>
   );
 }
-// The menu, grouped under the four practices. The labels are the menu's own; "The Manifest" (2026-10-07) is new.
+// The menu, grouped under the four practices. The labels are the menu's own; "The Manifest" (2026-10-07) and
+// "The Film" (2026-10-11) are new.
 const MENU: { pillar: string; links: [string, string][] }[] = [
-  { pillar: "Learn", links: [["The Manifest", "/manifest"], ["Our Vision", "/learn"], ["Now, Let’s Begin", "/now-lets-begin"]] },
+  { pillar: "Learn", links: [["The Manifest", "/manifest"], ["The Film", "/film"], ["Our Vision", "/learn"], ["Now, Let’s Begin", "/now-lets-begin"]] },
   { pillar: "Guide", links: [["Wave Guides", "/guide"], ["Guide Library", "/guide/library"], ["The Teachback", "/guide/teachback"], ["The Waves Fund Team", "/guide/team"]] },
   { pillar: "Give", links: [["Give Together", "/give"], ["Partners", "/guide/partners"], ["Partnerships & Impact Investment", `mailto:${CONTACT}`]] },
   { pillar: "Grow", links: [["Waves", "/waves"], ["Your Workspace", "/workspace"], ["Submit A Project", "/apply"]] },

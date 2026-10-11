@@ -22,7 +22,7 @@ const pageNames: Record<string, string> = {
   "/": "What’s Your Vision?", "/learn": "Learn", "/guide": "Wave Guides", "/give": "Give", "/grow": "Grow",
   "/waves": "Waves", "/projects": "Projects", "/projects/:project": "Project Details", "/apply": "Submit A Project", "/guide/apply": "Wave Guide Application",
   "/contribute": "Contribute", "/guide/team": "The Waves Fund Team", "/guide/partners": "Partners",
-  "/guide/partners/green-reef": "Green Reef Foundation", "/guide/partners/green-reef/proposal": "Green Reef Proposal",
+  "/guide/partners/green-reef": "Green Reef Foundation",
   "/guide/partners/semble": "Partner · Semble.CC", "/guide/partners/ocean97": "Ocean97.Com", "/privacy": "Privacy & Participation",
 };
 const number = (value: number) => new Intl.NumberFormat("en-US").format(value);

@@ -3,10 +3,17 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "crons": [{ "path": "/api/digest", "schedule": "0 14 * * *" }],
+  "redirects": [
+    { "source": "/guide/partners/green-reef/proposal", "destination": "/guide/partners/green-reef", "permanent": true }
+  ],
   "rewrites": [
     {
       "source": "/now-lets-begin",
       "destination": "/now-lets-begin.html"
+    },
+    {
+      "source": "/film",
+      "destination": "/share/film.html"
     },
     {
       "source": "/learn",
@@ -43,10 +50,6 @@
     {
       "source": "/apply",
       "destination": "/share/apply.html"
-    },
-    {
-      "source": "/guide/partners/green-reef/proposal",
-      "destination": "/share/green-reef-proposal.html"
     },
     {
       "source": "/((?!media/|assets/|api/).*)",
