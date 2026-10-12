@@ -12,5 +12,9 @@
 .fm-video { display: block; width: 100%; height: 100%; object-fit: contain; background: #000; }
 .fm-video::cue { font-family: "Inter Variable", Inter, sans-serif; font-size: 0.9em; line-height: 1.4; color: #f3faff; background: rgba(1, 5, 19, 0.74); }
 .fm-actions { justify-content: center; margin-top: clamp(28px, 4vw, 44px); }
-@media (max-width: 640px) { .fm-stage { width: auto; margin-inline: calc(-1 * var(--gutter, 22px)); border-radius: 0; } }
+/* The first film, below: smaller, the same light. */
+.fm-second { margin-top: clamp(80px, 12vw, 150px); text-align: center; }
+.fm-second .eyebrow { justify-content: center; margin: 0 0 22px; }
+.fm-stage.fm-stage-small { width: min(100%, 880px); }
+@media (max-width: 640px) { .fm-stage, .fm-stage.fm-stage-small { width: auto; margin-inline: calc(-1 * var(--gutter, 22px)); border-radius: 0; } }
 }
