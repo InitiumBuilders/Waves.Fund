@@ -11,6 +11,7 @@ const KNOWN_PAGES = new Set([
   "/guide/apply", "/contribute", "/guide/team", "/guide/partners",
   "/guide/partners/green-reef",
   "/guide/partners/semble", "/guide/partners/ocean97", "/privacy",
+  "/manifest", "/film", "/guide/library", "/guide/library/:lesson", "/guide/teachback", "/waves/:wave",
 ]);
 const DAY = 86400000;
 const fail = (status, message) => Object.assign(new Error(message), { status });

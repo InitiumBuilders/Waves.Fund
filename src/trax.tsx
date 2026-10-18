@@ -24,6 +24,8 @@ const pageNames: Record<string, string> = {
   "/contribute": "Contribute", "/guide/team": "The Waves Fund Team", "/guide/partners": "Partners",
   "/guide/partners/green-reef": "Green Reef Foundation",
   "/guide/partners/semble": "Partner · Semble.CC", "/guide/partners/ocean97": "Ocean97.Com", "/privacy": "Privacy & Participation",
+  "/manifest": "The Manifest", "/film": "The Film", "/guide/library": "The Guide Library", "/guide/library/:lesson": "A Guide Lesson",
+  "/guide/teachback": "The Teachback", "/waves/:wave": "A Wave’s Page",
 };
 const number = (value: number) => new Intl.NumberFormat("en-US").format(value);
 function duration(ms: number) {
@@ -39,6 +41,8 @@ function dateLabel(day: string) {
 }
 function measuredPage(path: string) {
   if (/^\/projects\/[a-f0-9-]{36}$/.test(path)) return "/projects/:project";
+  if (/^\/guide\/library\/[a-z0-9-]{1,80}$/.test(path)) return "/guide/library/:lesson";
+  if (/^\/waves\/[a-z0-9-]{1,80}$/.test(path)) return "/waves/:wave";
   return Object.hasOwn(pageNames, path) ? path : null;
 }
 function allowedBrowser() {

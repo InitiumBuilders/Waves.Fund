@@ -13,7 +13,8 @@ import { ActionButton, ButtonLink, CONTACT, Intro } from "./ui";
 import { useStateStore } from "./state";
 import { MindAnchor, mindGrow, mindWave } from "./mind/WaveMind";
 import { GiveReview } from "./together/team";
-import { YourWave, readDraft, saveDraft, useWide } from "./your-wave";
+import { YourGuide, YourWave, clearShared, readDraft, readShared, rememberSent, saveDraft, sentWaves, useWide } from "./your-wave";
+import type { WaveDraft } from "./your-wave";
 export function Application({
   kind = "project",
 }: {
@@ -21,11 +22,18 @@ export function Application({
 }) {
   const { state, setState, motion } = useStateStore();
   const [params] = useSearchParams();
-  const project = kind === "project";
+  const project = kind === "project", guide = kind === "guide";
   const [draft] = useState(() => (project ? readDraft() : null));
+  // A Wave shared with this person (Shape It Together). If they have no Wave of their own yet it opens at once;
+  // otherwise they choose between it and their own.
+  const [incoming] = useState(() => (project ? readShared() : null));
+  const [startEmpty] = useState(() => !(draft?.title || draft?.story || draft?.move || state.vision));
+  const take = Boolean(incoming && startEmpty);
+  const [offer, setOffer] = useState<WaveDraft | null>(() => (incoming && !startEmpty && (incoming.title !== draft?.title || incoming.story !== draft?.story || incoming.move !== draft?.move) ? incoming : null));
+  useEffect(() => { if (incoming) clearShared(); }, [incoming]);
   const wide = useWide();
   const [waveType, setWaveType] = useState<WaveType | "">(() =>
-    project ? WAVE_TYPES.find(type => type.id === (params.get("waveType") || draft?.waveType))?.id || "" : "",
+    project ? WAVE_TYPES.find(type => type.id === (params.get("waveType") || (take ? incoming!.waveType : draft?.waveType)))?.id || "" : "",
   );
   const [name, setName] = useState(""),
     [email, setEmail] = useState(""),
@@ -34,14 +42,14 @@ export function Application({
         ? "Wave Guide Application"
         : kind === "support"
           ? (params.get("type") || "Time") + " Contribution"
-          : draft?.title || "",
+          : take ? incoming!.title : draft?.title || "",
     ),
     [description, setDescription] = useState(() =>
-      !project ? "" : draft?.story && draft.story.startsWith(state.vision) ? draft.story : state.vision || draft?.story || "",
+      !project ? "" : take ? incoming!.story : draft?.story && draft.story.startsWith(state.vision) ? draft.story : state.vision || draft?.story || "",
     ),
     [budget, setBudget] = useState(""),
     [category, setCategory] = useState("Aquatic Food Systems"),
-    [milestone, setMilestone] = useState(draft?.move || ""),
+    [milestone, setMilestone] = useState(take ? incoming!.move : draft?.move || ""),
     [availability, setAvailability] = useState(""),
     [consent, setConsent] = useState(false),
     [publicConsent, setPublicConsent] = useState(false),
@@ -85,7 +93,10 @@ export function Application({
       });
       const r: Receipt = { ...ids, title, kind, ...(kind === "project" && waveType ? { waveType } : {}) };
       saveReceipt(r);
-      if (project) saveDraft({ title: "", story: "", move: "", waveType: "" });
+      if (project) {
+        saveDraft({ title: "", story: "", move: "", waveType: "" });
+        rememberSent({ id: ids.id, title, story: description, move: milestone, waveType });
+      }
       setReceipt(r);
       // The receipt opens at its top, where the Wave that was just sent comes in.
       window.scrollTo({ top: 0, behavior: motion ? "smooth" : "instant" });
@@ -140,10 +151,10 @@ export function Application({
     );
   return (
     <div className={"narrow-page application-page" + (project ? " yw-page" : "")}>
-      <div className={project ? "yw-layout" : undefined}>
+      <div className={project || guide ? "yw-layout" : undefined}>
       <div className="yw-main">
       <Intro
-        mind={project && wide ? undefined : "seed"}
+        mind={(project || guide) && wide ? undefined : "seed"}
         eyebrow={
           kind === "guide"
             ? "WAVE GUIDES"
@@ -178,6 +189,16 @@ export function Application({
             : "Built For All Lifelong Learners And Leaders Building Waves For Humanity"}
         </p>
       </Intro>
+      {offer && (
+        <section className="panel yw-offer" role="status">
+          <p className="eyebrow">SHAPED TOGETHER</p>
+          <h2>{offer.title.trim() || "A Wave"} Was Shared With You.</h2>
+          <div className="button-row">
+            <button type="button" className="glow-button" onClick={() => { setTitle(offer.title); setDescription(offer.story); setState((s) => ({ ...s, vision: offer.story.slice(0, 500) })); setMilestone(offer.move); setWaveType(WAVE_TYPES.find((t) => t.id === offer.waveType)?.id || ""); setOffer(null); }}>Open It</button>
+            <button type="button" className="text-button" onClick={() => setOffer(null)}>Keep Mine</button>
+          </div>
+        </section>
+      )}
       <form className="application-form panel" onSubmit={submit}>
         <div className="form-pair">
           <label>
@@ -283,7 +304,7 @@ export function Application({
               placeholder="What will you deliver, by when, and how will you show it?"
             />
           </label>
-          {!wide && <YourWave title={title} story={description} move={milestone} waveType={waveType} inPanel />}
+          {!wide && <YourWave title={title} story={description} move={milestone} waveType={waveType} inPanel shape />}
           </>
         ) : (
           <label>
@@ -297,6 +318,7 @@ export function Application({
             />
           </label>
         )}
+        {guide && !wide && <YourGuide name={name} bio={description} inPanel />}
         <div className="form-trap" aria-hidden="true">
           <label>
             Website
@@ -357,7 +379,8 @@ export function Application({
         </p>
       </form>
       </div>
-      {project && wide && <YourWave title={title} story={description} move={milestone} waveType={waveType} />}
+      {project && wide && <YourWave title={title} story={description} move={milestone} waveType={waveType} shape />}
+      {guide && wide && <YourGuide name={name} bio={description} />}
       </div>
     </div>
   );
@@ -383,6 +406,8 @@ export function ReceiptTracker() {
     <section className="section panel receipt-tracker">
       <p className="eyebrow">YOUR APPLICATIONS</p>
       <h2>Follow Your Next Move</h2>
+      {/* The newest Wave this browser sent, on its own water, while it waits for review. */}
+      {(() => { const ids = new Set(receipts.map((r) => r.id)); const w = sentWaves().filter((x) => ids.has(x.id)).pop(); return w ? <YourWave title={w.title} story={w.story} move={w.move} waveType={w.waveType} sent inPanel className="yw-grow" /> : null; })()}
       {!receipts.length ? (
         <p>
           Your application receipts will appear here after you submit a project,

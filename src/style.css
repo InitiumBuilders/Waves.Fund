@@ -1130,6 +1130,9 @@ thead {
   max-width: 540px;
   margin: 15px auto 25px;
 }
+.empty-state > .glow-button {
+  margin-top: 25px;
+}
 .project-card {
   text-align: left;
   width: 100%;

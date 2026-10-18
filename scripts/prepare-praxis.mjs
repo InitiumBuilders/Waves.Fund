@@ -7,7 +7,11 @@ import { readFile, writeFile, copyFile, mkdir } from "node:fs/promises";
 export const SHARE_PAGES = [
   { route: "/now-lets-begin", file: "now-lets-begin.html", title: "Now, Let’s Begin — The Wave Praxis | Waves.Fund", description: "Build your custom Wave with a real Wave Guide. Explore Wave One, the complete Wave Praxis, and a new way to bring people and funding around your mission." },
   { route: "/manifest", file: "share/manifest.html", image: "manifest", title: "The Manifest | Waves.Fund", description: "Trust People. And They Become Trustworthy. Waves.Fund on one page." },
-  { route: "/film", file: "share/film.html", image: "film", title: "The Film | Waves.Fund", description: "Trust People. And They Become Trustworthy. Waves.Fund in three minutes." },
+  { route: "/film", file: "share/film.html", image: "film", title: "The Film | Waves.Fund", description: "Trust People. And They Become Trustworthy. Waves.Fund in four and a half minutes.",
+    // the film itself, for search results and players that show video
+    ogType: "video.other",
+    head: `<meta property="og:video" content="https://www.waves.fund/media/film/raise-waves-hype.mp4" /><meta property="og:video:type" content="video/mp4" /><meta property="og:video:width" content="1920" /><meta property="og:video:height" content="1080" />`
+      + `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "VideoObject", name: "Raise Waves.", description: "Waves.Fund in four and a half minutes: the Wave, the Guide, the plan, and a thousand Waves on the water.", thumbnailUrl: ["https://www.waves.fund/media/share/film.jpg", "https://www.waves.fund/media/film/raise-waves-hype.webp"], uploadDate: "2026-10-11", duration: "PT4M28S", contentUrl: "https://www.waves.fund/media/film/raise-waves-hype.mp4", embedUrl: "https://www.waves.fund/film", publisher: { "@type": "Organization", name: "Waves.Fund", logo: { "@type": "ImageObject", url: "https://www.waves.fund/media/logo.webp" } } })}</script>` },
   { route: "/learn", file: "share/learn.html", image: "learn", title: "Raise Capital In A Whole New Way. Raise Waves. | Waves.Fund", description: "Welcome To The Frontier Of Funding. #BuildDifferent #BuildAWave" },
   { route: "/guide", file: "share/guide.html", image: "guide", title: "Your vision. Your Wave. A Guide beside you. | Waves.Fund", description: "A Wave Guide works with you to design, build, and evolve a custom home for your mission: its story, its people, and its next move." },
   { route: "/guide/library", file: "share/guide-library.html", image: "guide", title: "The Wave Guide Library | Waves.Fund", description: "Learn the practice. Build it together. Six lessons and seven working templates for the human in the loop." },
@@ -30,9 +34,10 @@ if (process.argv.includes("--after-build")) {
       .replace(/(<meta\s+property="og:title"\s+content=")[^"]*(")/, `$1${page.title}$2`)
       .replace(/(<meta\s+property="og:description"\s+content=")[^"]*(")/, `$1${page.description}$2`)
       .replace(/(<meta\s+property="og:url"\s+content=")[^"]*(")/, `$1${url}$2`)
+      .replace(/(<meta\s+property="og:type"\s+content=")[^"]*(")/, `$1${page.ogType || "website"}$2`)
       .replace(/(<meta\s+property="og:image"\s+content=")[^"]*(")/, `$1${image}$2`)
       .replace(/(<meta\s+name="twitter:image"\s+content=")[^"]*(")/, `$1${image}$2`)
-      .replace("</head>", `<link rel="canonical" href="${url}" /></head>`);
+      .replace("</head>", `<link rel="canonical" href="${url}" />${page.head || ""}</head>`);
     await writeFile(new URL(`../dist/${page.file}`, import.meta.url), html);
   }
 } else {

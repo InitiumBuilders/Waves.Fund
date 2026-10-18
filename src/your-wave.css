@@ -33,10 +33,26 @@ html[data-motion="off"] .yw-title, html[data-motion="off"] .yw-story, html[data-
 @media (min-width: 1100px) {
   .yw-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 44px; align-items: start; margin-inline: calc(50% - min(590px, 50vw - var(--gutter, 40px))); }
   .yw-layout > .yw { position: sticky; top: 108px; margin-top: clamp(24px, 6vh, 64px); }
+  /* The page's dot field runs behind everything and frames words by where they sit on the page, but this card stays
+     put while the page scrolls; a feathered pool of night under it keeps the field's dots off its water and words. */
+  .yw-layout > .yw::before { content: ""; position: absolute; inset: -90px -160px; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgba(1, 5, 19, 0.97), rgba(1, 5, 19, 0.93) 72%, rgba(1, 5, 19, 0)); }
   /* The form is wider than its reading measure here; its centred line stays centred. */
   .yw-layout .form-contact { margin-inline: auto; }
   .yw-layout .yw-sea { height: 240px; }
 }
+
+/* Shape It Together: under the Wave, a way to send it to one person. */
+.yw-shape { margin-top: 26px; display: grid; gap: 8px; justify-items: start; }
+.yw-shape-button:disabled { opacity: 0.45; cursor: default; }
+.yw-shape-note { margin: 0; font-size: 14px; line-height: 1.5; color: #cfeaff; }
+/* A Wave shared with this person, waiting for their choice. */
+.yw-offer { margin: 0 0 22px; padding: 24px 26px; }
+.yw-offer .eyebrow { margin: 0 0 10px; }
+.yw-offer h2 { margin: 0 0 18px; font-size: clamp(24px, 3vw, 32px); font-weight: 520; letter-spacing: -0.03em; line-height: 1.15; overflow-wrap: anywhere; }
+.yw-offer .button-row { margin: 0; }
+
+/* Grow: the newest Wave sent from this browser, above its receipt. */
+.receipt-tracker .yw-grow { margin: 8px 0 30px; }
 
 /* The receipt: the Wave that was just sent, its wave coming in. */
 .receipt-panel .yw { margin: 6px 0 26px; }

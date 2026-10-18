@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Check, Share2 } from "lucide-react";
 import type { MutableRefObject } from "react";
 import type { RippleModel, Source } from "./together/ripple";
 import { hash } from "./together/ripple";
@@ -14,7 +15,7 @@ const Sea = lazy(() => import("./together/sea").then((m) => ({ default: m.Sea })
    first move) rises from it once as a ripple, and rings with sound on. The first move is a second light, nearer the
    shore, in step with the first: a next move people can reach. When the application is sent, a wave rises from the
    horizon and comes all the way in. Nothing here is stored anywhere but this browser. */
-export type YourWaveParts = { title: string; story: string; move: string; sent: boolean; ground: number };
+export type YourWaveParts = { title: string; story: string; move: string; sent: boolean; ground: number; hue?: number };
 const PARTS = ["title", "story", "move", "sent"] as const;
 
 export function yourWaveModel(parts: MutableRefObject<YourWaveParts>): RippleModel {
@@ -35,7 +36,7 @@ export function yourWaveModel(parts: MutableRefObject<YourWaveParts>): RippleMod
     const dt = Math.min(0.1, Math.max(0, t - last)); last = t;
     level += (target - level) * Math.min(1, dt * 1.6);
     const lambda = Math.max(40, Math.min(100, Math.min(w, h) * 0.2));
-    const hue = 0.1 + 0.5 * hash(p.title.trim().toLowerCase() || "your wave");
+    const hue = p.hue ?? 0.1 + 0.5 * hash(p.title.trim().toLowerCase() || "your wave");
     const x = w * 0.5, y = h * 0.24;
     const sources: Source[] = [{ x, y, a: level, phase: 0, hue, size: 2.4 + level * 2.2, born: -100, reach: 0.28 + 0.5 * level }];
     for (const k of PARTS) {
@@ -68,6 +69,62 @@ export function saveDraft(d: WaveDraft) {
   } catch { /* storage blocked: the draft lasts this visit */ }
 }
 
+/* A Wave once sent, kept in this browser beside its receipt, so Grow can show the builder their Wave while it is in
+   review. Only the newest few are kept. */
+const SENT = "waves-sent-waves";
+export type SentWave = { id: string; title: string; story: string; move: string; waveType: string };
+export function rememberSent(w: SentWave) {
+  try {
+    const list = sentWaves().filter((x) => x.id !== w.id);
+    localStorage.setItem(SENT, JSON.stringify([...list, w].slice(-5)));
+  } catch { /* storage blocked: the receipt still holds the title */ }
+}
+export function sentWaves(): SentWave[] {
+  try {
+    const d = JSON.parse(localStorage.getItem(SENT) || "[]");
+    return Array.isArray(d) ? d.filter((w) => w && typeof w.id === "string" && typeof w.title === "string") : [];
+  } catch { return []; }
+}
+
+/* Shape It Together: a builder sends their draft Wave to one person as a link. The words ride in the link's fragment
+   (after the #), which a browser never sends to any server; the other person opens the application with the Wave
+   filled in, shapes it, and can send it back the same way. Name and email never travel. */
+const b64 = (o: unknown) => { const bytes = new TextEncoder().encode(JSON.stringify(o)); let s = ""; bytes.forEach((b) => (s += String.fromCharCode(b))); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
+const unb64 = (t: string) => { const s = atob(t.replace(/-/g, "+").replace(/_/g, "/")); return JSON.parse(new TextDecoder().decode(Uint8Array.from(s, (c) => c.charCodeAt(0)))); };
+export function shareLink(d: WaveDraft) {
+  return `${window.location.origin}/apply#wave=${b64({ t: d.title.slice(0, 120), s: d.story.slice(0, 2500), m: d.move.slice(0, 700), w: d.waveType.slice(0, 40) })}`;
+}
+export function readShared(): WaveDraft | null {
+  try {
+    const m = /[#&]wave=([A-Za-z0-9_-]+)/.exec(window.location.hash); if (!m) return null;
+    const o = unb64(m[1]), s = (v: unknown, n: number) => (typeof v === "string" ? v.slice(0, n) : "");
+    const d = { title: s(o?.t, 120), story: s(o?.s, 2500), move: s(o?.m, 700), waveType: s(o?.w, 40) };
+    return d.title || d.story || d.move ? d : null;
+  } catch { return null; }
+}
+export function clearShared() { try { history.replaceState(history.state, "", window.location.pathname + window.location.search); } catch { /* the link stays as it was */ } }
+export function ShapeTogether({ draft }: { draft: WaveDraft }) {
+  const [done, setDone] = useState(false);
+  const ready = Boolean(draft.title.trim() || draft.story.trim());
+  useEffect(() => { setDone(false); }, [draft.title, draft.story, draft.move, draft.waveType]);
+  const send = async () => {
+    const url = shareLink(draft);
+    try {
+      // a phone hands the link to its share sheet; a desktop copies it, ready to paste into a message
+      if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ title: `${draft.title.trim() || "A Wave"} · Waves.Fund`, url });
+      else { await navigator.clipboard.writeText(url); setDone(true); }
+    } catch { /* the person closed the share sheet */ }
+  };
+  return (
+    <div className="yw-shape">
+      <button type="button" className="text-button yw-shape-button" onClick={send} disabled={!ready}>
+        {done ? <Check size={17} /> : <Share2 size={17} />}{done ? "Link Copied" : "Shape It Together"}
+      </button>
+      <p className="yw-shape-note">Send your Wave to one person to shape it with you.</p>
+    </div>
+  );
+}
+
 export function useWide(query = "(min-width: 1100px)") {
   const [wide, setWide] = useState(() => matchMedia(query).matches);
   useEffect(() => {
@@ -80,8 +137,8 @@ export function useWide(query = "(min-width: 1100px)") {
 
 // `inPanel`: the Wave stands inside a panel (the form on a phone, the receipt), so its water draws only its light and
 // lattice and lets the panel show through, instead of laying the page's night over it.
-export function YourWave({ title, story, move, waveType, sent = false, inPanel = false, className = "" }: {
-  title: string; story: string; move: string; waveType?: string; sent?: boolean; inPanel?: boolean; className?: string;
+export function YourWave({ title, story, move, waveType, sent = false, inPanel = false, shape = false, className = "" }: {
+  title: string; story: string; move: string; waveType?: string; sent?: boolean; inPanel?: boolean; shape?: boolean; className?: string;
 }) {
   const ground = inPanel ? 0 : 0.92;
   const parts = useRef<YourWaveParts>({ title, story, move, sent, ground });
@@ -103,6 +160,30 @@ export function YourWave({ title, story, move, waveType, sent = false, inPanel =
         {story.trim() ? <p className="yw-story">{story}</p> : <span className="yw-bars" aria-hidden="true"><i /><i /><i /></span>}
         <p className="eyebrow yw-label">THE CURRENT MOVE</p>
         {move.trim() ? <p className="yw-move">{move}</p> : <span className="yw-bars" aria-hidden="true"><i /><i /></span>}
+        {shape && <ShapeTogether draft={{ title, story, move, waveType: waveType || "" }} />}
+      </div>
+    </section>
+  );
+}
+
+/* Your Guide card: a Wave Guide applicant sees themselves the way a Guide appears on a Wave's page, on their own
+   water, with the violet light the Guide carries beside a builder's. */
+export function YourGuide({ name, bio, inPanel = false, className = "" }: { name: string; bio: string; inPanel?: boolean; className?: string }) {
+  const ground = inPanel ? 0 : 0.92;
+  const parts = useRef<YourWaveParts>({ title: name, story: bio, move: "", sent: false, ground, hue: 0.85 });
+  parts.current = { title: name, story: bio, move: "", sent: false, ground, hue: 0.85 };
+  const model = useRef<RippleModel>(yourWaveModel(parts));
+  return (
+    <section className={`yw yw-guide ${className}`} aria-label="Your Wave Guide card">
+      <div className="yw-sea">
+        <Suspense fallback={<div className="ripple yw-scene" aria-hidden="true" />}>
+          <Sea model={model} className="yw-scene" maxDpr={1.25} still={4.5} aria-hidden="true" />
+        </Suspense>
+      </div>
+      <div className="yw-copy">
+        <p className="eyebrow">YOUR WAVE GUIDE</p>
+        {name.trim() ? <h2 className="yw-title">{name}</h2> : <span className="yw-bar yw-bar-title" aria-hidden="true" />}
+        {bio.trim() ? <p className="yw-story">{bio}</p> : <span className="yw-bars" aria-hidden="true"><i /><i /><i /></span>}
       </div>
     </section>
   );
