@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowRight, Download, Share2, Check, RefreshCw, ShieldCheck } from "lucide-react";
 import { ButtonLink, WaveMark } from "./ui";
 import { SeaHero } from "./sea-hero";
-import { BEAT } from "./cadence";
+import { BEAT, still as stillMotion } from "./cadence";
 import { sound } from "./sound";
 import { safeWebLink, saveFile, waveRequest } from "./workspace-client";
 import type { RippleModel, Source } from "./together/ripple";
@@ -78,16 +78,25 @@ export function PublicWave() {
 }
 
 /* The Journey is the Wave's record. Each entry carries the seal it was given when it was recorded; checking runs the
-   same hash in this browser, entry by entry. */
+   same hash in this browser, entry by entry. The answer comes down the line one link at a time, a fifth of a beat
+   apart, because each seal holds the one before it; with sound on each matching link adds a note, so a changed one
+   is a missing note. */
 const sealWords: Record<Exclude<SealState, null>, string> = { match: "Matches its seal.", edited: "Changed after it was sealed.", unlinked: "Its link to the entry before has changed." };
 function Journey({journey}:{journey:WaveJourney[]}) {
-  const [states,setStates]=useState<SealState[]|null>(null),[checking,setChecking]=useState(false);
-  useEffect(()=>setStates(null),[journey]);
+  const [states,setStates]=useState<SealState[]|null>(null),[checking,setChecking]=useState(false),[shown,setShown]=useState(0);
+  useEffect(()=>{setStates(null);setShown(0);},[journey]);
+  useEffect(()=>{
+    if(!states)return;
+    if(stillMotion()){setShown(states.length);setChecking(false);return;}
+    let k=0;const id=setInterval(()=>{if(states[k]==="match")sound("land",k);k++;setShown(k);if(k>=states.length){clearInterval(id);setChecking(false);}},BEAT*200);
+    return ()=>clearInterval(id);
+  },[states]);
   const head=journey.at(-1)?.seal, sealed=journey.filter(item=>item.seal).length;
   const changed=states?.filter(s=>s==="edited"||s==="unlinked").length||0;
-  const check=async()=>{setChecking(true);try{setStates(await checkJourney(journey));}finally{setChecking(false);}};
-  return <section className="pw-chapter arrive"><p className="eyebrow">YOU HELPED. HERE’S WHAT CHANGED.</p><h2>The Journey</h2>{journey.length ? <ol className="pw-journey">{journey.map((item,index)=><li key={item.id}><time dateTime={item.created}>{formatDate(item.created)}</time><h3>{item.title}</h3><p>{item.body}</p><Evidence href={item.evidence}/>{item.seal&&<p className="pw-seal"><span>Seal</span> <code>{item.seal.slice(0,12)}</code>{states?.[index]&&<span className={`pw-seal-state ${states[index]}`}>{sealWords[states[index]!]}</span>}</p>}</li>)}</ol> : <p>The next outcome will be shared here after the work is completed and approved.</p>}
-    {head&&<div className="pw-seals"><p>Each entry is sealed when it is recorded, with a fingerprint of its words and of the entry before it. If an entry’s words change later, or an entry is removed, the seals stop matching. Check every seal here, in your own browser.</p><button type="button" className="workspace-button secondary" disabled={checking} onClick={check}>{checking?"Checking…":"Check The Seals"}<ShieldCheck size={17}/></button>{states&&<p className="pw-seals-result" role="status">{changed?`${changed} of ${sealed} entries changed after they were sealed.`:`All ${sealed} seals match.`}</p>}<p className="pw-seal-head"><span>Latest seal</span><code>{head}</code></p><p className="pw-seals-note">Save it, and you can tell later whether anything before it was rewritten.</p></div>}
+  const done=Boolean(states)&&shown>=journey.length;
+  const check=async()=>{setChecking(true);setShown(0);setStates(null);try{setStates(await checkJourney(journey));}catch{setChecking(false);}};
+  return <section className="pw-chapter arrive"><p className="eyebrow">YOU HELPED. HERE’S WHAT CHANGED.</p><h2>The Journey</h2>{journey.length ? <ol className="pw-journey">{journey.map((item,index)=><li key={item.id} className={states&&index<shown?"pw-checked":undefined}><time dateTime={item.created}>{formatDate(item.created)}</time><h3>{item.title}</h3><p>{item.body}</p><Evidence href={item.evidence}/>{item.seal&&<p className="pw-seal"><span>Seal</span> <code>{item.seal.slice(0,12)}</code>{states?.[index]&&index<shown&&<span className={`pw-seal-state ${states[index]}`}>{sealWords[states[index]!]}</span>}</p>}</li>)}</ol> : <p>The next outcome will be shared here after the work is completed and approved.</p>}
+    {head&&<div className="pw-seals"><p>Each entry is sealed when it is recorded, with a fingerprint of its words and of the entry before it. If an entry’s words change later, or an entry is removed, the seals stop matching. Check every seal here, in your own browser.</p><button type="button" className="workspace-button secondary" disabled={checking} onClick={check}>{checking?"Checking…":"Check The Seals"}<ShieldCheck size={17}/></button>{done&&<p className="pw-seals-result" role="status">{changed?`${changed} of ${sealed} entries changed after they were sealed.`:`All ${sealed} seals match.`}</p>}<p className="pw-seal-head"><span>Latest seal</span><code>{head}</code></p><p className="pw-seals-note">Save it, and you can tell later whether anything before it was rewritten.</p></div>}
   </section>;
 }
 

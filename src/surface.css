@@ -1,0 +1,26 @@
+@layer base {
+/* Words surface (src/surface.ts). The heading's own words stay in the page, unseen; the split copy over them moves.
+   Each word rises from just below its own line, so the line itself is the waterline. */
+.sf { position: relative; -webkit-text-fill-color: transparent; text-shadow: none !important; }
+.sf > :not(sf-layer) { opacity: 0; }
+sf-layer { position: absolute; inset: 0; padding: inherit; -webkit-text-fill-color: currentColor; pointer-events: none; user-select: none; }
+/* A gradient's words carry their own slice of it (sf-g), so the copied gradient span itself paints nothing. */
+sf-layer .sf-gp { background: none !important; }
+/* The hero's block rise would double the words' own rise. */
+.sea-hero-copy > h1.sf, .page-intro h1.sf { animation: none; }
+sf-w { display: inline-block; clip-path: inset(-0.12em -0.12em -0.22em -0.12em); }
+sf-i { display: inline-block; transform: translate3d(0, 118%, 0) rotate(5deg); transform-origin: 0 100%; opacity: 0; }
+/* Words are plain ink until their gradient slice is measured; a word never waits invisible for a measurement. */
+sf-i { -webkit-text-fill-color: currentColor; }
+sf-i::before { content: attr(data-w); }
+sf-i.sf-g::before { background-image: var(--sf-bg); background-size: var(--sf-bs); background-position: var(--sf-bp); background-repeat: no-repeat; background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.sf-on sf-i { animation: sf-rise 1.15s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) var(--sf-d, 0s) both; }
+.sf-now sf-i { animation: none; transform: none; opacity: 1; }
+@keyframes sf-rise {
+  0% { transform: translate3d(0, 118%, 0) rotate(5deg); opacity: 0; }
+  35% { opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+html[data-motion="off"] sf-i { animation: none; transform: none; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { sf-i { animation: none !important; transform: none !important; opacity: 1 !important; } }
+}

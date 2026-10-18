@@ -58,6 +58,7 @@ Log long runs to a file and grep it. A crash piped through `tail` prints only th
 | `perf2.mjs <base> <route> <scroll 0..1>` | Frame times at 6x CPU throttle on a phone |
 | `seaperf.mjs <base>` | Frame times in the Give sea's chapters, 1x and 6x |
 | `ringperf.mjs <base>` | Scrolling with the tour's ring up versus without |
+| `sfaudit.mjs <base>` | Every heading on every route at two sizes: surfaces each one, then checks the moving copy wraps exactly like the real words, and lists headings that fell back to plain |
 | `tour.mjs <base> <dir> [routes]` + `sheet.py <dir> <out>` | Scroll captures of each route and contact sheets |
 | `tourtest.mjs <base> <path> <d|m> [draft]` | Walks one tour path (vision, guide, give, waves, all) and records each step |
 | `tourextras.mjs <base>` | The first-visit offer, Escape, the menu entry |

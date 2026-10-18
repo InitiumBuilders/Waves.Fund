@@ -402,6 +402,31 @@ submissions are open, and its first screen offers Bring Your Vision.
 On the Manifest, with sound on, each light that comes up in the hero rings one note of a D major chord, so the chord
 builds as the lights join.
 
+## The site answers (2026-10-18)
+
+Five systems, each one file, each with one statement.
+
+- **Words surface** (`src/surface.ts`). A heading's words rise into place from below their own line when it comes
+  into view, line by line and left to right, the way a wave passes along a shore. The heading's text is never
+  touched (React owns it, reading tools read it): an aria-hidden copy split into words lies exactly over it, its
+  letters drawn from attributes so the page's text stays as written, and only the copy moves. A copy that would wrap
+  differently from the original removes itself (checked when the heading resizes and as it comes into view;
+  `sfaudit` found 208 surfacing and 2 falling back, none mismatched). Forms, live previews, the workspace and receipts
+  keep plain headings because their headings change as people act.
+- **The press** (`src/press.ts`). Light spreads through a button from where the finger landed (from its centre for a
+  key), a ring goes out through the field, a button rings the water's note for where it was touched when sound is
+  on, and on a phone that can, a primary press gives one 8 ms tick.
+- **The rim light** (`src/rim.ts`). With a mouse, a card's rim catches the light where the pointer is. The light is a
+  disc moved by transform inside a mask that only shows the rim. Phones keep the resting rim.
+- **The lens** (`src/mind/field.ts`, `uBlur`). The front layer of dots is in focus; the middle layer is drawn as
+  softer, wider discs, brighter at the rim, and an active dot comes forward into focus.
+- **The record fills in** (`src/record.css`, `src/public-wave.tsx`). The Record's line draws down with the scroll and
+  each move lights as it is reached. "Check The Seals" answers one link at a time, a fifth of a beat apart, with a ring
+  on each point; with sound on each matching link adds a note, so a changed link is a missing note.
+
+The phone sea heroes measure the night under their words from the words themselves (it starts 120px above the
+eyebrow), so a long title never stands on bright water.
+
 ## Rules
 
 - No particle swarms. Dots never fly in to form a shape (August, 2026-09-23).

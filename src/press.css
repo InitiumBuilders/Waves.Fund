@@ -1,0 +1,20 @@
+@layer base {
+/* The press (src/press.ts): light spreading through the button from the point of touch, then gone. It adds light
+   (plus-lighter), so the words it passes over brighten instead of being covered. */
+press-clip { position: absolute; inset: 0; z-index: 0; overflow: hidden; border-radius: inherit; corner-shape: superellipse(2.15); pointer-events: none; }
+press-ring {
+  position: absolute; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(232, 252, 255, 0.5), rgba(110, 228, 255, 0.26) 52%, rgba(120, 140, 255, 0.08) 80%, rgba(120, 140, 255, 0));
+  mix-blend-mode: plus-lighter;
+  transform: translate(-50%, -50%) scale(0);
+  animation: press-ring 0.95s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+}
+.text-button > press-ring { background: radial-gradient(closest-side, rgba(232, 252, 255, 0.34), rgba(110, 228, 255, 0.14) 58%, rgba(110, 228, 255, 0)); }
+@keyframes press-ring {
+  0% { transform: translate(-50%, -50%) scale(0.04); opacity: 1; }
+  55% { opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+html[data-motion="off"] press-ring { display: none; }
+@media (prefers-reduced-motion: reduce) { press-ring { display: none; } }
+}

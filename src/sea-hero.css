@@ -5,16 +5,19 @@
 .sea-hero-stage { position: relative; height: calc(100svh - var(--head)); overflow: hidden; }
 .sea-hero-scene { position: absolute; inset: 0; cursor: crosshair; touch-action: pan-y; }
 
+/* On a phone the words sit at the foot and the night under them is measured from the words themselves: it starts
+   120px above the eyebrow, however long the title runs, so the water never shows through a line. */
 .sea-hero-copy {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  position: absolute; inset: auto 0 0 0; z-index: 1; pointer-events: none;
   display: flex; flex-direction: column; justify-content: flex-end;
   /* The tab bar's fade reaches 72px above it; the words stay clear of it. */
   padding: 40px var(--gutter) calc(150px + env(safe-area-inset-bottom));
 }
 .sea-hero-copy > * { pointer-events: auto; margin: 0; }
+.sea-hero-stage::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 90px; z-index: 1; pointer-events: none; background: linear-gradient(rgba(1, 5, 19, 0.7), rgba(1, 5, 19, 0)); }
 .sea-hero-copy::before, .sea-hero-copy::after { content: ""; position: absolute; left: 0; right: 0; z-index: -1; pointer-events: none; }
-.sea-hero-copy::before { top: 0; height: 90px; background: linear-gradient(rgba(1, 5, 19, 0.7), rgba(1, 5, 19, 0)); }
-.sea-hero-copy::after { bottom: 0; height: 64%; background: linear-gradient(rgba(1, 5, 19, 0), rgba(1, 5, 19, 0.88) 40%, rgba(1, 5, 19, 0.96)); }
+.sea-hero-copy::before { display: none; }
+.sea-hero-copy::after { top: -120px; bottom: 0; background: linear-gradient(rgba(1, 5, 19, 0), rgba(1, 5, 19, 0.9) 120px, rgba(1, 5, 19, 0.96)); }
 .sea-hero-copy .eyebrow { margin-bottom: 22px; }
 .sea-hero-copy h1 { font-size: clamp(44px, 7.4vw, 108px); font-weight: 460; letter-spacing: -0.052em; line-height: 0.98; text-shadow: none; }
 .sea-hero-copy h1 span {
@@ -37,8 +40,9 @@ html[data-motion="off"] .sea-hero-copy > * { animation: none; }
 @media (min-width: 800px) { .sea-hero { --head: 88px; } }
 @media (min-width: 900px) {
   .sea-hero-stage { height: min(calc(100svh - var(--head)), 900px); }
-  .sea-hero-copy { justify-content: center; max-width: 760px; padding: 40px 0 60px var(--gutter); }
-  .sea-hero-copy::before { top: 0; bottom: 0; left: 0; right: auto; width: 780px; height: auto; background: linear-gradient(90deg, rgba(1, 5, 19, 0.92) 0%, rgba(1, 5, 19, 0.82) 58%, rgba(1, 5, 19, 0)); }
+  .sea-hero-copy { inset: 0; justify-content: center; max-width: 760px; padding: 40px 0 60px var(--gutter); }
+  .sea-hero-stage::before { display: none; }
+  .sea-hero-copy::before { display: block; top: 0; bottom: 0; left: 0; right: auto; width: 780px; height: auto; background: linear-gradient(90deg, rgba(1, 5, 19, 0.92) 0%, rgba(1, 5, 19, 0.82) 58%, rgba(1, 5, 19, 0)); }
   .sea-hero-copy::after { display: none; }
 }
 }

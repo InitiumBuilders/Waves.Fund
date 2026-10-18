@@ -16,6 +16,9 @@ import "./style.css";
 import "./refine.css";
 import "./motus.css";
 import "./clarity.css";
+import { startSurfacing } from "./surface";
+import { startPress } from "./press";
+import { startRim } from "./rim";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
@@ -25,3 +28,6 @@ createRoot(document.getElementById("root")!).render(
     </BrowserRouter>
   </StrictMode>,
 );
+startSurfacing();
+startPress();
+startRim();

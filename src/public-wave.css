@@ -27,7 +27,14 @@
 /* Seals: each entry's fingerprint, small under it; checking adds what the check found beside it. */
 .pw-journey .pw-seal { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; white-space: normal; }
 .pw-seal code, .pw-seal-head code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; letter-spacing: 0.04em; }
-.pw-seal-state { font-weight: 560; }
+.pw-seal-state { font-weight: 560; animation: pw-state-in 0.5s var(--ease-out) both; }
+@keyframes pw-state-in { from { opacity: 0; transform: translate3d(-6px, 0, 0); } }
+/* The check reaching an entry: its point of light answers with a ring. */
+.pw-journey li::after { content: ""; position: absolute; left: -7.5px; top: -1.5px; width: 24px; height: 24px; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(160, 246, 255, 0.85), 0 0 16px rgba(94, 233, 255, 0.5); opacity: 0; transform: scale(0.3); pointer-events: none; }
+.pw-journey li.pw-checked::after { animation: pw-ring 0.9s var(--ease-out) both; }
+@keyframes pw-ring { 0% { opacity: 0.95; transform: scale(0.3); } 100% { opacity: 0; transform: scale(1.6); } }
+html[data-motion="off"] .pw-journey li.pw-checked::after, html[data-motion="off"] .pw-seal-state { animation: none; }
+@media (prefers-reduced-motion: reduce) { .pw-journey li.pw-checked::after, .pw-seal-state { animation: none; } }
 .pw-seals { margin-top: 34px; display: grid; gap: 14px; justify-items: start; }
 .pw-seals > p { margin: 0; font-size: 15px; line-height: 1.6; }
 .pw-seals .pw-seals-result { font-weight: 560; }

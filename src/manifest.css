@@ -2,10 +2,9 @@
 /* The Manifest (/manifest). One reading column, wide room between chapters, one wave symbol at the head of each.
    Mobile first. */
 .manifest-body { padding-bottom: clamp(60px, 10vw, 120px); }
-/* On a phone the hero's words are taller than on Learn: a smaller title and a taller floor keep them off the water. */
+/* On a phone the hero's words are taller than on Learn: a smaller title leaves more of the water above them. */
 @media (max-width: 899px) {
   .manifest-page .sea-hero-copy h1 { font-size: clamp(38px, 10.6vw, 64px); }
-  .manifest-page .sea-hero-copy::after { height: 86%; }
 }
 .mf-chapter, .mf-close { max-width: 680px; margin-inline: auto; padding-top: clamp(104px, 15vw, 190px); }
 .mf-chapter.mf-wide { max-width: 1180px; }

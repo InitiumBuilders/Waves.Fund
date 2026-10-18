@@ -15,6 +15,16 @@
 .rc-all summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; padding-left: 94px; font-size: 15px; font-weight: 560; }
 .rc-all summary:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 4px; border-radius: 8px; }
 .rc-repo { margin-top: 26px; margin-left: 94px; }
+/* The record fills in as you read: the line draws down with the scroll and each move's light comes on as it is
+   reached. Scrolling back rewinds it. */
+@supports (animation-timeline: view()) {
+  .rc-list::before { transform-origin: top; animation: rc-line linear both; animation-timeline: view(); animation-range: entry 0% cover 55%; }
+  .rc-move::before { animation: rc-node linear both; animation-timeline: view(); animation-range: entry 20% entry 90%; }
+}
+@keyframes rc-line { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes rc-node { from { opacity: 0.18; transform: scale(0.45); } to { opacity: 1; transform: none; } }
+html[data-motion="off"] .rc-list::before, html[data-motion="off"] .rc-move::before { animation: none; }
+@media (prefers-reduced-motion: reduce) { .rc-list::before, .rc-move::before { animation: none; } }
 @media (max-width: 560px) {
   .rc-list::before { left: 58px; }
   .rc-move { grid-template-columns: 48px minmax(0, 1fr); gap: 26px; }

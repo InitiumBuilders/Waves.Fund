@@ -73,6 +73,10 @@ function ownText(el: Element) {
 function lines(el: Element, sy: number, out: Box[]) {
   const range = document.createRange();
   range.selectNodeContents(el);
+  // A surfacing heading's moving copy (src/surface.ts) comes last; its words sit where the real words are, and
+  // before they rise they wait below the line, so only the real words are measured.
+  const layer = el.querySelector(":scope > sf-layer");
+  if (layer) range.setEndBefore(layer);
   const rows: number[][] = [];
   for (const r of range.getClientRects()) {
     if (r.width < 1 || r.height < 1) continue;

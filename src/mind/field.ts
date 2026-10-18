@@ -219,10 +219,10 @@ ${FIELD}
 ${PROJECT}
 uniform int uCols;
 uniform vec2 uOrigin;
-uniform float uSpacing, uBase, uGrowR, uLayerA, uDispK, uActK, uDpr, uDepth;
+uniform float uSpacing, uBase, uGrowR, uLayerA, uDispK, uActK, uDpr, uDepth, uBlur;
 uniform vec3 uHue, uTintHue;
 uniform vec4 uTint;
-out vec3 vColor; out float vA; out float vEdge;
+out vec3 vColor; out float vA; out float vEdge; out float vBlur;
 void main() {
   int i = gl_VertexID;
   vec2 base = uOrigin + vec2(float(i % uCols), float(i / uCols)) * uSpacing;
@@ -232,6 +232,10 @@ void main() {
   vec3 s = project(pos, f.z * uDispK + uDepth);
   float m = maskAt(s.xy);
   float r = (uBase + act * uGrowR) * (1.0 + uScrollP * 0.35) * s.z * (0.55 + 0.45 * m);
+  // The lens: a layer behind the plane of focus spreads each dot into a wider, softer disc. An active dot comes
+  // forward into focus, so energy passing through the back of the field sharpens as it lights.
+  vBlur = uBlur * clamp(1.0 - act * 0.6, 0.0, 1.0);
+  r *= 1.0 + vBlur * 1.6;
   gl_PointSize = max(1.0, r * 2.0 * 1.5 * uDpr);
   vEdge = 1.0 / 1.5;
   gl_Position = toClip(s.xy);
@@ -246,14 +250,17 @@ void main() {
 }`;
 const DOT_FS = `#version 300 es
 precision highp float;
-in vec3 vColor; in float vA; in float vEdge;
+in vec3 vColor; in float vA; in float vEdge; in float vBlur;
 out vec4 o;
 void main() {
   if (vA < 0.004) discard;
   float d = length(gl_PointCoord * 2.0 - 1.0);
-  float disc = 1.0 - smoothstep(vEdge - 0.12, vEdge, d);
-  float halo = exp(-d * d * 4.0) * 0.22;
-  float a = (disc + halo) * vA;
+  // In focus: a crisp disc with a small halo. Out of focus: a soft disc, a little brighter at its rim, as a lens
+  // draws a light behind the plane it is focused on. The light is spread, not added: the disc dims as it widens.
+  float disc = 1.0 - smoothstep(vEdge - mix(0.12, 0.42, vBlur), vEdge, d);
+  float rim = vBlur * 0.5 * exp(-pow((d - vEdge * 0.86) / 0.09, 2.0));
+  float halo = exp(-d * d * 4.0) * 0.22 * (1.0 - vBlur);
+  float a = (disc * (1.0 - vBlur * 0.62) + rim + halo) * vA;
   o = vec4(vColor * a, a);
 }`;
 const LINK_VS = `#version 300 es
@@ -394,7 +401,7 @@ const approach = (v: number, target: number, k: number, dt: number) => v + (targ
 const mix3 = (a: number[], b: number[], k: number) => a.map((v, i) => v + (b[i] - v) * k);
 const smooth = (a: number, b: number, x: number) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
-type Layer = { spacing: number; parallax: number; base: number; grow: number; alpha: number; disp: number; act: number; depth: number; cols: number; rows: number };
+type Layer = { spacing: number; parallax: number; base: number; grow: number; alpha: number; disp: number; act: number; depth: number; blur: number; cols: number; rows: number };
 type NetNode = { lx: number; ly: number; delay: number; flash: number };
 type NetEdge = { a: number; b: number; delay: number; phase: number; speed: number; last: number };
 type Net = { nodes: NetNode[]; edges: NetEdge[]; t0: number; life: number };
@@ -465,10 +472,10 @@ export class Field {
     const s = mobile ? 26 : 30;
     // Back to front: a deep, dense matrix far behind, an offset middle, and the front dots that carry the field.
     this.layers = [
-      { spacing: s * 0.62, parallax: 0.08, base: 1.0, grow: 1.1, alpha: 0.3, disp: 0.35, act: 0.6, depth: -340, cols: 0, rows: 0 },
-      { spacing: s, parallax: 0.16, base: 1.2, grow: 1.3, alpha: 0.42, disp: 0.6, act: 0.8, depth: -220, cols: 0, rows: 0 },
+      { spacing: s * 0.62, parallax: 0.08, base: 1.0, grow: 1.1, alpha: 0.3, disp: 0.35, act: 0.6, depth: -340, blur: 0.5, cols: 0, rows: 0 },
+      { spacing: s, parallax: 0.16, base: 1.2, grow: 1.3, alpha: 0.42, disp: 0.6, act: 0.8, depth: -220, blur: 1, cols: 0, rows: 0 },
       // A dot at a mass grows to about five times its rest size, not seven: a cluster is a lean of the lattice, not a lump.
-      { spacing: s, parallax: 0.3, base: mobile ? 2.2 : 2.1, grow: mobile ? 2.8 : 3.2, alpha: 0.9, disp: 1, act: 1, depth: 0, cols: 0, rows: 0 },
+      { spacing: s, parallax: 0.3, base: mobile ? 2.2 : 2.1, grow: mobile ? 2.8 : 3.2, alpha: 0.9, disp: 1, act: 1, depth: 0, blur: 0, cols: 0, rows: 0 },
     ];
     this.resize();
   }
@@ -859,6 +866,7 @@ export class Field {
       gl.uniform1f(this.dot.u("uDispK"), l.disp);
       gl.uniform1f(this.dot.u("uActK"), l.act);
       gl.uniform1f(this.dot.u("uDepth"), l.depth);
+      gl.uniform1f(this.dot.u("uBlur"), l.blur);
       gl.drawArrays(gl.POINTS, 0, l.cols * l.rows);
     }
     gl.bindVertexArray(null);

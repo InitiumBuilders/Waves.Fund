@@ -1,0 +1,18 @@
+@layer base {
+/* The rim light (src/rim.ts): a 1px edge lit from the pointer's side, brightest nearest it. Light, not a border: it
+   is there only while a hand is over the card and it fades as it travels round. */
+rim-light {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border-radius: inherit; corner-shape: superellipse(2.15);
+  padding: 1.2px; overflow: hidden;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease, ease);
+}
+/* The light itself: a disc centred on the pointer, seen only where the rim lets it through. */
+rim-glow { position: absolute; left: -300px; top: -300px; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(closest-side, rgba(214, 252, 255, 0.9), rgba(120, 200, 255, 0.42) 34%, rgba(150, 140, 255, 0.12) 62%, rgba(150, 140, 255, 0) 78%); will-change: transform; }
+.rim-on > rim-light { opacity: 1; }
+html[data-motion="off"] rim-light { transition: none; }
+}
