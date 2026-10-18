@@ -104,15 +104,6 @@ function safeProject(a) {
     ...(waveTypes.has(a.waveType) ? { waveType: a.waveType } : {}),
   };
 }
-async function recordSubmission(a) {
-  if (a.kind !== "project") return;
-  const id = hash(a.id);
-  try {
-    await write(`trax/submissions/${id}.json`, { id, kind: "project", created: a.created });
-  } catch (error) {
-    if (!/already exists/i.test(error.message)) console.error("Submission count deferred", error.name);
-  }
-}
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -231,7 +222,6 @@ export default async function handler(req, res) {
       const existing = await read(path);
       if (existing) {
         if (same(existing.receiptHash, hash(receipt))) {
-          await recordSubmission(existing);
           return res.json({ id, status: existing.status });
         }
         throw fail(409, "Please start a new application.");
@@ -256,7 +246,6 @@ export default async function handler(req, res) {
         ...(b.kind === "project" && waveTypes.has(b.waveType) ? { waveType: b.waveType } : {}),
       };
       await write(path, application);
-      await recordSubmission(application);
       // The team hears that something arrived, never who: names and emails stay in the inbox.
       await notify(`A new ${application.kind} application`, [
         `A new ${application.kind} application arrived${application.kind === "project" && title ? `: "${title}"` : ""}.`,

@@ -10,7 +10,7 @@ const PROPS = ["display", "position", "top", "right", "bottom", "left", "z-index
   "font-weight", "line-height", "letter-spacing", "text-transform", "text-align", "color", "background-color", "background-image",
   "border-top-width", "border-top-color", "border-radius", "box-shadow", "opacity", "transform", "visibility", "overflow-x", "overflow-y",
   "filter", "backdrop-filter", "pointer-events", "cursor", "outline-style", "text-decoration-line", "white-space", "mix-blend-mode", "inset"];
-const ROUTES = (process.env.ROUTES || "/,/manifest,/film,/now-lets-begin,/learn,/guide,/guide/library,/guide/library/listen,/guide/apply,/guide/team,/guide/partners,/guide/partners/green-reef,/guide/partners/semble,/guide/partners/ocean97,/give,/give/guide,/guide/teachback,/grow,/apply,/waves,/privacy,/trax,/nope").split(",");
+const ROUTES = (process.env.ROUTES || "/,/manifest,/film,/now-lets-begin,/learn,/guide,/guide/library,/guide/library/listen,/guide/apply,/guide/team,/guide/partners,/guide/partners/green-reef,/guide/partners/semble,/guide/partners/ocean97,/give,/give/guide,/guide/teachback,/grow,/apply,/waves,/privacy,/nope").split(",");
 
 if (mode === "snap") {
   const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");

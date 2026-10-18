@@ -30,7 +30,6 @@ import { MemberBoundary } from "./member-boundary";
 import { Current } from "./mind/Current";
 import { Vessel } from "./vessel";
 import { useStateStore } from "./state";
-import { Trax, TraxCollector } from "./trax";
 import { FlowNavigation } from "./flow";
 import { go, Seamless } from "./seamless";
 import { TourLauncher } from "./tour-launch";
@@ -43,6 +42,7 @@ import { hash } from "./together/ripple";
 import type { RippleModel, Source } from "./together/ripple";
 import { api, CommunityProvider, getReceipts, useCommunity } from "./community";
 import { readDraft } from "./your-wave";
+import { TheRecord } from "./record";
 import type { Project } from "./community";
 import { Application, Privacy, ReceiptTracker, TeamReview } from "./forms";
 import {
@@ -96,7 +96,6 @@ const TITLES: Record<string, string> = {
   "/guide/partners/ocean97": "Ocean97.Com",
   "/privacy": "Privacy & Participation",
   "/team/review": "Team Review",
-  "/trax": "Trax",
   "/workspace": "Your Workspace",
 };
 function ScreenPosition() {
@@ -406,6 +405,7 @@ function Grow() {
           foundation and are not inferred from link visits.
         </p>
         <ReceiptTracker />
+        <TheRecord />
       </section>
     </div>
   );
@@ -427,7 +427,6 @@ function AppContent() {
       </a>
       <Background />
       <WaveMind />
-      <TraxCollector />
       <Seamless />
       <TourLauncher />
       <div
@@ -472,7 +471,6 @@ function AppContent() {
             <Route path="/waves/:slug" element={<PublicWave />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/team/review" element={<TeamReview />} />
-            <Route path="/trax" element={<Trax />} />
             <Route
               path="/partners"
               element={<Navigate to="/guide/partners" replace />}

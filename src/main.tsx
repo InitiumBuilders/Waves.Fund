@@ -7,7 +7,6 @@ import "./layers.css";
 import "./mind/mind.css";
 import "./symbols.css";
 import "./together/give-landing.css";
-import "./trax.css";
 import "./sea-hero.css";
 import "./together/ripple.css";
 import "./circuit.css";

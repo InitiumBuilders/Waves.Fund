@@ -11,7 +11,7 @@ export type WaveMove = {
   id: string; title: string; owner: string; needs: string; completion: string;
   status: 'open' | 'complete'; evidence: string; outcome: string;
 };
-export type WaveJourney = { id: string; title: string; body: string; evidence: string; created: string };
+export type WaveJourney = { id: string; title: string; body: string; evidence: string; created: string; prev?: string; sealed?: string; seal?: string };
 export type WaveOffer = {
   id: string; name: string; email: string; message: string; moveId: string;
   recognitionConsent: boolean; status: 'offered' | 'acknowledged' | 'agreed' | 'completed' | 'declined' | 'withdrawn';

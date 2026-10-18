@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, randomUUID } from 'node:crypto';
+import { createHash, createHmac, randomBytes, randomUUID } from 'node:crypto';
 
 export const fault = (status, message) => Object.assign(new Error(message), { status });
 const clean = (value, max = 2000) => typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -17,6 +17,19 @@ function link(value) {
 }
 function required(value, label) { if (!value) throw fault(400, `${label} is required.`); return value; }
 function hash(value, secret) { return createHmac('sha256', secret).update(value).digest('hex'); }
+// A Journey entry is sealed once, when it is recorded: a SHA-256 of its words, its dates, and the seal of the entry
+// before it. A seal never changes afterwards, so the public page can show an entry whose words changed later, and a
+// removed entry breaks the link of the one after it. src/seal.ts computes the same hash in the visitor's browser.
+export const sealOf = item => createHash('sha256').update(JSON.stringify([item.prev, item.id, item.title, item.body, item.evidence, item.created, item.sealed])).digest('hex');
+function sealJourney(journey, at) {
+  let prev = '';
+  return journey.map(item => {
+    const result = item.seal ? item : { ...item, prev, sealed: at };
+    if (!item.seal) result.seal = sealOf(result);
+    prev = result.seal;
+    return result;
+  });
+}
 function memberRoles(wave, actor) {
   const assigned = wave.members.filter(member => member.email === actor.email).map(member => member.role);
   return [...new Set([...(actor.isAdmin ? ['admin'] : []), ...assigned])];
@@ -147,8 +160,12 @@ export function createWorkspaceService({ store, secret, now = () => new Date().t
       if (body.journey) {
         if (!Array.isArray(body.journey) || body.journey.length > 100) throw fault(400, 'A Journey can contain up to 100 entries.');
         const existing = new Map(wave.journey.map(item => [item.id, item]));
-        wave.journey = body.journey.map(item => ({ id: existing.has(item.id) ? item.id : randomUUID(), title: required(clean(item.title, 160), 'Journey title'), body: clean(item.body, 4000), evidence: link(item.evidence), created: existing.get(item.id)?.created || now() }));
+        wave.journey = body.journey.map(item => {
+          const old = existing.get(item.id);
+          return { id: old ? item.id : randomUUID(), title: required(clean(item.title, 160), 'Journey title'), body: clean(item.body, 4000), evidence: link(item.evidence), created: old?.created || now(), ...(old?.seal ? { prev: old.prev, sealed: old.sealed, seal: old.seal } : {}) };
+        });
       }
+      wave.journey = sealJourney(wave.journey, now());
       wave.title = wave.draft.title;
       wave.pending = null;
       if (wave.status === 'review') wave.status = 'draft';
@@ -160,6 +177,7 @@ export function createWorkspaceService({ store, secret, now = () => new Date().t
       requireRole(wave, actor, ['builder']);
       if (!wave.engagement.builderApprovedAt || !wave.engagement.guideApprovedAt) throw fault(400, 'The builder and lead Guide must approve the engagement first.');
       for (const [value, label] of [[wave.draft.title, 'Wave title'], [wave.draft.story, 'Story'], [wave.draft.guideName, 'Guide name'], [wave.currentMove.title, 'Current move'], [wave.currentMove.needs, 'Help needed']]) required(value, label);
+      wave.journey = sealJourney(wave.journey, now());
       if (wave.initialReviewAt) { wave.published = snapshot(wave, now()); wave.status = 'published'; wave.pending = null; }
       else { wave.pending = snapshot(wave, now()); wave.status = 'review'; }
     } else if (action === 'review') {

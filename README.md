@@ -17,7 +17,7 @@ Live on waves.fund today:
 - Learner support on published projects. It is one signal per browser and advisory, not a verified vote.
 - The Guide Library at `/guide/library`, with six lessons and seven worksheets.
 - `/now-lets-begin`, with the Wave Praxis and eight illustrative Wave models.
-- `/trax`, private page-view and engaged-time analytics for the team.
+- The Record, at the end of `/grow`: every move made on this repo, dated and linked to its commit (`scripts/record.mjs`).
 - Giving goes to the Green Reef Foundation through its Benevity page. This site never handles money.
 
 Built and switched off: shared Wave workspaces at `/workspace` and public Wave pages at `/waves/:slug`, using Clerk sign-in and Neon Postgres. Two flags keep them off until accounts are set up and tested end to end.
@@ -26,7 +26,7 @@ Proposed and not built: grant rounds, Wave Pools, platform adapters and a publis
 
 ## Stack
 
-Vite, React 19, TypeScript and React Router in the browser. Vercel Node functions in `api/`. Private Vercel Blob storage for applications and analytics. Clerk and Neon for the workspace pilot.
+Vite, React 19, TypeScript and React Router in the browser. Vercel Node functions in `api/`. Private Vercel Blob storage for applications. Clerk and Neon for the workspace pilot.
 
 ## Run it
 
@@ -50,7 +50,6 @@ node --test scripts/workspace.test.mjs
 ```
 src/            pages and components
 api/            community.js   applications, review, public feed, support signals
-                trax.js        analytics
                 workspace.js, waves.js, _workspace/   the workspace pilot
 docs/           the Wave Praxis and the Guide Library lessons
 public/media/   artwork, video and logos
@@ -61,7 +60,8 @@ scripts/        build helpers, workspace schema and tests, secret check
 
 - Applicant names and emails never reach the public feed. See `safeProject` in `api/community.js`.
 - Receipts are stored only as keyed hashes.
-- Trax sets no cookies and keeps no visitor ID, query string, referrer or form value. It skips visitors who send Do Not Track or Global Privacy Control.
+- There is no visitor analytics or tracking. The Waves themselves, their moves and their receipts, are the record.
+- Each Journey entry on a Wave is sealed when it is recorded: a SHA-256 of its words and the seal before it (`sealOf` in `api/_workspace/core.js`). Seals never change, and the public Wave page re-checks them in the visitor's browser (`src/seal.ts`).
 - Server keys never use the `VITE_` prefix, so they stay out of the browser bundle.
 
 If you find a security problem, email August@Outlier.Systems rather than opening a public issue.

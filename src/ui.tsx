@@ -275,9 +275,6 @@ export function Header() {
             <Link to="/team/review" onClick={() => setOpen(false)}>
               Team Access
             </Link>
-            <Link to="/trax" onClick={() => setOpen(false)}>
-              Trax
-            </Link>
           </div>
         </Sheet>
       )}

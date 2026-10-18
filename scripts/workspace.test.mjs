@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { createWorkspaceService } from '../api/_workspace/core.js';
+import { createWorkspaceService, sealOf } from '../api/_workspace/core.js';
 import { bodyOf, configured, readiness } from '../api/_workspace/http.js';
 
 const admin = { email: 'team@example.test', userId: 'admin-user', isAdmin: true };
@@ -161,6 +161,38 @@ test('completion records a Journey and reopening creates the next move without l
   wave = (await service.mutate('update', { id: wave.id, version: wave.version, currentMove: { title: 'Test the working tool', status: 'open', needs: 'One tester' } }, guide)).wave;
   assert.notEqual(wave.currentMove.id, firstMove);
   assert.equal(wave.journey.length, 1);
+});
+
+test('Journey entries are sealed once, chained, and keep their seals when edited', async () => {
+  const { service } = harness();
+  let wave = await published(service);
+  wave = (await service.mutate('update', { id: wave.id, version: wave.version, currentMove: { ...wave.currentMove, status: 'complete', outcome: 'The review changed our design.', evidence: 'https://example.test/outcome' } }, guide)).wave;
+  wave = (await service.mutate('update', { id: wave.id, version: wave.version, journey: [...wave.journey, { id: randomUUID(), title: 'A second milestone', body: 'We tested it.', evidence: '', seal: 'forged', prev: 'forged' }] }, guide)).wave;
+  const [first, second] = wave.journey;
+  assert.equal(first.prev, '');
+  assert.equal(first.seal, sealOf(first));
+  assert.equal(second.prev, first.seal);
+  assert.equal(second.seal, sealOf(second));
+  wave = (await service.mutate('update', { id: wave.id, version: wave.version, journey: [{ ...first, body: 'Rewritten later.' }, second] }, guide)).wave;
+  assert.equal(wave.journey[0].seal, first.seal);
+  assert.notEqual(sealOf(wave.journey[0]), wave.journey[0].seal);
+  wave = (await service.mutate('update', { id: wave.id, version: wave.version, journey: [wave.journey[1]] }, guide)).wave;
+  assert.equal(wave.journey[0].prev, first.seal);
+  wave = (await service.mutate('publish', { id: wave.id, version: wave.version }, builder)).wave;
+  assert.equal((await service.published(wave.slug)).wave.journey[0].seal, second.seal);
+});
+
+test('Journey entries recorded before seals are sealed in order on the next save', async () => {
+  const { service, db } = harness();
+  let wave = await published(service);
+  const stored = db.get(wave.id);
+  stored.journey = [{ id: randomUUID(), title: 'Older', body: 'Before seals.', evidence: '', created: '2026-09-01T00:00:00.000Z' }, { id: randomUUID(), title: 'Newer', body: 'Also before.', evidence: '', created: '2026-09-02T00:00:00.000Z' }];
+  wave = (await service.mutate('update', { id: wave.id, version: wave.version, brief: { mission: 'Same', audience: 'Same', needs: 'Same' } }, guide)).wave;
+  const [older, newer] = wave.journey;
+  assert.equal(older.sealed, '2026-09-24T12:00:00.000Z');
+  assert.equal(older.created, '2026-09-01T00:00:00.000Z');
+  assert.equal(newer.prev, older.seal);
+  assert.equal(newer.seal, sealOf(newer));
 });
 
 test('request boundary rejects cross-site writes and unconfigured installation reports readiness', async () => {

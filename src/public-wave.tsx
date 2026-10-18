@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { MutableRefObject } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowRight, Download, Share2, Check, RefreshCw } from "lucide-react";
+import { ArrowRight, Download, Share2, Check, RefreshCw, ShieldCheck } from "lucide-react";
 import { ButtonLink, WaveMark } from "./ui";
 import { SeaHero } from "./sea-hero";
 import { BEAT } from "./cadence";
 import { sound } from "./sound";
 import { safeWebLink, saveFile, waveRequest } from "./workspace-client";
 import type { RippleModel, Source } from "./together/ripple";
-import type { PublicWave as PublicWaveRecord, ReceiptResult, WaveOffer, WavePass } from "./workspace-types";
+import type { PublicWave as PublicWaveRecord, ReceiptResult, WaveJourney, WaveOffer, WavePass } from "./workspace-types";
+import { checkJourney, type SealState } from "./seal";
 import "./workspace.css";
 import "./public-wave.css";
 
@@ -69,11 +70,25 @@ export function PublicWave() {
       <section className="pw-chapter arrive"><p className="eyebrow">THE CURRENT MOVE</p><div className="panel pw-move"><span className="workspace-badge">{open ? "Help Welcome" : "Complete"}</span><h2>{wave.currentMove.title}</h2><dl className="workspace-detail"><div><dt>Responsible</dt><dd>{wave.currentMove.owner}</dd></div><div><dt>Help Needed</dt><dd>{wave.currentMove.needs}</dd></div><div><dt>Complete When</dt><dd>{wave.currentMove.completion}</dd></div>{wave.currentMove.outcome && <div><dt>What Changed</dt><dd>{wave.currentMove.outcome}</dd></div>}</dl>{wave.currentMove.evidence && <div className="workspace-actions"><Evidence href={wave.currentMove.evidence}/></div>}</div></section>
       {open && <div className="pw-chapter arrive"><OfferHelp wave={wave} onReceipt={setLatestReceipt}/></div>}
       <section className="pw-chapter arrive"><p className="eyebrow">THE PEOPLE MOVING IT FORWARD</p><h2>Contributions & Carrying</h2>{!wave.contributions.length && !wave.carrying.length && <p>Agreed contributions and outcomes will appear here with permission. Each person’s help becomes part of the Journey.</p>}{wave.contributions.map((contribution,index)=><article className="workspace-entry" key={`contribution-${index}`}><span className="workspace-badge">Completed Contribution</span><h3>{contribution.name}</h3><p>{contribution.outcome}</p><Evidence href={contribution.evidence}/></article>)}{wave.carrying.map((person,index)=><article className="workspace-entry" key={`pass-${index}`}><span className="workspace-badge">{person.status === "accepted" ? "Carrying This Wave" : person.status}</span><h3>{person.name}</h3><p>{person.purpose}</p>{person.outcome && <p>{person.outcome}</p>}<Evidence href={person.evidence}/></article>)}</section>
-      <section className="pw-chapter arrive"><p className="eyebrow">YOU HELPED. HERE’S WHAT CHANGED.</p><h2>The Journey</h2>{wave.journey.length ? <ol className="pw-journey">{wave.journey.map(item=><li key={item.id}><time dateTime={item.created}>{formatDate(item.created)}</time><h3>{item.title}</h3><p>{item.body}</p><Evidence href={item.evidence}/></li>)}</ol> : <p>The next outcome will be shared here after the work is completed and approved.</p>}</section>
+      <Journey journey={wave.journey}/>
       <details className="pw-chapter pw-receipt" open={hasReceipt}><summary>Follow Your Contribution</summary><ReceiptTracker slug={slug} receivedReceipt={latestReceipt}/></details>
       <section className="pw-close arrive"><h2>Build Your Own Wave.</h2><p>A Wave Guide works with you to design, build, and evolve the tools and story your mission needs. Begin with your vision, then agree your scope and fee together.</p><div className="button-row"><ButtonLink to={`/apply${wave.template?`?waveType=${encodeURIComponent(wave.template)}`:""}`}>Bring Your Vision</ButtonLink><ButtonLink to="/guide/library" secondary>Explore The Guide Library</ButtonLink></div></section>
     </div>
   </div>;
+}
+
+/* The Journey is the Wave's record. Each entry carries the seal it was given when it was recorded; checking runs the
+   same hash in this browser, entry by entry. */
+const sealWords: Record<Exclude<SealState, null>, string> = { match: "Matches its seal.", edited: "Changed after it was sealed.", unlinked: "Its link to the entry before has changed." };
+function Journey({journey}:{journey:WaveJourney[]}) {
+  const [states,setStates]=useState<SealState[]|null>(null),[checking,setChecking]=useState(false);
+  useEffect(()=>setStates(null),[journey]);
+  const head=journey.at(-1)?.seal, sealed=journey.filter(item=>item.seal).length;
+  const changed=states?.filter(s=>s==="edited"||s==="unlinked").length||0;
+  const check=async()=>{setChecking(true);try{setStates(await checkJourney(journey));}finally{setChecking(false);}};
+  return <section className="pw-chapter arrive"><p className="eyebrow">YOU HELPED. HERE’S WHAT CHANGED.</p><h2>The Journey</h2>{journey.length ? <ol className="pw-journey">{journey.map((item,index)=><li key={item.id}><time dateTime={item.created}>{formatDate(item.created)}</time><h3>{item.title}</h3><p>{item.body}</p><Evidence href={item.evidence}/>{item.seal&&<p className="pw-seal"><span>Seal</span> <code>{item.seal.slice(0,12)}</code>{states?.[index]&&<span className={`pw-seal-state ${states[index]}`}>{sealWords[states[index]!]}</span>}</p>}</li>)}</ol> : <p>The next outcome will be shared here after the work is completed and approved.</p>}
+    {head&&<div className="pw-seals"><p>Each entry is sealed when it is recorded, with a fingerprint of its words and of the entry before it. If an entry’s words change later, or an entry is removed, the seals stop matching. Check every seal here, in your own browser.</p><button type="button" className="workspace-button secondary" disabled={checking} onClick={check}>{checking?"Checking…":"Check The Seals"}<ShieldCheck size={17}/></button>{states&&<p className="pw-seals-result" role="status">{changed?`${changed} of ${sealed} entries changed after they were sealed.`:`All ${sealed} seals match.`}</p>}<p className="pw-seal-head"><span>Latest seal</span><code>{head}</code></p><p className="pw-seals-note">Save it, and you can tell later whether anything before it was rewritten.</p></div>}
+  </section>;
 }
 
 function OfferHelp({wave,onReceipt}:{wave:PublicWaveRecord;onReceipt:(receipt:string)=>void}) {

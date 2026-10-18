@@ -24,6 +24,16 @@
 .pw-journey time { font-size: 13px; letter-spacing: 0.08em; color: var(--cyan); font-variant-numeric: tabular-nums; }
 .pw-journey h3 { margin: 6px 0 6px; font-size: clamp(19px, 1.7vw, 23px); }
 .pw-journey p { margin: 0 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* Seals: each entry's fingerprint, small under it; checking adds what the check found beside it. */
+.pw-journey .pw-seal { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; white-space: normal; }
+.pw-seal code, .pw-seal-head code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; letter-spacing: 0.04em; }
+.pw-seal-state { font-weight: 560; }
+.pw-seals { margin-top: 34px; display: grid; gap: 14px; justify-items: start; }
+.pw-seals > p { margin: 0; font-size: 15px; line-height: 1.6; }
+.pw-seals .pw-seals-result { font-weight: 560; }
+.pw-seals .pw-seal-head { display: grid; gap: 4px; font-size: 13px; }
+.pw-seal-head code { overflow-wrap: anywhere; }
+.pw-seals .pw-seals-note { font-size: 14px; }
 
 /* Following a contribution is folded until someone has a receipt on this device. */
 .pw-receipt > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 17px; font-weight: 540; color: var(--ink); }

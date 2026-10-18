@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-/* The Motus Trax vessel, ported from motus.love (DuoZone src/components/TraxKit.jsx).
+/* The vessel, ported from motus.love (DuoZone src/components/TraxKit.jsx).
    Every stat is a stock: a tank of dark ferrofluid filled toward its next Motus milestone
    (11, 111, 1111). The liquid is one height field with Rosensweig spikes, a drifting body
    under the surface and a drop that leaps and falls home. It sleeps off screen and when hidden. */
