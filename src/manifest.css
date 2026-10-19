@@ -10,9 +10,15 @@
 .mf-chapter.mf-wide { max-width: 1180px; }
 .mf-chapter.mf-wide > :is(.mf-mark, .eyebrow, h2) { max-width: 680px; margin-inline: auto; }
 
-/* The chapter's mark: its wave, and its number on the same line. */
-.mf-mark { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; color: var(--cyan); }
-.mf-mark .mf-symbol { width: min(48%, 190px); flex: none; }
+/* The chapter's mark: its number, then its wave across the whole column. Each chapter opens on its wave, large
+   enough to read as the chapter's figure; the lines keep their fine weight at any size, so it stays a drawing. (A
+   reveal tied to the scroll was tried and cost scroll frames on a phone; the figure arrives with its chapter.) */
+.mf-mark { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 30px; color: var(--cyan); }
+.mf-mark .mf-symbol { width: 100%; flex: none; }
+.mf-mark .mf-number { order: -1; }
+.mf-mark .mf-symbol svg * { vector-effect: non-scaling-stroke; }
+/* On a phone the travelling mark (src/mind/Current.tsx) rides the right edge; the figure ends short of its lane. */
+@media (max-width: 799px) { .mf-mark .mf-symbol { width: calc(100% - 34px); } }
 .mf-number { font-size: 13px; font-weight: 600; letter-spacing: 0.16em; color: var(--cyan); font-variant-numeric: tabular-nums; }
 .mf-chapter h2 { font-size: clamp(32px, 4.6vw, 58px); font-weight: 460; letter-spacing: -0.045em; line-height: 1.04; margin: 0 0 26px; text-wrap: balance; }
 .mf-chapter h2 span, .mf-close h2 span { background: linear-gradient(100deg, #d8fbff 0%, #6fe3ff 38%, #8da2ff 72%, #b69cff 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #7fe4ff; text-shadow: none; }

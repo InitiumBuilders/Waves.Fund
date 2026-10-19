@@ -427,6 +427,17 @@ Five systems, each one file, each with one statement.
 The phone sea heroes measure the night under their words from the words themselves (it starts 120px above the
 eyebrow), so a long title never stands on bright water.
 
+Then what can be seen on every page (same day):
+
+- **The ground takes the colour of where you are.** The practice's hue (modes.ts HUES) now shows in the lattice at
+  rest, scaled to the resting dot's brightness, so the colour changes and the ground stays as quiet behind words.
+- **Glass that holds light.** A card's top edge is the brightest part of its rim and a soft light falls a little way
+  into the glass from there; the sides and foot stay quiet.
+- **Each Manifest chapter opens on its wave.** The chapter's figure from the wave alphabet spans the column (it was
+  190px), its lines kept at their fine weight, on quiet ground (`data-clear`), ending short of the travelling mark's
+  lane on a phone. A reveal tied to the scroll was tried and taken out: it cost scroll frames on a phone.
+- **His line at the foot of every page surfaces** like the headings, words unchanged.
+
 ## Rules
 
 - No particle swarms. Dots never fly in to form a shape (August, 2026-09-23).

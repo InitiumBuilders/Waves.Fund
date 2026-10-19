@@ -39,7 +39,8 @@ const together = (): RippleModel => {
 
 type Chapter = { n: string; label: string; Symbol?: ComponentType<{ className?: string }> };
 const Mark = ({ n, Symbol }: Omit<Chapter, "label">) => (
-  <div className="mf-mark" aria-hidden="true">
+  // data-clear: the field keeps quiet ground behind the figure, so its fine lines are not crowded by dots.
+  <div className="mf-mark" aria-hidden="true" data-clear>
     {Symbol && <Symbol className="mf-symbol" />}
     <span className="mf-number">{n}</span>
   </div>

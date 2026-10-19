@@ -239,7 +239,12 @@ void main() {
   gl_PointSize = max(1.0, r * 2.0 * 1.5 * uDpr);
   vEdge = 1.0 / 1.5;
   gl_Position = toClip(s.xy);
-  vec3 dim = vec3(0.26, 0.4, 0.7);
+  // At rest the ground already carries the colour of the practice you are in (Learn cyan, Guide blue, Give violet,
+  // Grow aqua), at the resting dot's own brightness, so the hue changes and the ground stays as quiet behind words.
+  // Energy passing through brings it to full strength.
+  vec3 restBase = vec3(0.26, 0.4, 0.7);
+  vec3 tone = uHue * (dot(restBase, vec3(0.2126, 0.7152, 0.0722)) / max(dot(uHue, vec3(0.2126, 0.7152, 0.0722)), 0.05));
+  vec3 dim = mix(restBase, tone, 0.72);
   float tint = uTint.w * exp(-pow(length(base - uTint.xy) / uTint.z, 2.0));
   vec3 hue = mix(uHue, uTintHue, clamp(tint, 0.0, 1.0));
   vColor = mix(dim, hue, clamp(act * 0.85 + tint * 0.5, 0.0, 1.0));

@@ -7,7 +7,8 @@ import "./surface.css";
    split into words (aria-hidden) is laid exactly over it, and only the copy moves. If the copy would wrap
    differently from the original, it is taken away and the heading simply stays as it is. */
 
-const SELECTOR = "main h1, main h2";
+// Headings, and his line at the foot of every page.
+const SELECTOR = "main h1, main h2, .app-footer > p[data-mind='bond']";
 // Forms, live previews and the workspace change their headings as people type or act; they keep plain headings.
 const SKIP = "form, dialog, .yw, .yw-offer, .workspace-page, .tour, .tour-card, .receipt-panel, [data-no-surface]";
 const LINE = 0.11, WORD = 0.034, MAX = 0.9;
