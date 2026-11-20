@@ -55,6 +55,8 @@
 .wave-one .wave-one-detail { font-size:11px;line-height:1.8;margin-top:15px; }
 .wave-one-journey { list-style:none;margin:22px 0 0;padding:0;display:grid;gap:18px; }
 .wave-one-journey li { display:flex;gap:14px;position:relative; }
+/* Under the three milestones: the way to every recorded move, on Wave One's own page. */
+.wave-one .wave-one-all { margin:20px 0 0 38px; }
 .wave-one-journey li:not(:last-child)::before { content:"";position:absolute;top:23px;bottom:-18px;left:11px;width:1px;background:linear-gradient(#54d9ff66,#54d9ff25); }
 .wave-one-node { width:23px;height:23px;display:grid;place-items:center;flex:none;position:relative;background:#082d4cc9;border:1px solid #6ddefa70;border-radius:50%;box-shadow:0 0 15px #0eabff16; }
 .wave-one-future .wave-one-node { border-style:dashed;background:transparent; }

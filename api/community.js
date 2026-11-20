@@ -290,6 +290,7 @@ export default async function handler(req, res) {
           "More Information Needed",
           "Approved For Community Review",
           "Guide Accepted",
+          "Offer Accepted",
           "Not Selected",
         ].includes(b.status)
       )
@@ -306,6 +307,9 @@ export default async function handler(req, res) {
         );
       if (b.status === "Guide Accepted" && a.kind !== "guide")
         throw fail(400, "This is not a guide application.");
+      // An offer of time or knowledge can be answered with a yes; until 2026-11-20 it could only wait or be declined.
+      if (b.status === "Offer Accepted" && a.kind !== "support")
+        throw fail(400, "This is not a support offer.");
       a.status = b.status;
       a.reviewed = new Date().toISOString();
       await write(`applications/${a.id}.json`, a, true);

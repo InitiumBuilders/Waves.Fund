@@ -1,5 +1,6 @@
 import { FIELD_MODES, type FieldMode } from "./modes";
 import { Energy } from "./energy";
+import { begin, finish, settled, type Program } from "./programs";
 
 /** An anchor rectangle in document pixels, where a mode of the field takes place. */
 export type Anchor = { name: FieldMode; left: number; top: number; width: number; height: number };
@@ -383,23 +384,7 @@ void main() {
   o = vec4(m, m, m, 1.0);
 }`;
 
-function compile(gl: WebGL2RenderingContext, vs: string, fs: string) {
-  const make = (type: number, src: string) => {
-    const s = gl.createShader(type)!;
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw Error(gl.getShaderInfoLog(s) || "shader");
-    return s;
-  };
-  const p = gl.createProgram()!;
-  gl.attachShader(p, make(gl.VERTEX_SHADER, vs));
-  gl.attachShader(p, make(gl.FRAGMENT_SHADER, fs));
-  gl.linkProgram(p);
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(p) || "link");
-  const cache = new Map<string, WebGLUniformLocation | null>();
-  return { p, u: (name: string) => { if (!cache.has(name)) cache.set(name, gl.getUniformLocation(p, name)); return cache.get(name)!; } };
-}
-type Prog = ReturnType<typeof compile>;
+type Prog = Program;
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const approach = (v: number, target: number, k: number, dt: number) => v + (target - v) * (1 - Math.exp(-k * dt));
@@ -414,6 +399,11 @@ type Net = { nodes: NetNode[]; edges: NetEdge[]; t0: number; life: number };
 export class Field {
   private gl: WebGL2RenderingContext;
   private dot: Prog; private link: Prog; private edge: Prog; private maskProg: Prog;
+  // While the programs compile nothing is drawn and nothing waits for them (programs.ts). Once they are ready the
+  // field comes up over most of a second (`shown`), so it never pops in over a page already being read.
+  private pending = true; private dead = false; private shown = 1;
+  /** A program failed to compile after the field was made. */
+  onFail: () => void = () => {};
   private vao: WebGLVertexArrayObject;
   private maskVao: WebGLVertexArrayObject; private maskBuf: WebGLBuffer;
   private maskTex: WebGLTexture; private maskFbo: WebGLFramebuffer;
@@ -458,10 +448,10 @@ export class Field {
     const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: true, powerPreference: "high-performance" });
     if (!gl) throw Error("webgl2 unavailable");
     this.gl = gl;
-    this.dot = compile(gl, DOT_VS, DOT_FS);
-    this.link = compile(gl, LINK_VS, LINK_FS);
-    this.edge = compile(gl, EDGE_VS, EDGE_FS);
-    this.maskProg = compile(gl, MASK_VS, MASK_FS);
+    this.dot = begin(gl, DOT_VS, DOT_FS);
+    this.link = begin(gl, LINK_VS, LINK_FS);
+    this.edge = begin(gl, EDGE_VS, EDGE_FS);
+    this.maskProg = begin(gl, MASK_VS, MASK_FS);
     this.vao = gl.createVertexArray()!;
     // The mask: instanced rounded boxes into a quarter-resolution single-channel texture.
     this.maskVao = gl.createVertexArray()!;
@@ -482,7 +472,16 @@ export class Field {
       // A dot at a mass grows to about five times its rest size, not seven: a cluster is a lean of the lattice, not a lump.
       { spacing: s, parallax: 0.3, base: mobile ? 2.2 : 2.1, grow: mobile ? 2.8 : 3.2, alpha: 0.9, disp: 1, act: 1, depth: 0, blur: 0, cols: 0, rows: 0 },
     ];
+    if (settled(gl, this.programs()) && this.energy.settled()) this.arrive(); else this.shown = 0;
     this.resize();
+  }
+
+  private programs() { return [this.dot, this.link, this.edge, this.maskProg]; }
+  /** Every program has finished compiling: check each one, then the field may be drawn. */
+  private arrive() {
+    const why = finish(this.gl, this.programs()) || this.energy.arrive();
+    if (why) throw Error(why);
+    this.pending = false;
   }
 
   resize() {
@@ -553,7 +552,7 @@ export class Field {
   }
   setMotion(on: boolean) { this.motion = on; if (!on) { this.a = this.b; this.mix = 1; this.morphStart = -1; this.nets = []; } this.wake(); }
   invalidate() { this.wake(); }
-  wake() { this.stirred = this.now(); if (this.running) return; this.running = true; this.raf = requestAnimationFrame(this.frame); }
+  wake() { if (this.dead) return; this.stirred = this.now(); if (this.running) return; this.running = true; this.raf = requestAnimationFrame(this.frame); }
   stop() { cancelAnimationFrame(this.raf); this.running = false; }
   destroy() { this.stop(); }
   now() { return (performance.now() - this.t0) / 1000; }
@@ -726,6 +725,11 @@ export class Field {
   }
 
   private frame = () => {
+    if (this.pending) {
+      // Still compiling: ask again next frame and draw nothing.
+      if (!settled(this.gl, this.programs()) || !this.energy.settled()) { this.raf = requestAnimationFrame(this.frame); return; }
+      try { this.arrive(); } catch { this.dead = true; this.running = false; this.onFail(); return; }
+    }
     const t0 = this.now();
     // At rest the field breathes at half rate; anything that stirs it brings it back to full rate.
     const resting = this.motion && this.morphStart < 0 && t0 - this.stirred > 1.5 && this.pointer.s < 0.01 && !this.energy.busy && !this.nets.length;
@@ -734,6 +738,7 @@ export class Field {
     const gl = this.gl, t = t0, dt = Math.min(0.05, Math.max(0.001, t - (this.last || t)));
     this.last = t;
     let animating = this.motion;
+    if (this.shown < 1) { this.shown = Math.min(1, this.shown + dt / 0.9); animating = true; }
     if (this.morphStart >= 0) {
       const k = Math.min(1, (t - this.morphStart) / 1.3);
       this.mix = ease(k);
@@ -830,7 +835,7 @@ export class Field {
       gl.uniform2f(p.u("uTilt"), this.tilt[0], this.tilt[1]);
       gl.uniform1f(p.u("uFocal"), FOCAL);
       gl.uniform1i(p.u("uMask"), 0);
-      gl.uniform1f(p.u("uOpacity"), this.opacity);
+      gl.uniform1f(p.u("uOpacity"), this.opacity * this.shown);
     };
     const origin = (l: Layer) => {
       const shift = (sy * l.parallax) % l.spacing;

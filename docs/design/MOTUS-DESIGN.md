@@ -438,6 +438,32 @@ Then what can be seen on every page (same day):
   lane on a phone. A reveal tied to the scroll was tried and taken out: it cost scroll frames on a phone.
 - **His line at the foot of every page surfaces** like the headings, words unchanged.
 
+## The TrustBase: ground made of moves (2026-11-20)
+
+The third part of a founding Wave's page (`src/founding-wave.tsx`). What it says: a wave that was kept becomes ground,
+and the ground can be checked.
+
+- Each day is a row. Under it lies one fine line for each move made that day, so quiet days are thin and full days
+  are thick, and the days stack like layers. No count is drawn as a meter; the count is in words beside the date.
+- As a day comes into view a wave travels along the top of its band and settles flat into it, then the lines
+  appear. It is tied to the scroll (a named view timeline on the band), so scrolling back lifts the wave again.
+  Transform and opacity only: the wave is a repeating picture moved one wavelength and flattened. Where the browser
+  cannot tie an animation to the scroll, it settles once over one beat when the day is reached. With motion reduced,
+  every band is at rest.
+- The settle plays between two heights of the screen. On a phone it starts 14% up, because the tab bar covers the
+  foot of the screen; the first version played there, where nobody could see it.
+- Check The Record sits above the list, so the answer can be watched coming down through the days: light runs along
+  each band's lines, the day says "Matches.", a note lands with sound on, and the lattice answers from the button
+  when every move matched. A day with a changed move stays dark, opens, and says which move and how.
+- People and words come after the moves. Each is added only with the person's yes, by a public commit.
+
+## The field arrives (2026-11-20)
+
+The lattice no longer holds the page while its shaders compile (`src/mind/programs.ts`). The page paints and can be
+used at once; the field starts compiling, asks nothing, and when it is ready comes up over 0.9 s through the same
+opacity the pages already set. Nothing else about the field changed. If a program fails after the page is up, the
+still picture takes its place, as it does when WebGL is missing.
+
 ## Rules
 
 - No particle swarms. Dots never fly in to form a shape (August, 2026-09-23).

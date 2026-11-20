@@ -1,10 +1,14 @@
 import { useId, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Check, Copy, Flag, Globe, Share2, Users } from "lucide-react";
+import record from "./record-data.json";
 import "./wave-one.css";
 
-const WAVE_URL = "https://www.waves.fund/now-lets-begin#wave-one";
+// Passing the Wave passes its own page: the story, the next move and every move so far.
+const WAVE_URL = "https://www.waves.fund/waves/waves-fund";
 const views = ["Story", "Next Move", "Journey"] as const;
+// The day of the first public move, as the Record on Grow words it.
+const since = new Date(record.moves[record.moves.length - 1].date + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 type WaveView = (typeof views)[number];
 
 export function WaveOne() {
@@ -116,6 +120,7 @@ export function WaveOne() {
                 <li><span className="wave-one-node" aria-hidden="true"><Check size={13} /></span><div><strong>The Home Is Live</strong><p>Waves.Fund welcomes project and Wave Guide applications.</p><span className="wave-one-record">Available Today</span></div></li>
                 <li className="wave-one-future"><span className="wave-one-node" aria-hidden="true"><ArrowRight size={13} /></span><div><strong>The Next Chapter</strong><p>A proposed pilot to build custom Waves with builders and Guides.</p><span className="wave-one-record">Proposed</span></div></li>
               </ol>
+              <Link className="text-button wave-one-all" to="/waves/waves-fund#trustbase">Every Move Since {since} <ArrowRight size={15} aria-hidden="true" /></Link>
             </div>
           )}
         </div>

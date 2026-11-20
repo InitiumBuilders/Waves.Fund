@@ -48,6 +48,8 @@ Log long runs to a file and grep it. A crash piped through `tail` prints only th
 | `copy.mjs <base> <dir> [routes]` | The words on every page, one file per route, and a word count |
 | `scenes.mjs <base> [routes]` then `sharecards.mjs [names]` | Share cards: the hero sea captured without its words (into `share/` in the folder you run from), then the 1200x630 card with the page's line, written to `public/media/share/` |
 | `wavewalk.mjs [dev base] [slug]` | Walks a Wave workspace from setup to published as stand-in people (dev server only; data in memory) |
+| `waveone.mjs <base> [--live-github]` | Wave One, the founding Wave: on the Waves sea and list, on its own page at two sizes, the Wave One card's link, reduced motion, and the record check's four answers (GitHub is answered by the test; `--live-github` asks the real one once) |
+| `firstvisit.mjs <base> [route] [runs] [phone\|wide] [--cold]` | A first visit in a brand-new browser profile: first paint, long tasks and the longest gap between frames (the 4 to 6 s shader freeze of 2026-11-20 shows here) |
 | `soundshot.mjs <dev base> <out.wav> [seconds]` | Renders the site's sound offline from the real engine (dev server) to a WAV file, with its peak and loudness |
 | `axe.mjs <base>` | WCAG 2.2 AA with axe-core: 18 pages at two sizes, the open menu, the tour's question and a step |
 | `density.mjs <base> [routes]` | Typical text size, text under 14px, longest line, section gaps, words per screen |

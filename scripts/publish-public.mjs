@@ -14,6 +14,7 @@ const PRIVATE = [
   /^docs\/RELEASE-/,
   /^scripts\/inspect-workspace-services\.mjs$/,
   /^docs\/NEXT-MOVES\.md$/,
+  /^docs\/davara\//,
   /^scripts\/qa\/inventory\.mjs$/,
   /^public\/media\/film\//,   // the film is brand media; the site serves it, the code repo does not carry it
 ];

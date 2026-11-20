@@ -43,6 +43,7 @@ import type { RippleModel, Source } from "./together/ripple";
 import { api, CommunityProvider, getReceipts, useCommunity } from "./community";
 import { readDraft } from "./your-wave";
 import { TheRecord } from "./record";
+import { asProject, FOUNDING } from "./founding";
 import type { Project } from "./community";
 import { Application, Privacy, ReceiptTracker, TeamReview } from "./forms";
 import {
@@ -60,7 +61,7 @@ const GuidePitch = lazy(() => import("./guide-library").then(m => ({ default: m.
 const GuideLibrary = lazy(() => import("./guide-library").then(m => ({ default: m.GuideLibrary })));
 const GuideLesson = lazy(() => import("./guide-library").then(m => ({ default: m.GuideLesson })));
 const Workspace = lazy(() => import("./workspace").then(m => ({ default: m.Workspace })));
-const PublicWave = lazy(() => import("./public-wave").then(m => ({ default: m.PublicWave })));
+const WavePage = lazy(() => import("./founding-wave"));
 const MemberSignIn = lazy(() => import("./member-auth").then(m => ({ default: m.MemberSignIn })));
 const GiveApp = lazy(() => import("./together/app"));
 const Teachback = lazy(() => import("./teachback"));
@@ -85,6 +86,7 @@ const TITLES: Record<string, string> = {
   "/grow": "Grow",
   "/waves": "Waves In Motion",
   "/projects": "Waves In Motion",
+  "/waves/waves-fund": "Wave One",
   "/now-lets-begin": "Now, Let’s Begin",
   "/apply": "What’s Your Vision?",
   "/guide/apply": "Become A Wave Guide",
@@ -177,7 +179,8 @@ function Projects() {
   // request is made only while the workspace is switched on.
   const [built, setBuilt] = useState<PublicWave[]>([]);
   useEffect(() => { if (import.meta.env.VITE_WORKSPACE_ENABLED === "true") waveRequest<{ waves?: PublicWave[] }>("").then((r) => setBuilt(r.waves || [])).catch(() => {}); }, []);
-  const builtProjects: Project[] = built.map((w) => ({ id: w.id, slug: w.slug, title: w.title, description: w.story, category: w.template && w.template !== "custom" ? `${w.template} Wave` : "Wave", budget: 0, milestone: w.currentMove.title, signals: w.contributions.length + w.carrying.length, pulses: w.journey.map((j) => j.created) }));
+  // Founding Waves (src/founding.ts) are on the sea from the start; a published Wave at the same address replaces one.
+  const builtProjects: Project[] = [...FOUNDING.filter((f) => !built.some((w) => w.slug === f.slug)).map(asProject), ...built.map((w) => ({ id: w.id, slug: w.slug, title: w.title, description: w.story, category: w.template && w.template !== "custom" ? `${w.template} Wave` : "Wave", budget: 0, milestone: w.currentMove.title, signals: w.contributions.length + w.carrying.length, pulses: w.journey.map((j) => j.created) }))];
   const filtered = [...builtProjects, ...projects].filter((p) =>
     (p.title + " " + p.category + " " + p.description)
       .toLowerCase()
@@ -234,9 +237,10 @@ function Projects() {
         </label>
         <ButtonLink to="/apply">Submit A Project</ButtonLink>
       </div>
-      {loading ? (
+      {/* A founding Wave is in the page itself, so its card stands while the feed loads and if the feed fails. */}
+      {loading && !filtered.length ? (
         <p className="panel">Loading projects…</p>
-      ) : error ? (
+      ) : error && !filtered.length ? (
         <div className="panel error-message" role="alert">
           {error}
           <button onClick={refresh}>Try Again</button>
@@ -468,7 +472,7 @@ function AppContent() {
             />
             <Route path="/projects" element={<Projects />} />
             <Route path="/waves" element={<Projects />} />
-            <Route path="/waves/:slug" element={<PublicWave />} />
+            <Route path="/waves/:slug" element={<WavePage />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/team/review" element={<TeamReview />} />
             <Route

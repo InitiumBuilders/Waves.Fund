@@ -48,6 +48,10 @@
       "destination": "/share/waves.html"
     },
     {
+      "source": "/waves/waves-fund",
+      "destination": "/share/wave-one.html"
+    },
+    {
       "source": "/apply",
       "destination": "/share/apply.html"
     },
@@ -96,7 +100,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://clerk.www.waves.fund https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.clerk.com; font-src 'self'; media-src 'self'; connect-src 'self' https://clerk.www.waves.fund; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' https://clerk.www.waves.fund https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.clerk.com; font-src 'self'; media-src 'self'; connect-src 'self' https://clerk.www.waves.fund https://api.github.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         }
       ]
     }

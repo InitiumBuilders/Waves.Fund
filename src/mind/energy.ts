@@ -1,3 +1,5 @@
+import { begin, finish, settled, type Program } from "./programs";
+
 /* The energy layer: liquid light that moves through the site the way a waveguide moves a wave.
 
    Vessels (stocks) sit at the foot of cards and hold liquid energy; their level is what the card holds.
@@ -192,21 +194,6 @@ void main() {
   o = vec4(col * min(alpha, 1.0), min(alpha, 1.0));
 }`;
 
-function compile(gl: WebGL2RenderingContext) {
-  const make = (type: number, src: string) => {
-    const s = gl.createShader(type)!;
-    gl.shaderSource(s, src); gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw Error(gl.getShaderInfoLog(s) || "energy shader");
-    return s;
-  };
-  const p = gl.createProgram()!;
-  gl.attachShader(p, make(gl.VERTEX_SHADER, VS)); gl.attachShader(p, make(gl.FRAGMENT_SHADER, FS));
-  gl.linkProgram(p);
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(p) || "energy link");
-  const cache = new Map<string, WebGLUniformLocation | null>();
-  return { p, u: (n: string) => { if (!cache.has(n)) cache.set(n, gl.getUniformLocation(p, n)); return cache.get(n)!; } };
-}
-
 const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 
 /** Round each corner of a guide into an arc, so light and liquid turn smoothly. */
@@ -237,7 +224,7 @@ export function pathOf(pts: number[][]) {
 
 export class Energy {
   private gl: WebGL2RenderingContext;
-  private prog; private vao: WebGLVertexArrayObject;
+  private prog: Program; private vao: WebGLVertexArrayObject;
   vessels: Vessel[] = [];
   guides: Guide[] = [];
   private drops: Drop[] = [];
@@ -260,19 +247,24 @@ export class Energy {
     const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false });
     if (!gl) throw Error("webgl2 unavailable");
     this.gl = gl;
-    this.prog = compile(gl);
+    // aPos is given place 0 before linking, so its place is known without asking (programs.ts).
+    this.prog = begin(gl, VS, FS, ["aPos"]);
     this.vao = gl.createVertexArray()!;
     const buf = gl.createBuffer()!;
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(this.prog.p, "aPos");
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.bindVertexArray(null);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   }
+
+  /** The program has finished compiling. Never waits. */
+  settled() { return settled(this.gl, [this.prog]); }
+  /** Call once settled. The reason it failed, or "". */
+  arrive() { return finish(this.gl, [this.prog]); }
 
   resize(w: number, h: number, dpr: number) {
     this.w = w; this.h = h; this.dpr = dpr;

@@ -261,6 +261,8 @@ export function WaveMind() {
     try {
       engine = new Engine(canvas.current, layer.current, matchMedia("(max-width: 760px), (pointer: coarse)").matches);
       document.documentElement.dataset.mind = "on";
+      // The programs finish compiling a moment after the field is made. If one fails then, the still picture takes over.
+      engine.onFail = () => { setFailed(true); document.documentElement.dataset.mind = "off"; };
       if (import.meta.env.DEV) Object.assign(window, { __mind: engine, __measure: measure, __engine: () => engine });
     } catch (error) {
       if (import.meta.env.DEV) console.error("Wave Mind unavailable:", error);

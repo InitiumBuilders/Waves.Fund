@@ -3,7 +3,7 @@
 // Usage: node sfaudit.mjs <base>. Playwright: set PLAYWRIGHT_CORE (see README).
 const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
 const base = process.argv[2];
-const routes = ["/", "/manifest", "/film", "/now-lets-begin", "/learn", "/guide", "/guide/library", "/guide/library/discovery", "/guide/apply", "/guide/team", "/guide/partners", "/guide/partners/green-reef", "/guide/partners/semble", "/guide/partners/ocean97", "/give", "/give/guide", "/guide/teachback", "/grow", "/apply", "/waves", "/privacy"];
+const routes = ["/", "/manifest", "/film", "/now-lets-begin", "/learn", "/guide", "/guide/library", "/guide/library/discovery", "/guide/apply", "/guide/team", "/guide/partners", "/guide/partners/green-reef", "/guide/partners/semble", "/guide/partners/ocean97", "/give", "/give/guide", "/guide/teachback", "/grow", "/apply", "/waves", "/waves/waves-fund", "/privacy"];
 const b = await chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--enable-gpu"] });
 let bad = 0, total = 0, off = 0;
 for (const vp of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {

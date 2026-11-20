@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { MutableRefObject } from "react";
+import type { MutableRefObject, ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowRight, Download, Share2, Check, RefreshCw, ShieldCheck } from "lucide-react";
 import { ButtonLink, WaveMark } from "./ui";
@@ -20,7 +20,7 @@ function Evidence({ href }: { href: string }) { const safe = safeWebLink(href); 
    contribution, an accepted carrier) is another light, coming up beside it in step, so the swell grows with its people.
    Its finished moves rise from its light as ripples when the page opens, oldest first, one a beat, and ring with sound
    on. Every eight beats a wave rises from the horizon and comes all the way to you. */
-function waveSea(wave: MutableRefObject<PublicWaveRecord | null>): RippleModel {
+export function waveSea(wave: MutableRefObject<PublicWaveRecord | null>): RippleModel {
   let t0: number | null = null;
   const rung = new Set<number>();
   return (t, w, h) => {
@@ -43,7 +43,8 @@ function waveSea(wave: MutableRefObject<PublicWaveRecord | null>): RippleModel {
   };
 }
 
-export function PublicWave() {
+/* `fallback` stands in when no published Wave answers at this address: a founding Wave (founding-wave.tsx). */
+export function PublicWave({ fallback }: { fallback?: ReactNode } = {}) {
   const { slug = "" } = useParams();
   const [latestReceipt, setLatestReceipt] = useState("");
   const [wave, setWave] = useState<PublicWaveRecord | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState(""), [shared, setShared] = useState(false);
@@ -53,6 +54,7 @@ export function PublicWave() {
   useEffect(() => { let active = true; setLoading(true); setWave(null); setError(""); waveRequest<{wave:PublicWaveRecord}>("", undefined, slug).then(r => { if(active) setWave(r.wave); }).catch(e => { if(active) setError(e.message); }).finally(() => { if(active) setLoading(false); }); return () => { active = false; }; }, [slug]);
   const share = async () => { const url = `${window.location.origin}/waves/${slug}`; try { if (navigator.share) await navigator.share({title:wave?.title,url}); else { await navigator.clipboard.writeText(url); setShared(true); } } catch { setShared(false); } };
   if (loading) return <div className="workspace-page workspace-loading" role="status">Opening this Wave…</div>;
+  if ((error || !wave) && fallback) return <>{fallback}</>;
   if (error || !wave) return <div className="workspace-page"><section className="panel"><WaveMark /><h1>This Wave Is Not Available Yet.</h1><p>{error || "Published Waves appear here when the builder and team are ready to share them."}</p><div className="workspace-actions"><ButtonLink to="/waves">Explore Waves</ButtonLink><ButtonLink to="/now-lets-begin#wave-examples" secondary>Explore The Starting Models</ButtonLink></div></section></div>;
   const open = wave.currentMove.status === "open";
   const hasReceipt = (() => { try { return Boolean(latestReceipt || localStorage.getItem(`waves-offer-receipt:${slug}`)); } catch { return Boolean(latestReceipt); } })();

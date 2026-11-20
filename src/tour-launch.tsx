@@ -16,6 +16,14 @@ export function startTour(path?: string) {
   window.dispatchEvent(new CustomEvent(EVENT, { detail: path }));
 }
 
+/* The offer's place (tour-offer.css): the bottom left corner, above the tab bar on a phone. True when nothing to
+   press is under it right now, so the offer never covers a button the page is asking for. */
+function placeIsFree() {
+  const phone = innerWidth < 800, left = phone ? 12 : 28, top = innerHeight - (phone ? 100 : 28) - 58;
+  const pressable = "a, button, input, textarea, select, summary, label, [role='button']";
+  return [8, 29, 50].every((y) => [24, 115, 206].every((x) => !document.elementFromPoint(left + x, top + y)?.closest(pressable)));
+}
+
 const offered = () => { try { return localStorage.getItem(OFFERED) === "1"; } catch { return true; } };
 const markOffered = () => { try { localStorage.setItem(OFFERED, "1"); } catch { /* the offer simply returns next visit */ } };
 
@@ -38,10 +46,20 @@ export function TourLauncher() {
 
   // A first visit is offered the tour once, quietly, after the page has had time to show itself. Never inside the
   // Give app or team pages, where people come to do something, and never where the first screen already offers it.
+  // The offer never sits on something to press: it waits until its place is free. Once shown it leaves when the
+  // reader scrolls on or opens another page, and the tour stays in the menu.
   useEffect(() => {
+    setOffer(false);
     if (run || offered() || /^\/(give\/|team|workspace|sign-)/.test(pathname) || /^\/(learn|manifest)\/?$/.test(pathname)) return;
-    const t = setTimeout(() => setOffer(true), pathname === "/" ? 13000 : 7000);
-    return () => clearTimeout(t);
+    let ready = false, shownAt: number | null = null, settle = 0;
+    const tryShow = () => { if (ready && shownAt === null && placeIsFree()) { shownAt = scrollY; setOffer(true); } };
+    const wait = window.setTimeout(() => { ready = true; tryShow(); }, pathname === "/" ? 13000 : 7000);
+    const onScroll = () => {
+      if (shownAt === null) { clearTimeout(settle); settle = window.setTimeout(tryShow, 300); return; }
+      if (Math.abs(scrollY - shownAt) > 240) { markOffered(); setOffer(false); removeEventListener("scroll", onScroll); }
+    };
+    addEventListener("scroll", onScroll, { passive: true });
+    return () => { clearTimeout(wait); clearTimeout(settle); removeEventListener("scroll", onScroll); if (shownAt !== null) markOffered(); };
   }, [pathname, run]);
 
   return (

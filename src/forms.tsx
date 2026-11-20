@@ -200,29 +200,64 @@ export function Application({
         </section>
       )}
       <form className="application-form panel" onSubmit={submit}>
-        <div className="form-pair">
+        {/* The form gives before it asks. It opens with the vision, as the question above it promises; then the
+            Wave those words make; then the practical parts; and last, who to answer. */}
+        <label>
+          {kind === "project"
+            ? "Your Vision & Who It Serves"
+            : kind === "guide"
+              ? "What Are You Learning, And What Can You Share?"
+              : "How Would You Like To Contribute?"}
+          <textarea
+            required
+            minLength={20}
+            maxLength={2500}
+            rows={6}
+            value={description}
+            onChange={(e) => { setDescription(e.target.value); if (project) setState((s) => ({ ...s, vision: e.target.value.slice(0, 500) })); }}
+          />
+          <small>{description.length}/2500</small>
+        </label>
+        {kind === "project" && (
+          <>
+            <label>
+              Project Name
+              <input
+                required
+                maxLength={120}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </label>
+          </>
+        )}
+        {kind === "project" ? (
+          <>
           <label>
-            Your Name
-            <input
+            Your First Milestone
+            <textarea
               required
-              autoComplete="name"
-              maxLength={100}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              maxLength={700}
+              rows={3}
+              value={milestone}
+              onChange={(e) => setMilestone(e.target.value)}
+              placeholder="What will you deliver, by when, and how will you show it?"
             />
           </label>
+          {!wide && <YourWave title={title} story={description} move={milestone} waveType={waveType} inPanel shape />}
+          </>
+        ) : (
           <label>
-            Email
+            Availability & Areas Of Experience
             <input
               required
-              type="email"
-              autoComplete="email"
-              maxLength={254}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              maxLength={300}
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value)}
+              placeholder="Time you can offer and the work you know"
             />
           </label>
-        </div>
+        )}
         {kind === "project" && (
           <>
             <label>
@@ -237,15 +272,6 @@ export function Application({
               </select>
             </label>
             <p id="wave-model-help" className="fine-print">A starting point for your own Wave. Your Guide will shape it with you, and it can change as your mission grows.</p>
-            <label>
-              Project Name
-              <input
-                required
-                maxLength={120}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </label>
             <div className="form-pair">
               <label>
                 Focus
@@ -275,50 +301,30 @@ export function Application({
             </div>
           </>
         )}
-        <label>
-          {kind === "project"
-            ? "Your Vision & Who It Serves"
-            : kind === "guide"
-              ? "What Are You Learning, And What Can You Share?"
-              : "How Would You Like To Contribute?"}
-          <textarea
-            required
-            minLength={20}
-            maxLength={2500}
-            rows={6}
-            value={description}
-            onChange={(e) => { setDescription(e.target.value); if (project) setState((s) => ({ ...s, vision: e.target.value.slice(0, 500) })); }}
-          />
-          <small>{description.length}/2500</small>
-        </label>
-        {kind === "project" ? (
-          <>
+        {guide && !wide && <YourGuide name={name} bio={description} inPanel />}
+        <div className="form-pair">
           <label>
-            Your First Milestone
-            <textarea
-              required
-              maxLength={700}
-              rows={3}
-              value={milestone}
-              onChange={(e) => setMilestone(e.target.value)}
-              placeholder="What will you deliver, by when, and how will you show it?"
-            />
-          </label>
-          {!wide && <YourWave title={title} story={description} move={milestone} waveType={waveType} inPanel shape />}
-          </>
-        ) : (
-          <label>
-            Availability & Areas Of Experience
+            Your Name
             <input
               required
-              maxLength={300}
-              value={availability}
-              onChange={(e) => setAvailability(e.target.value)}
-              placeholder="Time you can offer and the work you know"
+              autoComplete="name"
+              maxLength={100}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </label>
-        )}
-        {guide && !wide && <YourGuide name={name} bio={description} inPanel />}
+          <label>
+            Email
+            <input
+              required
+              type="email"
+              autoComplete="email"
+              maxLength={254}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+        </div>
         <div className="form-trap" aria-hidden="true">
           <label>
             Website
@@ -689,6 +695,7 @@ export function TeamReview() {
                       <option>Approved For Community Review</option>
                     )}
                     {a.kind === "guide" && <option>Guide Accepted</option>}
+                    {a.kind === "support" && <option>Offer Accepted</option>}
                     <option>Not Selected</option>
                   </select>
                 </label>
@@ -780,7 +787,7 @@ export function Privacy() {
         </p>
         <h2>Site Activity</h2>
         <p>
-          We measure anonymous page views and active, visible reading time to improve the experience. We do not collect form values, query strings, referrers, or persistent visitor identifiers for analytics. Do Not Track and Global Privacy Control preferences are respected. Activity records are combined into daily totals after their day is more than 48 hours old, when the team refreshes its dashboard. Anonymous submission counts can remain after an application is removed.
+          We do not measure page views or reading time. Waves.Fund keeps no analytics about its visitors.
         </p>
         <h2>Giving</h2>
         <p>

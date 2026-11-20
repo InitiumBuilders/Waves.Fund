@@ -1,0 +1,93 @@
+@layer pages {
+/* A founding Wave's page (/waves/waves-fund). It reads in the public Wave's column (public-wave.css). New here: the
+   ways into the next move, and the TrustBase. Mobile first. */
+.fw .pw-guide .fw-mantra { margin-top: 12px; font-weight: 600; }
+.fw-move > p { margin: 0; font-size: clamp(17px, 1.35vw, 19px); line-height: 1.7; }
+.fw-ways { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 20px; }
+.fw-ways li { display: grid; gap: 8px; justify-items: start; }
+.fw-ways li > span { font-size: 14px; line-height: 1.5; }
+.fw-move .fw-detail { margin: 22px 0 6px; font-size: 14px; line-height: 1.6; }
+#next-move, #trustbase { scroll-margin-top: 100px; }
+@media (max-width: 799px) { .tb-ground { --from: 14%; --to: 52%; } }
+@media (min-width: 640px) { .fw-ways { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 28px; } }
+
+/* The TrustBase. Each day is a row: its date, how many moves, the newest one; opened, every move that day. */
+.tb .tb-lede { margin: 0 0 22px; }
+.tb-days { list-style: none; margin: 0; padding: 0; }
+.tb-day { padding: 0 0 26px; }
+.tb-day summary, .tb-one { display: grid; gap: 6px; }
+.tb-day summary { list-style: none; cursor: pointer; position: relative; min-height: 44px; padding-right: 36px; border-radius: 10px; }
+.tb-day summary::-webkit-details-marker { display: none; }
+.tb-day summary::after { content: ""; position: absolute; right: 8px; top: 5px; width: 8px; height: 8px; border-right: 1.5px solid #8fdcff; border-bottom: 1.5px solid #8fdcff; transform: rotate(45deg); transition: transform 0.3s var(--ease); }
+.tb-day details[open] > summary::after { transform: translateY(4px) rotate(225deg); }
+.tb-day summary:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 6px; }
+.tb-head { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.tb-head time { font-size: 13px; font-weight: 640; letter-spacing: 0.1em; text-transform: uppercase; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tb-count { font-size: 13px; letter-spacing: 0.04em; white-space: nowrap; }
+.tb-state { margin-left: auto; font-size: 13px; font-weight: 620; white-space: nowrap; animation: pw-state-in 0.5s var(--ease-out) both; }
+.tb-one .tb-state { margin-right: 36px; }
+.tb-day .tb-first { margin: 0; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; overflow-wrap: anywhere; }
+.tb-day details[open] > summary .tb-first { display: none; }
+.tb-moves { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 14px; }
+.tb-moves li { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; overflow-wrap: anywhere; }
+.tb-first a, .tb-moves a { text-decoration: none; }
+.tb-first a:hover, .tb-first a:focus-visible, .tb-moves a:hover, .tb-moves a:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
+.tb-move-state { display: block; margin-top: 4px; font-size: 13px; font-weight: 620; }
+
+/* The ground under a day: one fine line for each move made that day, so the days stack like layers. As the day comes
+   into view a wave travels along the top of its band and settles flat into it. Transform and opacity only. */
+/* The wave settles between two heights of the screen: from where a band clears the foot of the screen to where the
+   eye reads. A phone's tab bar covers the foot, so there it starts higher. */
+.tb-ground { --gap: 5px; --from: 3%; --to: 38%; position: relative; display: block; height: calc(14px + var(--n) * var(--gap)); margin-top: 12px; overflow: hidden; view-timeline: --tb-ground block;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 62%, rgba(0, 0, 0, 0.35) 86%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 62%, rgba(0, 0, 0, 0.35) 86%, transparent); }
+.tb-lines { position: absolute; inset: 14px 0 0; will-change: opacity; background: repeating-linear-gradient(to bottom, rgba(150, 228, 255, 0.66) 0 1px, transparent 1px var(--gap)); }
+.tb-wave { position: absolute; left: -96px; right: 0; top: 0; height: 29px; opacity: 0; transform-origin: 50% 50%; will-change: transform, opacity;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='29' viewBox='0 0 96 29'%3E%3Cpath d='M0 4.5C8.69 4.5 16.17 9.38 24 14.5S39.31 24.5 48 24.5 64.17 19.62 72 14.5 87.31 4.5 96 4.5' fill='none' stroke='%23a6ecff' stroke-width='1.4' stroke-linecap='square'/%3E%3C/svg%3E") 0 0 / 96px 29px repeat-x; }
+@keyframes tb-settle {
+  0% { opacity: 1; transform: translate3d(0, 0, 0) scaleY(1); }
+  40% { transform: translate3d(38px, 0, 0) scaleY(0.56); }
+  72% { opacity: 1; transform: translate3d(69px, 0, 0) scaleY(0.2); }
+  100% { opacity: 0; transform: translate3d(96px, 0, 0) scaleY(0.04); }
+}
+@keyframes tb-laid { 0%, 48% { opacity: 0; } 100% { opacity: 1; } }
+@supports (animation-timeline: view()) {
+  .tb-wave { animation: tb-settle linear both; animation-timeline: --tb-ground; animation-range: cover var(--from) cover var(--to); }
+  .tb-lines { animation: tb-laid linear both; animation-timeline: --tb-ground; animation-range: cover var(--from) cover var(--to); }
+}
+/* Where the scroll cannot drive it (founding-wave.tsx adds .tb-timed), each day's wave settles once, over one beat. */
+.tb-timed .tb-day:not(.tb-in) .tb-lines { opacity: 0; }
+.tb-timed .tb-day.tb-in .tb-wave { animation: tb-settle 1.5s linear both; }
+.tb-timed .tb-day.tb-in .tb-lines { animation: tb-laid 1.5s linear both; }
+
+/* The check reaching a day: light runs along its lines, left to right, and they stay a little brighter. */
+.tb-ground::after { content: ""; position: absolute; inset: 14px auto 0 0; width: 44%; opacity: 0; transform: translate3d(-105%, 0, 0); pointer-events: none;
+  background: linear-gradient(90deg, rgba(236, 254, 255, 0), rgba(236, 254, 255, 0.98) 70%, rgba(236, 254, 255, 0));
+  -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0 1px, transparent 1px var(--gap)); mask-image: repeating-linear-gradient(to bottom, #000 0 1px, transparent 1px var(--gap)); }
+.tb-ok .tb-ground::after { animation: tb-pass 1.2s var(--ease-out) both; }
+.tb-ok .tb-lines { background: repeating-linear-gradient(to bottom, rgba(206, 246, 255, 0.95) 0 1px, transparent 1px var(--gap)); }
+@keyframes tb-pass { 0% { opacity: 1; transform: translate3d(-105%, 0, 0); } 100% { opacity: 0; transform: translate3d(235%, 0, 0); } }
+
+html[data-motion="off"] .tb-wave, html[data-motion="off"] .tb-lines, html[data-motion="off"] .tb-ground::after, html[data-motion="off"] .tb-state { animation: none !important; }
+html[data-motion="off"] .tb-timed .tb-day .tb-lines { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .tb-wave, .tb-lines, .tb-ground::after, .tb-state { animation: none !important; }
+  .tb-timed .tb-day .tb-lines { opacity: 1; }
+}
+
+.tb-check { margin: 0 0 clamp(36px, 6vw, 54px); display: grid; gap: 14px; justify-items: start; }
+.tb-code { margin-top: 2px; }
+.tb-check > p { margin: 0; font-size: 15px; line-height: 1.6; }
+.tb-check .tb-result { font-weight: 580; min-height: 1.6em; }
+
+/* Its people, and what people say about it. */
+.tb-people, .tb-words { margin-top: clamp(56px, 9vw, 96px); }
+.tb-people h3 { margin: 10px 0 14px; font-size: clamp(22px, 2.4vw, 30px); font-weight: 500; letter-spacing: -0.035em; line-height: 1.1; }
+.tb-people > p, .tb-words > p { margin: 0 0 14px; }
+.tb-people .fine-print { margin: 0; }
+.tb-people h4 { margin: 0 0 6px; font-size: clamp(19px, 1.7vw, 23px); }
+.tb-words figure { margin: 18px 0 0; }
+.tb-words blockquote { margin: 0; font-size: clamp(19px, 1.7vw, 23px); line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.tb-words figcaption { margin-top: 10px; font-size: 14px; }
+.tb-words .text-button { margin: 4px 0 18px; }
+.tb-words .fine-print { margin: 0 0 10px; }
+}
