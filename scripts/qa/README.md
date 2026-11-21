@@ -17,22 +17,32 @@ when a session ends, so they live here now. Each one drives a real browser throu
 
 ## The gate
 
-`node scripts/qa/gate.mjs <url>` runs the checks a release must pass and gives one verdict: console and page errors
-on every route at both sizes, no page wider than a phone, centred lines still centred (a second pass before failing),
-accessibility (axe-core, WCAG 2.2 AA), and a walk through the whole tour. `--build` runs `npm run build` first,
+`node scripts/qa/gate.mjs <url>` runs the checks a release must pass and gives one verdict: a first visit in a
+brand-new browser profile is not held still (worst pause under 1.5 s; it runs first and alone, because the other
+rigs load the machine), console and page errors on every route at both sizes, no page wider than a phone, centred
+lines still centred (a second pass before failing), accessibility (axe-core, WCAG 2.2 AA), and a walk through the
+whole tour. `--build` runs `npm run build` first,
 `--styles <baseline.json>` also compares every element's computed style with a baseline, `--quick` skips the tour
 and the second centring pass. It exits 1 on any failure and writes its logs to a temporary folder. About ten minutes.
 
 ## The release, in order
 
-1. `npx tsc --noEmit -p tsconfig.json` and `npx vite build`.
-2. Stage: `vercel deploy --prod --skip-domain --yes --archive=tgz --scope sourcecrowd`, then
+Since 2026-11-20 the public copy goes first, so the build that goes live already lists its own move on the Record
+and on Wave One's TrustBase, and one deploy is enough. (Before, the Record lagged a push and needed a second deploy.)
+Nothing below starts without August's word for that build.
+
+1. `npx tsc --noEmit -p tsconfig.json` and `npx vite build`; the gate and the checks for what changed, on the local
+   build. Read the screenshots before calling them proof. Commit.
+2. Public copy: `node scripts/publish-public.mjs`, `node scripts/check-secrets.mjs .open-source .env.local
+   .env.workspace.production`, then commit and push inside `.open-source` as InitiumBuilders. The first line of that
+   commit is shown on the site as the move, so write it as one plain sentence.
+3. `node scripts/record.mjs`, commit the new `src/record-data.json`.
+4. Stage: `vercel deploy --prod --skip-domain --yes --archive=tgz --scope sourcecrowd`, then
    `vercel inspect <url> --wait --scope sourcecrowd`.
-3. `node scripts/qa/gate.mjs <staged url>`. Everything passes or no promote.
-4. The checks for what changed (below). Read the screenshots before calling them proof.
-5. `vercel promote <staged url> --yes --scope sourcecrowd`.
-6. Public copy: `node scripts/publish-public.mjs`, `node scripts/check-secrets.mjs .open-source .env.local
-   .env.workspace.production`, then commit and push inside `.open-source` as InitiumBuilders.
+5. `node scripts/qa/gate.mjs <staged url>` and `node scripts/qa/waveone.mjs <staged url> --live-github`. Everything
+   passes or no promote. If something fails, fix forward: the public code is a few minutes ahead of the site.
+6. `vercel promote <staged url> --yes --scope sourcecrowd`, then `waveone.mjs https://www.waves.fund --live-github`
+   and `smoke2.mjs https://www.waves.fund` (both only read).
 
 Log long runs to a file and grep it. A crash piped through `tail` prints only the Node version line.
 

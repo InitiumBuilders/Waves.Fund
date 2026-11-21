@@ -41,6 +41,15 @@ if (flag("--build")) {
   if (r.code !== 0) { report(); process.exit(1); }
 }
 
+// A first visit, alone, before the other rigs load the machine: a brand-new browser profile, so nothing is kept from
+// an earlier visit. The page must not be held still. (Until 2026-11-20 the field's shaders froze every page for 4 to
+// 6 s on a first visit, and no check here could see it, because a machine that has visited once keeps them.)
+{
+  const first = await rig("firstvisit", "firstvisit.mjs", base, "/", "2", "phone");
+  const worst = num(first.out, /worst long task over \d+ runs: (\d+) ms/g)[0];
+  verdict("a first visit is not held still", worst !== undefined && worst < 1500, worst !== undefined ? `worst pause ${worst} ms (limit 1500)` : "did not finish, see firstvisit.log", first);
+}
+
 // Three independent rigs at a time; each launches its own browser.
 const [smoke, overflow, centre] = await Promise.all([
   rig("smoke", "smoke2.mjs", base),

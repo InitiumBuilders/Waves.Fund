@@ -136,6 +136,12 @@ if (live) {
   await ctx.close();
 }
 
+// 7. On a deployment, what gets shared is Wave One's own page: its title and its card (a local preview has no rewrites).
+if (base.startsWith("https://")) {
+  const html = await fetch(base + PAGE).then((r) => r.text()).catch(() => "");
+  ok(html.includes("<title>Wave One — Waves.Fund</title>") && /og:image" content="[^"]*\/media\/share\/wave-one\.jpg"/.test(html), "the shared page carries Wave One's title and its own card", (html.match(/og:image" content="[^"]*"/) || ["no og:image"])[0]);
+}
+
 await b.close();
 console.log(failed ? `${failed} FAILED` : "all passed");
 process.exit(failed ? 1 : 0);

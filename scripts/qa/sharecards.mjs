@@ -16,6 +16,8 @@ const CARDS = [
   { name: "learn", scene: "learn-65", head: "Raise Capital<br>In A Whole New Way.<br><span>Raise Waves.</span>", sub: "Welcome To The Frontier Of Funding" },
   { name: "manifest", scene: "manifest-65", head: "The <span>Manifest</span>", sub: "Trust People. And They Become Trustworthy." },
   { name: "waves", scene: "waves-85", head: "Waves<br><span>In Motion</span>", sub: "Explore approved Wave projects in community review." },
+  // Wave One, on its own water (scenes.mjs <base> waves/waves-fund). Both lines stand on the Wave One card.
+  { name: "wave-one", scene: "waves-waves-fund-85", head: "Wave <span>One</span>", sub: "The first Wave is our own." },
 ];
 // Only the named cards when names are given: node sharecards.mjs default learn waves
 const ONLY = process.argv.slice(2);

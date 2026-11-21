@@ -19,7 +19,7 @@ export const SHARE_PAGES = [
   { route: "/guide/teachback", file: "share/teachback.html", image: "teachback", title: "The Teachback | Waves.Fund", description: "Give Together. Teach Together. Organize a teachback." },
   { route: "/grow", file: "share/grow.html", title: "When Humanity Builds Together, We Change The World. | Waves.Fund", description: "Measure what moves." },
   { route: "/waves", file: "share/waves.html", image: "waves", title: "Waves In Motion | Waves.Fund", description: "Explore approved Wave projects in community review. Learn about the work and add your voice." },
-  { route: "/waves/waves-fund", file: "share/wave-one.html", image: "waves", title: "Wave One — Waves.Fund", description: "Trust People. And They Become Trustworthy. The first Wave is our own." },
+  { route: "/waves/waves-fund", file: "share/wave-one.html", image: "wave-one", title: "Wave One — Waves.Fund", description: "Trust People. And They Become Trustworthy. The first Wave is our own." },
   { route: "/apply", file: "share/apply.html", title: "What’s Your Vision? | Waves.Fund", description: "Funding For Lifelong Learners And Leaders. Bring your vision to Waves.Fund." },
 ];
 

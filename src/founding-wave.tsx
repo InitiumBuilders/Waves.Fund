@@ -10,6 +10,7 @@ import { mindWave } from "./mind/WaveMind";
 import { PublicWave, waveSea } from "./public-wave";
 import { asPublicWave, byDay, commitUrl, foundingWave } from "./founding";
 import type { FoundingWave } from "./founding";
+import { waveRequest } from "./workspace-client";
 import { compareMoves, publicHistory } from "./record-check";
 import type { MoveState } from "./record-check";
 import type { RippleModel } from "./together/ripple";
@@ -18,13 +19,23 @@ import "./founding-wave.css";
 
 const WORKSPACE_ON = import.meta.env.VITE_WORKSPACE_ENABLED === "true";
 
-/* /waves/:slug. A founding Wave stands at its address until a Wave published from the workspace takes it. */
+/* /waves/:slug. A founding Wave stands at its address until a Wave published from the workspace takes it. While the
+   workspace is on, the list of published Waves says whether one has (asking for the Wave itself would answer 404
+   until then, and leave an error in the console of a page that is fine). */
 export default function WavePage() {
   const { slug = "" } = useParams();
   const founding = foundingWave(slug);
+  const [taken, setTaken] = useState(false);
+  useEffect(() => {
+    setTaken(false);
+    if (!founding || !WORKSPACE_ON) return;
+    let active = true;
+    waveRequest<{ waves?: PublicWaveRecord[] }>("").then((r) => { if (active) setTaken(Boolean(r.waves?.some((w) => w.slug === slug))); }).catch(() => {});
+    return () => { active = false; };
+  }, [slug, founding]);
   if (!founding) return <PublicWave />;
   const page = <FoundingWavePage wave={founding} />;
-  return WORKSPACE_ON ? <PublicWave fallback={page} /> : page;
+  return taken ? <PublicWave fallback={page} /> : page;
 }
 
 const day = (d: string) => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });

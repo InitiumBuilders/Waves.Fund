@@ -1,5 +1,6 @@
 // Share-card scenes from the sea: the hero with its words, header and field hidden, cropped around the first light.
-// Usage: node scenes.mjs <base>   writes share/scene-learn-<phase>.png and share/scene-waves-<phase>.png
+// Usage: node scenes.mjs <base> [routes]   writes share/scene-learn-<phase>.png and share/scene-waves-<phase>.png;
+// a route with a slash, such as waves/waves-fund, is written as scene-waves-waves-fund-<phase>.png
 const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
 import { mkdir } from "node:fs/promises";
 const base = process.argv[2] || "http://127.0.0.1:5197";
@@ -20,7 +21,7 @@ for (const r of (process.argv[3] || "learn,waves").split(",")) {
     await p.waitForTimeout((((at - phase) % 12) + 12) % 12 * 1000);
     const light = await p.evaluate(() => { const c = document.querySelector(".sea-hero-scene canvas").getBoundingClientRect(); const q = window.__sea?.at(0); return { x: c.left + (q ? q[0] : c.width * 0.6), top: c.top, h: c.height, w: c.width }; });
     const W = 900, x = Math.round(Math.min(light.w - W, Math.max(0, light.x - W / 2)));
-    await p.screenshot({ path: `share/scene-${r}-${String(at).replace(".", "")}.png`, type: "png", clip: { x, y: Math.round(light.top), width: W, height: Math.round(light.h) } });
+    await p.screenshot({ path: `share/scene-${r.replaceAll("/", "-")}-${String(at).replace(".", "")}.png`, type: "png", clip: { x, y: Math.round(light.top), width: W, height: Math.round(light.h) } });
     console.log(r, "phase", at, "light x", Math.round(light.x), "crop x", x);
   }
   await p.close();
