@@ -6,15 +6,20 @@
 //     reaches half its strength (the night fades in over the 120px above the eyebrow, so that point is 60px above it);
 //   - the first thing to press (the first link or button in the page's first row of actions) stands either clear of
 //     the tab bar or wholly below it, never cut by it. On every page since 2026-11-21 (before, sea pages only).
-//   node scripts/qa/firstscreen.mjs <base> [routes] [--shots <folder>]
+//   node scripts/qa/firstscreen.mjs <base> [routes] [--shots <folder>] [--webkit]
+// --webkit measures in WebKit, the engine of every iPhone browser (Safari can run a page's scripts before its styles
+// apply, so a fit that measures layout is worth seeing there too).
 // Until 2026-11-21 the Learn page's title began 101px under the header on an iPhone SE, and the sea pages showed
 // 10 to 150px of water on an iPhone, because the words were set from the foot of a screen assumed to be tall.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-const { chromium } = await import(process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
+const webkit = process.argv.includes("--webkit");
+const pw = await import(webkit
+  ? process.env.PLAYWRIGHT_WEBKIT || "file:///C:/Users/Initi/iphone-duos-sold/node_modules/playwright-core/index.mjs"
+  : process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
 const args = process.argv.slice(2), plain = args.filter((a, i) => !a.startsWith("--") && args[i - 1] !== "--shots");
 const base = plain[0];
-if (!base) { console.error("usage: node scripts/qa/firstscreen.mjs <base> [routes] [--shots <folder>]"); process.exit(2); }
+if (!base) { console.error("usage: node scripts/qa/firstscreen.mjs <base> [routes] [--shots <folder>] [--webkit]"); process.exit(2); }
 const routes = (plain[1] || "/,/learn,/guide,/give,/grow,/waves,/waves/waves-fund,/apply,/manifest,/film,/now-lets-begin,/guide/apply,/guide/library,/guide/partners,/guide/team,/guide/teachback,/privacy,/contribute").split(",");
 const shots = args.includes("--shots") ? args[args.indexOf("--shots") + 1] : null;
 if (shots) mkdirSync(shots, { recursive: true });
@@ -22,19 +27,20 @@ const SIZES = [[375, 548, "iPhone SE"], [393, 659, "iPhone"], [360, 640, "Androi
 // The least water a sea page shows above the night's half-strength point.
 const WATER = 40;
 
-const b = await chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
+const b = webkit ? await pw.webkit.launch() : await pw.chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
 let faults = 0, seen = 0, seas = 0;
 for (const [w, h, name] of SIZES) {
-  const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  // isMobile is a Chrome setting; WebKit here takes the viewport and touch.
+  const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: webkit ? undefined : true, hasTouch: true });
   await ctx.route("**/*", (r) => (r.request().method() === "GET" ? r.continue() : r.abort()));
   // The project feed answered as production answers it today, so /waves shows the line it shows there.
   await ctx.route("**/api/community*", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ projects: [], guides: 1 }) }));
   await ctx.addInitScript(() => { try { localStorage.setItem("waves-tour-offered", "1"); } catch { /* storage may be off */ } });
   for (const route of routes) {
     const p = await ctx.newPage();
-    await p.goto(base + route, { waitUntil: "load", timeout: 90000 });
-    await p.waitForSelector("main h1", { timeout: 30000 }).catch(() => {});
-    await p.waitForTimeout(2500);
+    await p.goto(base + route, { waitUntil: "load", timeout: 90000 * (webkit ? 2 : 1) });
+    await p.waitForSelector("main h1", { timeout: 30000 * (webkit ? 3 : 1) }).catch(() => {});
+    await p.waitForTimeout(webkit ? 5000 : 2500);
     const m = await p.evaluate(() => {
       const top = (e) => (e ? Math.round(e.getBoundingClientRect().top + scrollY) : null);
       const h1 = [...document.querySelectorAll("main h1")].find((e) => e.getBoundingClientRect().height > 0);

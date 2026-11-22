@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "dfb35ea609db7849af490cbc95779d8e8a5dd5b1",
+   "date": "2026-11-21",
+   "move": "The Guide's waveguide comes back after a phone pauses it, and no page's first button sits under the tab bar"
+  },
+  {
    "sha": "ab13a97d837a0f6474e4ade3229694a9d060c6f2",
    "date": "2026-11-21",
    "move": "On phones the sea gets its own band above the words, each matching move gets its own light, and the moving scenes come back after a phone pauses them"

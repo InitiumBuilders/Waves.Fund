@@ -50,6 +50,27 @@ const press = async (p) => { await p.locator(".tb-check button").scrollIntoViewI
   await ctx.close();
 }
 
+// 1b. While the project feed is slow, the first screen of /waves never claims projects to explore and then takes it
+// back: with no reviewed projects (today), its empty-state line stands from the first frame. Until 2026-11-22 the
+// other line showed until the feed answered. The feed is held back here, and answered empty, whatever the server has.
+{
+  const ctx = await b.newContext({ viewport: { width: 393, height: 659 }, isMobile: true, hasTouch: true });
+  await ctx.route("**/*", (r) => (r.request().method() === "GET" ? r.continue() : r.abort()));
+  await ctx.route("**/api/community*", async (r) => { await new Promise((d) => setTimeout(d, 2500)); await r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ projects: [], guides: 1 }) }).catch(() => {}); });
+  await ctx.addInitScript(() => {
+    try { localStorage.setItem("waves-tour-offered", "1"); } catch { /* storage may be off */ }
+    window.__lines = [];
+    const look = () => { const t = document.querySelector(".sea-hero .intro-description p")?.textContent.trim() || ""; if (t && window.__lines[window.__lines.length - 1] !== t) window.__lines.push(t); requestAnimationFrame(look); };
+    requestAnimationFrame(look);
+  });
+  const p = await ctx.newPage();
+  await p.goto(base + "/waves", { waitUntil: "load", timeout: 90000 });
+  await p.waitForTimeout(5000);
+  const lines = await p.evaluate(() => window.__lines);
+  ok(lines.length === 1 && lines[0].startsWith("Project submissions are open."), "a slow feed: the /waves line stands from the first frame and never changes", lines.join(" -> "));
+  await ctx.close();
+}
+
 // 2. The page itself, at a phone and a wide screen.
 for (const vp of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
   const { ctx, p, errs, writes } = await open(vp, PAGE);

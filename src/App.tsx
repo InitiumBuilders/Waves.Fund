@@ -216,9 +216,10 @@ function Projects() {
         }
         actions={<ButtonLink to="/apply">Bring Your Vision</ButtonLink>}
       >
-        {/* While no Wave is published, the first screen says so, in the empty state's own words. */}
+        {/* While no Wave is published, the first screen says so, in the empty state's own words. Until the feed answers
+            it says the same, so it never claims projects to explore and then takes it back as the feed arrives. */}
         <p>
-          {!loading && !error && !projects.length && !built.length
+          {(loading || (!error && !projects.length)) && !built.length
             ? "Project submissions are open. The first reviewed projects will appear here."
             : "Explore approved Wave projects in community review. Learn about the work and add your voice."}
         </p>
