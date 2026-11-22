@@ -3,6 +3,7 @@ import type { RefObject } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, Share2 } from "lucide-react";
 import { ButtonLink } from "./ui";
+import { useBelowTheBar } from "./bar";
 import "./film.css";
 
 /* The films. First the hype film (4:28, August Jace's voice, the vision and the plan in motion), then the first film
@@ -56,6 +57,9 @@ function Chapters({ video }: { video: RefObject<HTMLVideoElement | null> }) {
 export default function Film() {
   const [shared, setShared] = useState(false);
   const hype = useRef<HTMLVideoElement>(null);
+  // On a phone the tab bar never cuts the first button: the row waits wholly below it instead (bar.ts).
+  const actions = useRef<HTMLDivElement>(null);
+  useBelowTheBar(actions);
   const share = async () => {
     const url = `${window.location.origin}/film`;
     try {
@@ -71,7 +75,7 @@ export default function Film() {
       </header>
       <Stage video={hype} src="/media/film/raise-waves-hype.mp4" poster="/media/film/raise-waves-hype.webp" captions="/media/film/raise-waves-hype.en.vtt" />
       <Chapters video={hype} />
-      <div className="button-row fm-actions">
+      <div ref={actions} className="button-row fm-actions">
         <ButtonLink to="/apply">Bring Your Vision</ButtonLink>
         <button type="button" className="text-button" onClick={share}>
           {shared ? <Check size={17} /> : <Share2 size={17} />}

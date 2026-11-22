@@ -18,9 +18,10 @@ const pw = await import(webkit
   ? process.env.PLAYWRIGHT_WEBKIT || "file:///C:/Users/Initi/iphone-duos-sold/node_modules/playwright-core/index.mjs"
   : process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--"));
-// A page that opens on the sea, the home page (the lattice alone), and the Give page (two seas on one page). The
-// ripple scene is drawn only for signed-in members, which no check here can reach; it handles a loss as the sea does.
-const base = args[0], routes = args.slice(1).length ? args.slice(1) : ["/waves/waves-fund", "/", "/give"];
+// A page that opens on the sea, the home page (the lattice alone), the Give page (two seas on one page) and the
+// Guide (its waveguide, and a second one further down). The ripple scene is drawn only for signed-in members, which no
+// check here can reach; it handles a loss as the sea does.
+const base = args[0], routes = args.slice(1).length ? args.slice(1) : ["/waves/waves-fund", "/", "/give", "/guide"];
 if (!base) { console.error("usage: node scripts/qa/contexts.mjs <base> [route ...] [--webkit]"); process.exit(2); }
 const SIZES = webkit ? [[393, 659, "phone"]] : [[393, 659, "phone"], [1440, 900, "wide"]];
 // WebKit on this machine compiles shaders in software and takes many seconds a page, so its waits are longer.
@@ -72,20 +73,22 @@ const setup = (mode) => {
     requestAnimationFrame(frame);
   });
   const onScreen = (el) => { const r = el.getBoundingClientRect(); return el.isConnected && r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight; };
+  // The boxes a scene draws in: the sea and the ripple (.ripple), and the Guide's waveguide.
+  const BOXES = ".ripple, .waveguide-scene";
   window.__state = () => ({
     names: window.__ctx.map((x) => x.name),
     lost: window.__ctx.filter((x) => x.gl.isContextLost()).map((x) => x.name),
-    still: [...document.querySelectorAll(".ripple")].filter((e) => e.querySelector("canvas") && e.dataset.still === "on").length,
-    seas: [...document.querySelectorAll(".ripple")].filter((e) => e.querySelector("canvas")).length,
+    still: [...document.querySelectorAll(BOXES)].filter((e) => e.querySelector("canvas") && e.dataset.still === "on").length,
+    seas: [...document.querySelectorAll(BOXES)].filter((e) => e.querySelector("canvas")).length,
     fallback: !!document.querySelector(".mind-fallback"),
     seaWanted: !!document.querySelector(".sea-hero"),
     losses: window.__ctx.map((x) => x.lost),
     returned: window.__ctx.map((x) => x.returned),
     // A scene draws only while it is on screen; one further down the page waits until it is scrolled to.
     inView: window.__ctx.map((x) => onScreen(x.c)),
-    // What a visitor sees of each sea on screen: drawing into its buffer is not enough, its canvas must be shown
-    // (a sea fades its canvas in once its programs are ready, data-ready).
-    shown: [...document.querySelectorAll(".ripple")].filter((e) => e.querySelector("canvas") && onScreen(e)).map((e) => e.dataset.ready === "on" && getComputedStyle(e.querySelector("canvas")).opacity === "1"),
+    // What a visitor sees of each scene on screen: drawing into its buffer is not enough, its canvas must be shown
+    // (a scene fades its canvas in once its programs are ready, data-ready).
+    shown: [...document.querySelectorAll(BOXES)].filter((e) => e.querySelector("canvas") && onScreen(e)).map((e) => e.dataset.ready === "on" && getComputedStyle(e.querySelector("canvas")).opacity === "1"),
   });
 };
 // The liquid layer draws only where a page has vessels, so an empty one says nothing; a scene off screen draws nothing.
@@ -163,7 +166,7 @@ for (const [w, h, size] of SIZES) {
         if (steady) break;
       }
       check(s.names.length > 0 && !s.fallback && drawing(s, before), `${where}: ${s.names.length} scenes drawing (${s.names.join(", ")})`);
-      if (s.seas) check(s.shown.length > 0 && s.shown.every(Boolean), `${where}: each sea on screen is shown (ready, fully opaque)`);
+      if (s.seas) check(s.shown.length > 0 && s.shown.every(Boolean), `${where}: each scene on screen is shown (ready, fully opaque)`);
       await p.evaluate(() => window.__ctx.forEach((x) => x.ext?.loseContext()));
       await p.waitForTimeout(600 * SLOW);
       const gone = await p.evaluate(() => window.__state());
@@ -182,7 +185,7 @@ for (const [w, h, size] of SIZES) {
       }
       check(back.lost.length === 0, `${where}: every context is back`);
       if (back.seas) check(back.still === 0, `${where}: no scene is left on its still light`);
-      if (back.seas) check(back.shown.length > 0 && back.shown.every(Boolean), `${where}: each sea on screen is shown again (ready, fully opaque)`);
+      if (back.seas) check(back.shown.length > 0 && back.shown.every(Boolean), `${where}: each scene on screen is shown again (ready, fully opaque)`);
       check(!back.fallback, `${where}: the lattice is drawn, not replaced by the still picture`);
       s.names.forEach((name, i) => {
         if (before[i] < 0.002) return;
@@ -211,7 +214,7 @@ for (const [w, h, size] of SIZES) {
       check(s.names.length > 0 && s.losses.every((n) => n >= 1) && s.returned.every((n) => n >= 1), `${where}: every context was taken and came back (losses: ${list(s, "losses")}; returns: ${list(s, "returned")})`);
       check(!s.fallback, `${where}: the lattice is drawn, not replaced by the still picture`);
       check(s.lost.length === 0 && s.still === 0, `${where}: every context is back and no scene is left on its still light`);
-      if (s.seas) check(s.shown.length > 0 && s.shown.every(Boolean), `${where}: each sea on screen is shown (ready, fully opaque)`);
+      if (s.seas) check(s.shown.length > 0 && s.shown.every(Boolean), `${where}: each scene on screen is shown (ready, fully opaque)`);
       check(s.names.length > 0 && drawing(s, drawn), `${where}: ${s.names.length} scenes drawing (${s.names.map((n, i) => `${n} ${((drawn[i] || 0) * 100).toFixed(1)}%`).join(", ")})`);
       check(notes.length === 0, `${where}: nothing thrown or logged${said(notes)}`);
       await ctx.close();

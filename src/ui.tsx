@@ -16,6 +16,7 @@ import { useStateStore } from "./state";
 import { startTour } from "./tour-launch";
 import { SoundButton } from "./sound";
 import { MindAnchor, mindWave } from "./mind/WaveMind";
+import { useBelowTheBar } from "./bar";
 import type { FieldMode } from "./mind/modes";
 export const CONTACT = "August@Outlier.Systems";
 export const DONATE =
@@ -414,12 +415,15 @@ export function Intro({
   actions?: ReactNode;
   mind?: FieldMode;
 }) {
+  // On a phone the tab bar never cuts the first button: the row waits wholly below it instead (bar.ts).
+  const row = useRef<HTMLDivElement>(null);
+  useBelowTheBar(row);
   const text = (
     <>
       <p className="eyebrow">{eyebrow}</p>
       <h1>{title}</h1>
       {children && <div className="intro-description">{children}</div>}
-      {actions && <div className="button-row intro-actions">{actions}</div>}
+      {actions && <div ref={row} className="button-row intro-actions">{actions}</div>}
     </>
   );
   if (!mind) return <header className="page-intro">{text}</header>;

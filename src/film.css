@@ -30,4 +30,13 @@
 .fm-second .eyebrow { justify-content: center; margin: 0 0 22px; }
 .fm-stage.fm-stage-small { width: min(100%, 880px); }
 @media (max-width: 640px) { .fm-stage, .fm-stage.fm-stage-small { width: auto; margin-inline: calc(-1 * var(--gutter, 22px)); border-radius: 0; } }
+/* A short phone screen (an iPhone with Safari's bars showing, an SE): a tighter rhythm around the film, so its first
+   button clears the tab bar where it can. Where it cannot, bar.ts moves the row wholly below the bar. */
+@media (max-height: 700px) and (max-width: 899.98px) {
+  .fm-page { padding-top: 16px; }
+  .fm-head { margin-bottom: 16px; }
+  .fm-head .eyebrow { margin-bottom: 10px; }
+  .fm-ch { margin-top: 12px; }
+  .fm-actions { margin-top: 16px; }
+}
 }

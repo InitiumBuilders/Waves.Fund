@@ -483,6 +483,11 @@ button sits in the fade and Learn's and the Manifest's wait below the bar; on an
 Learn's and the Manifest's inside the fade.
 A wide screen that is short (a large phone on its side) grows its stage instead of cutting the words.
 
+The same rule holds on every page (since the evening of 2026-11-21): the first row of buttons in a page's intro, and
+the film page's row, move wholly below the bar when it would cut their first button (`src/bar.ts`). The film page
+also tightens its rhythm on short screens so its button clears the bar on an iPhone. Judge at 375x548, 393x659 and
+360x640.
+
 ## Scenes that come back (2026-11-21)
 
 A browser may take a page's WebGL contexts away and give them back (an iPhone does it to a page left in the
@@ -491,7 +496,8 @@ Seed's size, the vessels' fill). A context handed out already lost waits for its
 again at once is asked once more, then the scene rests on its still form: the sea's one light, the lattice's still
 picture. With nothing back after five seconds in view, the lattice shows its still picture. A sea hands its context
 back when its page closes, because a browser keeps only so many and evicts the oldest, the lattice's, past that. The
-sea and the ripple fade in when their programs are ready.
+sea, the ripple and the Guide's waveguide fade in when their programs are ready (the waveguide joined them the same
+evening).
 
 ## Rules
 

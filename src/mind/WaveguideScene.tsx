@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStateStore } from "../state";
+import { begin, finish, keeper, settled } from "./programs";
 
 /* A waveguide, drawn from its physics. A glass core sits inside a cladding with a slightly lower refractive
    index. Light launched into the core at a shallow angle meets the wall beyond the critical angle and
@@ -113,39 +114,56 @@ export function WaveguideScene({ variant = "hero", className = "" }: { variant?:
   const canvas = useRef<HTMLCanvasElement>(null);
   const { motion } = useStateStore();
   const angleRef = useRef(0.62);
+  // Raised when a lost WebGL context comes back, so the scene is built again on it.
+  const [gen, setGen] = useState(0);
+  const keep = useRef<ReturnType<typeof keeper> | null>(null);
+  keep.current ??= keeper();
 
   useEffect(() => {
     const c = canvas.current, b = box.current;
     if (!c || !b) return;
     const gl = c.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false });
     if (!gl) { b.dataset.still = "on"; return; }
-    const make = (type: number, src: string) => { const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s); return s; };
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, make(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, make(gl.FRAGMENT_SHADER, FS));
-    gl.bindAttribLocation(prog, 0, "aPos");
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { if (import.meta.env.DEV) console.error(gl.getProgramInfoLog(prog)); b.dataset.still = "on"; return; }
+    // A lost context can come back; the scene is then built again from the start (together/sea.tsx tells the whole
+    // story, and keeper() says when to stop asking).
+    let gone = gl.isContextLost(), raf = 0;
+    keep.current!.built();
+    const lost = (e: Event) => { if (keep.current!.ask()) e.preventDefault(); gone = true; cancelAnimationFrame(raf); raf = 0; b.dataset.still = "on"; delete b.dataset.ready; };
+    const back = () => { delete b.dataset.still; setGen((g) => g + 1); };
+    c.addEventListener("webglcontextlost", lost);
+    c.addEventListener("webglcontextrestored", back);
+    const unlisten = () => { c.removeEventListener("webglcontextlost", lost); c.removeEventListener("webglcontextrestored", back); };
+    if (gone) { b.dataset.still = "on"; return unlisten; }
+    // The program compiles without holding the page still (programs.ts). Nothing is drawn until it is ready.
+    const prog = begin(gl, VS, FS, ["aPos"]);
+    let ready = false, failed = false;
+    const arrive = () => {
+      if (ready) return true;
+      if (failed || gl.isContextLost() || !settled(gl, [prog])) return false;
+      const why = finish(gl, [prog]);
+      if (why) { failed = true; b.dataset.still = "on"; if (import.meta.env.DEV) console.error(why); return false; }
+      ready = true; b.dataset.ready = "on";
+      // Counted from now as well: where shaders compile slowly, getting ready takes seconds of its own.
+      keep.current!.built();
+      return true;
+    };
     const vao = gl.createVertexArray()!;
     gl.bindVertexArray(vao);
     const buf = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    const u = (n: string) => gl.getUniformLocation(prog, n);
-    let w = 0, h = 0, dpr = 1, raf = 0, visible = true, t0 = 0; // the shared clock, so the guide pulses in step with the field
-    const resize = () => {
-      const r = b.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = Math.max(1, r.width); h = Math.max(1, r.height);
-      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
-      draw();
-    };
+    // Uniform places are asked for once the program is ready (asking sooner would wait for it), then kept.
+    const u = prog.u;
+    let w = 0, h = 0, dpr = 1, visible = true;
+    const t0 = 0; // the shared clock, so the guide pulses in step with the field
     const draw = () => {
+      if (gone || !arrive()) return;
       const t = motion ? (performance.now() - t0) / 1000 : 6.5;
       gl.viewport(0, 0, c.width, c.height);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-      gl.useProgram(prog);
+      gl.useProgram(prog.p);
       gl.uniform2f(u("uRes"), w, h);
       gl.uniform1f(u("uTime"), t);
       gl.uniform1f(u("uDpr"), dpr);
@@ -155,8 +173,19 @@ export function WaveguideScene({ variant = "hero", className = "" }: { variant?:
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
-    const loop = () => { draw(); if (motion && visible && !document.hidden) raf = requestAnimationFrame(loop); else raf = 0; };
-    const start = () => { if (!raf && motion && visible) raf = requestAnimationFrame(loop); };
+    const resize = () => {
+      const r = b.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = Math.max(1, r.width); h = Math.max(1, r.height);
+      // Setting a canvas's size clears it, even to the size it already has, so it is set only when it changes.
+      const cw = Math.round(w * dpr), ch = Math.round(h * dpr);
+      if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+      draw();
+    };
+    // Frames run while the light moves, and until the program is ready even when it stands still.
+    const wanted = () => (motion || (!ready && !failed)) && visible && !gone;
+    const loop = () => { draw(); raf = wanted() && !document.hidden ? requestAnimationFrame(loop) : 0; };
+    const start = () => { if (!raf && wanted()) raf = requestAnimationFrame(loop); };
     const ro = new ResizeObserver(resize);
     ro.observe(b);
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); });
@@ -166,8 +195,20 @@ export function WaveguideScene({ variant = "hero", className = "" }: { variant?:
     resize();
     start();
     (b as HTMLDivElement & { redraw?: () => void }).redraw = draw;
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); document.removeEventListener("visibilitychange", onVis); };
-  }, [motion, variant]);
+    return () => {
+      cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); document.removeEventListener("visibilitychange", onVis); unlisten();
+      // After a loss nothing made before it belongs to the context any more, so there is nothing to free.
+      if (!gone && !gl.isContextLost()) { gl.deleteBuffer(buf); gl.deleteVertexArray(vao); gl.deleteShader(prog.v); gl.deleteShader(prog.f); gl.deleteProgram(prog.p); }
+    };
+  }, [motion, variant, gen]);
+
+  // When its page closes, the scene hands its context back at once instead of waiting for the garbage collector: a
+  // browser keeps only so many and takes the oldest, the lattice's, when there are more. Not in development, where
+  // React mounts every component twice on purpose.
+  useEffect(() => {
+    const c = canvas.current;
+    return () => { if (!import.meta.env.DEV) c?.getContext("webgl2")?.getExtension("WEBGL_lose_context")?.loseContext(); };
+  }, []);
 
   // In the study, the angle follows the scroll; a still frame redraws when motion is off.
   useEffect(() => {
