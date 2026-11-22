@@ -203,7 +203,11 @@ function TrustBase({ wave }: { wave: FoundingWave }) {
                   <ol className="tb-moves">{d.moves.map((m, k) => <li key={m.sha}>{link(m, k)}</li>)}</ol>
                 </details>
               )}
-              <span className="tb-ground" aria-hidden="true"><i className="tb-wave" /><i className="tb-lines" /></span>
+              <span className="tb-ground" aria-hidden="true">
+                <i className="tb-wave" /><i className="tb-lines" />
+                {/* One light for each line, so each move answers for itself: a move that does not match stays dark. */}
+                {d.moves.map((m, k) => <b key={m.sha} className={reached && states![starts[i] + k] === "match" ? "tb-ray tb-lit" : "tb-ray"} style={{ "--k": k } as CSSProperties} />)}
+              </span>
             </li>
           );
         })}

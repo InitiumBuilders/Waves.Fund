@@ -1,4 +1,4 @@
-import { begin, finish, settled, type Program } from "./programs";
+import { begin, finish, LostContext, settled, type Program } from "./programs";
 
 /* The energy layer: liquid light that moves through the site the way a waveguide moves a wave.
 
@@ -222,9 +222,12 @@ export function pathOf(pts: number[][]) {
   return { cum, len: cum[cum.length - 1] };
 }
 
+/** The liquid layer's context. The field asks for it first, so both canvases have theirs before either is used. */
+export const energyContext = (canvas: HTMLCanvasElement) => canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false });
+
 export class Energy {
   private gl: WebGL2RenderingContext;
-  private prog: Program; private vao: WebGLVertexArrayObject;
+  private prog: Program; private vao: WebGLVertexArrayObject; private buf: WebGLBuffer;
   vessels: Vessel[] = [];
   guides: Guide[] = [];
   private drops: Drop[] = [];
@@ -244,15 +247,16 @@ export class Energy {
   onArrive: (v: Vessel) => void = () => {};
 
   constructor(private canvas: HTMLCanvasElement) {
-    const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false });
+    const gl = energyContext(canvas);
     if (!gl) throw Error("webgl2 unavailable");
+    if (gl.isContextLost()) throw new LostContext();
     this.gl = gl;
     // aPos is given place 0 before linking, so its place is known without asking (programs.ts).
     this.prog = begin(gl, VS, FS, ["aPos"]);
     this.vao = gl.createVertexArray()!;
-    const buf = gl.createBuffer()!;
+    this.buf = gl.createBuffer()!;
     gl.bindVertexArray(this.vao);
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
@@ -263,6 +267,17 @@ export class Energy {
 
   /** The program has finished compiling. Never waits. */
   settled() { return settled(this.gl, [this.prog]); }
+  /** The browser has taken this layer's context away. */
+  lost() { return this.gl.isContextLost(); }
+  /** Clears what this layer last drew, while it still has its context (the field's own canvas lost its context). */
+  clear() { const gl = this.gl; if (gl.isContextLost()) return; gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); }
+  /** Frees what this layer made, while its context is there to free it on (a new layer is about to be made on it). */
+  dispose() {
+    const gl = this.gl;
+    if (gl.isContextLost()) return;
+    gl.deleteBuffer(this.buf); gl.deleteVertexArray(this.vao);
+    gl.deleteShader(this.prog.v); gl.deleteShader(this.prog.f); gl.deleteProgram(this.prog.p);
+  }
   /** Call once settled. The reason it failed, or "". */
   arrive() { return finish(this.gl, [this.prog]); }
 

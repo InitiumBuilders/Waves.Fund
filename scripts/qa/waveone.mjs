@@ -41,7 +41,10 @@ const press = async (p) => { await p.locator(".tb-check button").scrollIntoViewI
   ok(await card.count() === 1, "/waves lists Wave One once", await card.count());
   ok((await card.locator("a[href='/waves/waves-fund']").count()) === 1, "its card opens /waves/waves-fund");
   ok((await card.locator(".eyebrow").innerText()).trim() === "WAVE 001", "its card is marked WAVE 001");
-  ok(/Project submissions are open/.test(await p.locator(".sea-hero .intro-description").innerText()), "the first screen still says submissions are open");
+  // The card stands before the project feed has answered (a first request after a deploy can take seconds), so wait
+  // for the line the page settles on.
+  await p.waitForFunction(() => /Project submissions are open/.test(document.querySelector(".sea-hero .intro-description")?.textContent || ""), null, { timeout: 20000 }).catch(() => {});
+  ok(/Project submissions are open/.test(await p.locator(".sea-hero .intro-description").innerText()), "the first screen still says submissions are open", await p.locator(".sea-hero .intro-description").innerText());
   ok((await p.locator(".empty-state").count()) === 0, "the empty state is gone");
   ok(!errs.length, "/waves has no console errors", errs.join(" | "));
   await ctx.close();
@@ -78,6 +81,7 @@ for (const vp of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
   await p.waitForFunction((n) => document.querySelectorAll(".tb-day.tb-ok").length === n, days.length, { timeout: 15000 }).catch(() => {});
   ok((await p.locator(".tb-day.tb-ok").count()) === days.length, "all match: every day is lit", await p.locator(".tb-day.tb-ok").count());
   ok((await p.locator(".tb-state").allInnerTexts()).every((t) => t.trim() === "Matches."), "all match: every day says Matches.");
+  ok((await p.locator(".tb-ray.tb-lit").count()) === moves.length, "all match: one light for each move", await p.locator(".tb-ray.tb-lit").count());
   ok(asked.length === 1, "all match: GitHub is asked once", asked.length);
   await ctx.close();
 
@@ -87,6 +91,8 @@ for (const vp of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
   await p.waitForSelector(".tb-move-state", { timeout: 15000 }).catch(() => {});
   ok((await p.locator(".tb-move-state").allInnerTexts()).join("|") === "Its words differ from the commit.", "one edited: the move says its words differ");
   ok((await p.locator(".tb-day:not(.tb-ok) .tb-state").allInnerTexts()).join("|") === "1 changed.", "one edited: its day says 1 changed.");
+  await p.waitForFunction((n) => document.querySelectorAll(".tb-day.tb-reached").length === n, days.length, { timeout: 15000 }).catch(() => {});
+  ok((await p.locator(".tb-ray.tb-lit").count()) === moves.length - 1, "one edited: every other move has its light, that one has none", await p.locator(".tb-ray.tb-lit").count());
   ok((await p.locator(".tb-day:not(.tb-ok) details[open]").count()) + (await p.locator(".tb-day:not(.tb-ok) .tb-one").count()) === 1, "one edited: its day stands open");
   await ctx.close();
 

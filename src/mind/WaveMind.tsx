@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useStateStore } from "../state";
 import { Field as Engine, type Anchor, type Clear, type Topology } from "./field";
+import { keeper, LostContext } from "./programs";
 import { pathOf, rounded, type Guide, type Vessel } from "./energy";
 import { hueFor, HUES, type FieldMode } from "./modes";
 import "./mind.css";
@@ -16,12 +17,17 @@ export function mindWave(target: Element | { x: number; y: number }, strength = 
     engine.wave(r.left + r.width / 2, r.top + r.height / 2, strength);
   } else engine.wave(target.x, target.y, strength);
 }
+// What pages have told the field, and the vessels' fill, kept so that a field made again after a lost context starts
+// where the last one stood.
+let grown: number | null = null, moving: [number, number, number] | null = null;
+let carried: { vessels: Vessel[]; guides: Guide[] } | null = null;
 /** The travelling mark moves through the field as a small mass. */
-export function mindMove(x: number, y: number, strength: number) { engine?.move(x, y, strength); }
+export function mindMove(x: number, y: number, strength: number) { moving = [x, y, strength]; engine?.move(x, y, strength); }
 /** Grows the Seed (0 to 1), used by the application form. */
 export function mindGrow(value: number) {
+  grown = Math.max(0.04, Math.min(1, value));
   if (!engine) return;
-  engine.grow = Math.max(0.04, Math.min(1, value));
+  engine.grow = grown;
   engine.invalidate();
 }
 /** A network organises itself in the open space around an element. */
@@ -254,20 +260,64 @@ export function WaveMind() {
   const { motion } = useStateStore();
   const { pathname } = useLocation();
   const [failed, setFailed] = useState(false);
+  // Raised when lost WebGL contexts come back, so the field is built again on them.
+  const [gen, setGen] = useState(0);
+  const keep = useRef<ReturnType<typeof keeper> | null>(null);
+  keep.current ??= keeper();
   const visited = useRef(new Set<string>());
 
   useEffect(() => {
-    if (!canvas.current || !layer.current) return;
+    const cv = canvas.current, lv = layer.current;
+    if (!cv || !lv) return;
+    // A browser may take a page's WebGL contexts away (an iPhone does it to a page left in the background) and give
+    // them back later. Asking for them back (preventDefault) is what makes the browser return them, and keeper()
+    // says when to stop asking. Everything the field made is gone by then, so the field is made again when they
+    // come back. The two canvases lose theirs together and get one answer between them. Listening starts before the
+    // field is made, so a context lost while it is being made is heard too.
+    const both = [cv, lv];
+    keep.current!.built();
+    const still = () => { setFailed(true); document.documentElement.dataset.mind = "off"; };
+    // While a context is away the field draws nothing. If none has come back after five seconds of the page being in
+    // view, the still picture takes the field's place for the rest of the visit.
+    let asking: boolean | null = null, away = false, wait = 0, due = 0;
+    const arm = () => { clearTimeout(wait); if (away && !document.hidden) wait = window.setTimeout(still, 5000); };
+    const lost = (e: Event) => {
+      asking ??= keep.current!.ask();
+      engine?.halt();
+      if (!asking) { still(); return; }
+      e.preventDefault();
+      if (!away) { away = true; arm(); }
+    };
+    // The canvases may come back one after the other: one new field, on the next frame. If one is still away then,
+    // making the field waits for it again. A loss after a return is a new loss, so it asks the keeper again.
+    const back = () => {
+      asking = null; away = false; clearTimeout(wait);
+      cancelAnimationFrame(due); due = requestAnimationFrame(() => setGen((g) => g + 1));
+    };
+    for (const c of both) { c.addEventListener("webglcontextlost", lost); c.addEventListener("webglcontextrestored", back); }
+    document.addEventListener("visibilitychange", arm);
+    const quiet = () => {
+      for (const c of both) { c.removeEventListener("webglcontextlost", lost); c.removeEventListener("webglcontextrestored", back); }
+      document.removeEventListener("visibilitychange", arm);
+      clearTimeout(wait); cancelAnimationFrame(due);
+    };
     try {
-      engine = new Engine(canvas.current, layer.current, matchMedia("(max-width: 760px), (pointer: coarse)").matches);
+      engine = new Engine(cv, lv, matchMedia("(max-width: 760px), (pointer: coarse)").matches);
+      // Built: counted from now, since making the field can itself take seconds where shaders compile slowly.
+      keep.current!.built();
+      if (grown !== null) engine.grow = grown;
+      if (moving) engine.move(...moving);
+      if (carried) { engine.energy.setLayout(carried.vessels, carried.guides); carried = null; }
       document.documentElement.dataset.mind = "on";
       // The programs finish compiling a moment after the field is made. If one fails then, the still picture takes over.
-      engine.onFail = () => { setFailed(true); document.documentElement.dataset.mind = "off"; };
+      engine.onFail = still;
       if (import.meta.env.DEV) Object.assign(window, { __mind: engine, __measure: measure, __engine: () => engine });
     } catch (error) {
+      // Taken away while the field was being made: the field is made again when the context comes back (above).
+      if (error instanceof LostContext) { away = true; arm(); return quiet; }
       if (import.meta.env.DEV) console.error("Wave Mind unavailable:", error);
-      setFailed(true);
-      document.documentElement.dataset.mind = "off";
+      quiet();
+      still();
       return;
     }
     // Energy arrived in a card: its rim answers with light.
@@ -312,13 +362,16 @@ export function WaveMind() {
       removeEventListener("scroll", onScroll);
       removeEventListener("pointerover", onOver);
       document.removeEventListener("visibilitychange", onVisible);
+      quiet();
       lit.forEach(t => clearTimeout(t));
+      // The vessels keep their fill for a field made again on a returned context, so their cards do not fill twice.
+      if (engine) carried = { vessels: engine.energy.vessels, guides: engine.energy.guides };
       engine?.destroy();
       engine = null;
     };
-  }, []);
+  }, [gen]);
 
-  useEffect(() => { engine?.setMotion(motion); }, [motion]);
+  useEffect(() => { engine?.setMotion(motion); }, [motion, gen]);
 
   // Trust grows as the visitor moves through the site. Grow keeps its whale film in front, so the field steps back there.
   useEffect(() => {
@@ -329,7 +382,7 @@ export function WaveMind() {
       engine.opacity = pathname.toLowerCase().startsWith("/grow") ? 0.34 : 1;
       engine.invalidate();
     }
-  }, [pathname]);
+  }, [pathname, gen]);
 
   // Measure what the dots frame, the vessels and their guides, only when the layout changes. Then let energy move.
   useEffect(() => {
@@ -369,7 +422,7 @@ export function WaveMind() {
       engine.invalidate();
     }, 320);
     return () => { cancelAnimationFrame(frame); ro.disconnect(); mo.disconnect(); io.disconnect(); removeEventListener("resize", schedule); clearTimeout(late); clearInterval(watch); clearInterval(tick); };
-  }, [pathname]);
+  }, [pathname, gen]);
 
   // Find this page's anchors and follow the one most in view. Reaching one lets a network organise itself there.
   useEffect(() => {
@@ -442,7 +495,7 @@ export function WaveMind() {
     if (main) mo.observe(main, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-mind"] });
     // Networks form only where a page asks for one (an anchor) and at the closing bond. Open space stays open.
     return () => { io.disconnect(); ro.disconnect(); mo.disconnect(); if (t) clearTimeout(t); if (pending) clearTimeout(pending); if (later) clearTimeout(later); };
-  }, [pathname]);
+  }, [pathname, gen]);
 
   return failed
     ? <div className="mind-fallback" aria-hidden="true"><img src="/media/neural-still.webp" alt="" /></div>

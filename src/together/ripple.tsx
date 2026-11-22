@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { HTMLAttributes, MutableRefObject, PointerEvent, ReactNode } from "react";
 import { useStateStore } from "../state";
 import { BEAT, clock as shared } from "../cadence";
+import { begin, finish, keeper, settled } from "../mind/programs";
 import "./ripple.css";
 
 /* Ripples of light, summed the way real waves sum. Each source sends out circular waves; where two crests
@@ -134,32 +135,56 @@ export function Ripple({ model, className = "", handle, tappable = false, maxDpr
   const taps = useRef<Tap[]>([]);
   const clock = useRef<() => number>(() => 0);
   const { motion } = useStateStore();
+  // Raised when a lost WebGL context comes back, so the scene is built again on it.
+  const [gen, setGen] = useState(0);
+  const keep = useRef<ReturnType<typeof keeper> | null>(null);
+  keep.current ??= keeper();
 
   useEffect(() => {
     const c = canvas.current, b = box.current;
     if (!c || !b) return;
     const gl = c.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false });
     if (!gl) { b.dataset.still = "on"; return; }
-    const make = (type: number, src: string) => { const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s); return s; };
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, make(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, make(gl.FRAGMENT_SHADER, FS));
-    gl.bindAttribLocation(prog, 0, "aPos");
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { if (import.meta.env.DEV) console.error(gl.getProgramInfoLog(prog)); b.dataset.still = "on"; return; }
+    // A lost context can come back (see sea.tsx); the scene is then built again from the start.
+    let gone = gl.isContextLost(), raf = 0;
+    keep.current!.built();
+    const lost = (e: Event) => { if (keep.current!.ask()) e.preventDefault(); gone = true; cancelAnimationFrame(raf); raf = 0; b.dataset.still = "on"; delete b.dataset.ready; };
+    const back = () => { delete b.dataset.still; setGen((g) => g + 1); };
+    c.addEventListener("webglcontextlost", lost);
+    c.addEventListener("webglcontextrestored", back);
+    const unlisten = () => { c.removeEventListener("webglcontextlost", lost); c.removeEventListener("webglcontextrestored", back); };
+    if (gone) { b.dataset.still = "on"; return unlisten; }
+    // The program compiles without holding the page still (mind/programs.ts). Nothing is drawn until it is ready.
+    const prog = begin(gl, VS, FS, ["aPos"]);
+    let ready = false, failed = false;
+    const arrive = () => {
+      if (ready) return true;
+      if (failed || gl.isContextLost() || !settled(gl, [prog])) return false;
+      const why = finish(gl, [prog]);
+      if (why) { failed = true; b.dataset.still = "on"; if (import.meta.env.DEV) console.error(why); return false; }
+      ready = true; b.dataset.ready = "on";
+      // Counted from now as well: where shaders compile slowly, getting ready takes seconds of its own.
+      keep.current!.built();
+      return true;
+    };
     const vao = gl.createVertexArray()!;
     gl.bindVertexArray(vao);
     const buf = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    const U = (n: string) => gl.getUniformLocation(prog, n);
-    const loc = { res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), wave: U("uWave"), k: U("uK"), w: U("uW"), gain: U("uGain"), ridge: U("uRidge"), dots: U("uDots"), ground: U("uGround"), count: U("uCount"), a: U("uA"), b: U("uB"), sel: U("uSel"), ring: U("uRing"), front: U("uFront") };
+    // Asked for only once the program is ready (asking sooner would wait for it), then kept.
+    const U = prog.u;
+    const loc0 = () => ({ res: U("uRes"), dpr: U("uDpr"), time: U("uTime"), wave: U("uWave"), k: U("uK"), w: U("uW"), gain: U("uGain"), ridge: U("uRidge"), dots: U("uDots"), ground: U("uGround"), count: U("uCount"), a: U("uA"), b: U("uB"), sel: U("uSel"), ring: U("uRing"), front: U("uFront") });
+    let at: ReturnType<typeof loc0> | null = null;
     const A = new Float32Array(MAX * 4), B = new Float32Array(MAX * 4);
-    let w = 1, h = 1, dpr = 1, raf = 0, visible = true;
+    let w = 1, h = 1, dpr = 1, visible = true;
     const t0 = performance.now();
     clock.current = () => (motion ? (performance.now() - t0) / 1000 : still);
 
     const draw = () => {
+      if (gone || !arrive()) return;
+      const loc = (at ??= loc0());
       const t = clock.current();
       const f = model.current(t, w, h);
       const list = [...f.sources];
@@ -171,7 +196,7 @@ export function Ripple({ model, className = "", handle, tappable = false, maxDpr
       gl.viewport(0, 0, c.width, c.height);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-      gl.useProgram(prog);
+      gl.useProgram(prog.p);
       const k = (Math.PI * 2) / Math.max(8, f.lambda);
       gl.uniform2f(loc.res, w, h); gl.uniform1f(loc.dpr, dpr); gl.uniform1f(loc.time, t);
       // Crests pass once a beat on the clock the whole page shares, so every scene ripples in step.
@@ -189,26 +214,37 @@ export function Ripple({ model, className = "", handle, tappable = false, maxDpr
       const r = b.getBoundingClientRect();
       w = Math.max(1, r.width); h = Math.max(1, r.height);
       dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
-      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+      // Setting a canvas's size clears it, even to the size it already has, so it is set only when it changes.
+      const cw = Math.round(w * dpr), ch = Math.round(h * dpr);
+      if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
       draw();
     };
-    const loop = () => { draw(); raf = motion && visible && !document.hidden ? requestAnimationFrame(loop) : 0; };
-    const start = () => { if (!raf && motion && visible) raf = requestAnimationFrame(loop); };
+    // Frames run while the water moves, and until the program is ready even when it stands still.
+    const wanted = () => (motion || (!ready && !failed)) && visible && !gone;
+    const loop = () => { draw(); raf = wanted() && !document.hidden ? requestAnimationFrame(loop) : 0; };
+    const start = () => { if (!raf && wanted()) raf = requestAnimationFrame(loop); };
     const ro = new ResizeObserver(resize); ro.observe(b);
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); }); io.observe(b);
     const onVis = () => { if (!document.hidden) start(); };
     document.addEventListener("visibilitychange", onVis);
-    const lost = (e: Event) => { e.preventDefault(); cancelAnimationFrame(raf); raf = 0; b.dataset.still = "on"; };
-    c.addEventListener("webglcontextlost", lost);
     resize(); start();
     if (handle) handle.current = { redraw: () => { if (!raf) draw(); else start(); } };
     return () => {
       cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
-      document.removeEventListener("visibilitychange", onVis); c.removeEventListener("webglcontextlost", lost);
-      gl.deleteBuffer(buf); gl.deleteVertexArray(vao); gl.deleteProgram(prog);
+      document.removeEventListener("visibilitychange", onVis); unlisten();
+      // After a loss nothing made before it belongs to the context any more, so there is nothing to free.
+      if (!gone && !gl.isContextLost()) { gl.deleteBuffer(buf); gl.deleteVertexArray(vao); gl.deleteShader(prog.v); gl.deleteShader(prog.f); gl.deleteProgram(prog.p); }
       if (handle) handle.current = null;
     };
-  }, [motion, model, handle, maxDpr, still]);
+  }, [motion, model, handle, maxDpr, still, gen]);
+
+  // When its page closes, a scene hands its context back at once instead of waiting for the garbage collector. A
+  // browser keeps only so many (16 in WebKit) and takes the oldest, the lattice's, when there are more. Not in
+  // development, where React mounts every component twice on purpose.
+  useEffect(() => {
+    const c = canvas.current;
+    return () => { if (!import.meta.env.DEV) c?.getContext("webgl2")?.getExtension("WEBGL_lose_context")?.loseContext(); };
+  }, []);
 
   const tap = (e: PointerEvent<HTMLDivElement>) => {
     if (!tappable || !motion) return;

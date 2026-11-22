@@ -1,6 +1,6 @@
 import { FIELD_MODES, type FieldMode } from "./modes";
-import { Energy } from "./energy";
-import { begin, finish, settled, type Program } from "./programs";
+import { Energy, energyContext } from "./energy";
+import { begin, finish, LostContext, settled, type Program } from "./programs";
 
 /** An anchor rectangle in document pixels, where a mode of the field takes place. */
 export type Anchor = { name: FieldMode; left: number; top: number; width: number; height: number };
@@ -402,6 +402,8 @@ export class Field {
   // While the programs compile nothing is drawn and nothing waits for them (programs.ts). Once they are ready the
   // field comes up over most of a second (`shown`), so it never pops in over a page already being read.
   private pending = true; private dead = false; private shown = 1;
+  // Which of the two contexts went. What was made on one belongs to it, and is gone with it even once it comes back.
+  private goneField = false; private goneEnergy = false;
   /** A program failed to compile after the field was made. */
   onFail: () => void = () => {};
   private vao: WebGLVertexArrayObject;
@@ -447,7 +449,14 @@ export class Field {
   constructor(private canvas: HTMLCanvasElement, energyCanvas: HTMLCanvasElement, private mobile: boolean) {
     const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: true, powerPreference: "high-performance" });
     if (!gl) throw Error("webgl2 unavailable");
+    // Both canvases get their contexts before either is used. A context the browser has already taken away (WebKit
+    // has handed one out that way) is not a failed compile: WaveMind hears the loss on either canvas and makes the
+    // field again when the context comes back.
+    const other = energyContext(energyCanvas);
+    if (!other) throw Error("webgl2 unavailable");
+    if (gl.isContextLost() || other.isContextLost()) throw new LostContext();
     this.gl = gl;
+    this.energy = new Energy(energyCanvas);
     this.dot = begin(gl, DOT_VS, DOT_FS);
     this.link = begin(gl, LINK_VS, LINK_FS);
     this.edge = begin(gl, EDGE_VS, EDGE_FS);
@@ -463,7 +472,6 @@ export class Field {
     gl.bindVertexArray(null);
     this.maskTex = gl.createTexture()!;
     this.maskFbo = gl.createFramebuffer()!;
-    this.energy = new Energy(energyCanvas);
     const s = mobile ? 26 : 30;
     // Back to front: a deep, dense matrix far behind, an offset middle, and the front dots that carry the field.
     this.layers = [
@@ -472,7 +480,10 @@ export class Field {
       // A dot at a mass grows to about five times its rest size, not seven: a cluster is a lean of the lattice, not a lump.
       { spacing: s, parallax: 0.3, base: mobile ? 2.2 : 2.1, grow: mobile ? 2.8 : 3.2, alpha: 0.9, disp: 1, act: 1, depth: 0, blur: 0, cols: 0, rows: 0 },
     ];
-    if (settled(gl, this.programs()) && this.energy.settled()) this.arrive(); else this.shown = 0;
+    if (settled(gl, this.programs()) && this.energy.settled()) {
+      // A context taken away while the programs are checked here reads as a failed link. It is a loss.
+      try { this.arrive(); } catch (e) { if (gl.isContextLost() || this.energy.lost()) throw new LostContext(); throw e; }
+    } else this.shown = 0;
     this.resize();
   }
 
@@ -485,6 +496,8 @@ export class Field {
   }
 
   resize() {
+    // A halted field touches its context no more: what it made belongs to the context it lost.
+    if (this.dead) return;
     const gl = this.gl;
     this.dpr = Math.min(window.devicePixelRatio || 1, this.mobile ? 2 : 1.75);
     this.w = window.innerWidth; this.h = window.innerHeight;
@@ -521,6 +534,7 @@ export class Field {
   setQuiet(list: () => Clear[]) { this.quiet = list; }
   /** Content to frame: measured on layout changes only, uploaded once, moved by the scroll in the shader. */
   setClears(list: Clear[]) {
+    if (this.dead) return;
     const gl = this.gl;
     this.clears = list;
     const data = new Float32Array(list.length * 6);
@@ -554,7 +568,25 @@ export class Field {
   invalidate() { this.wake(); }
   wake() { if (this.dead) return; this.stirred = this.now(); if (this.running) return; this.running = true; this.raf = requestAnimationFrame(this.frame); }
   stop() { cancelAnimationFrame(this.raf); this.running = false; }
-  destroy() { this.stop(); }
+  /** The context was taken away: this field can draw nothing more. A new one is made if the context comes back. */
+  halt() {
+    this.dead = true; this.stop();
+    this.goneField ||= this.gl.isContextLost(); this.goneEnergy ||= this.energy.lost();
+    // When only one canvas loses its context, the other would hold its last frame on the screen while the page moves.
+    if (!this.gl.isContextLost()) { this.gl.clearColor(0, 0, 0, 0); this.gl.clear(this.gl.COLOR_BUFFER_BIT); }
+    this.energy.clear();
+  }
+  /** Stops for good and frees what the field made, where its context is still there (a new field may follow on it). */
+  destroy() {
+    this.stop();
+    const gl = this.gl;
+    if (!this.goneField && !gl.isContextLost()) {
+      for (const x of this.programs()) { gl.deleteShader(x.v); gl.deleteShader(x.f); gl.deleteProgram(x.p); }
+      gl.deleteVertexArray(this.vao); gl.deleteVertexArray(this.maskVao); gl.deleteBuffer(this.maskBuf);
+      gl.deleteTexture(this.maskTex); gl.deleteFramebuffer(this.maskFbo);
+    }
+    if (!this.goneEnergy) this.energy.dispose();
+  }
   now() { return (performance.now() - this.t0) / 1000; }
   get networks() { return this.nets.length; }
 
@@ -725,10 +757,18 @@ export class Field {
   }
 
   private frame = () => {
+    // A context taken away is not a failed compile: stop quietly. WaveMind hears the loss and makes a new field
+    // when the context comes back. (The loss is known here a moment before its event arrives.)
+    if (this.gl.isContextLost() || this.energy.lost()) { this.running = false; return; }
     if (this.pending) {
       // Still compiling: ask again next frame and draw nothing.
       if (!settled(this.gl, this.programs()) || !this.energy.settled()) { this.raf = requestAnimationFrame(this.frame); return; }
-      try { this.arrive(); } catch { this.dead = true; this.running = false; this.onFail(); return; }
+      try { this.arrive(); } catch {
+        this.running = false;
+        // A context taken away at this moment reads as a failed link. It is a loss, and WaveMind is waiting for it.
+        if (this.gl.isContextLost() || this.energy.lost()) return;
+        this.dead = true; this.onFail(); return;
+      }
     }
     const t0 = this.now();
     // At rest the field breathes at half rate; anything that stirs it brings it back to full rate.

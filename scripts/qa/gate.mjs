@@ -44,10 +44,18 @@ if (flag("--build")) {
 // A first visit, alone, before the other rigs load the machine: a brand-new browser profile, so nothing is kept from
 // an earlier visit. The page must not be held still. (Until 2026-11-20 the field's shaders froze every page for 4 to
 // 6 s on a first visit, and no check here could see it, because a machine that has visited once keeps them.)
+// Two pages, one after the other: the home page (the lattice) and a page that opens on the sea, which a shared link
+// to a Wave lands on. Each scene compiles its own programs, so one page passing says nothing about the other.
 {
-  const first = await rig("firstvisit", "firstvisit.mjs", base, "/", "2", "phone");
-  const worst = num(first.out, /worst long task over \d+ runs: (\d+) ms/g)[0];
-  verdict("a first visit is not held still", worst !== undefined && worst < 1500, worst !== undefined ? `worst pause ${worst} ms (limit 1500)` : "did not finish, see firstvisit.log", first);
+  const pages = ["/", "/waves/waves-fund"], worst = [];
+  let s = 0;
+  for (const page of pages) {
+    const first = await rig(`firstvisit${page.replace(/\W+/g, "-")}`, "firstvisit.mjs", base, page, "2", "phone");
+    worst.push(num(first.out, /worst long task over \d+ runs: (\d+) ms/g)[0]);
+    s += +first.s;
+  }
+  const done = worst.every((x) => x !== undefined);
+  verdict("a first visit is not held still", done && Math.max(...worst) < 1500, done ? `worst pause ${worst.map((x, i) => `${x} ms on ${pages[i]}`).join(", ")} (limit 1500)` : "did not finish, see the firstvisit logs", { s });
 }
 
 // Three independent rigs at a time; each launches its own browser.
@@ -62,10 +70,21 @@ let centreN = num(centre.out, /off-centre paragraphs: (\d+)/g);
 if (!flag("--quick") && centreN.some((x) => x > 0)) { const again = await rig("centre2", "centercheck.mjs", base); centreN = num(again.out, /off-centre paragraphs: (\d+)/g); }
 verdict("centred lines stay centred", centreN.length === 2 && centreN.every((x) => x === 0), centreN.length === 2 ? `off-centre: ${centreN.join(" / ")}` : "did not finish, see centre.log", centre);
 
-const later = [rig("axe", "axe.mjs", base)];
-if (!flag("--quick")) later.push(rig("tour", "tourtest.mjs", base, "all", "d"));
-if (stylesBaseline) later.push(rig("styles", "styles.mjs", "snap", base, join(work, "styles.json")));
-const [axe, tour, styles] = await Promise.all(later);
+// The first screen at the heights real phones give, and scenes that draw again after the browser takes their WebGL
+// contexts away and gives them back (an iPhone does that to a page left in the background).
+const [screens, contexts] = await Promise.all([
+  rig("firstscreen", "firstscreen.mjs", base),
+  rig("contexts", "contexts.mjs", base),
+]);
+{ const n = num(screens.out, /first screens with a fault: (\d+)/g); verdict("first screens on a real phone", n.length === 1 && n[0] === 0, n.length ? `${n[0]} with a fault` : "did not finish, see firstscreen.log", screens); }
+{ const ok = num(contexts.out, /(\d+) passed, \d+ failed/g)[0], bad = num(contexts.out, /\d+ passed, (\d+) failed/g)[0]; verdict("scenes return after a lost context", bad === 0 && ok > 0, bad !== undefined ? `${ok} passed, ${bad} failed` : "did not finish, see contexts.log", contexts); }
+
+// Each keeps its own place in the list, so a rig that is skipped cannot hand its place to the next one.
+const [axe, tour, styles] = await Promise.all([
+  rig("axe", "axe.mjs", base),
+  flag("--quick") ? null : rig("tour", "tourtest.mjs", base, "all", "d"),
+  stylesBaseline ? rig("styles", "styles.mjs", "snap", base, join(work, "styles.json")) : null,
+]);
 { const n = num(axe.out, /violations: (\d+)/g); verdict("accessibility (WCAG 2.2 AA)", n.length === 1 && n[0] === 0, n.length ? `${n[0]} violations` : "did not finish, see axe.log", axe); }
 if (tour) { const ended = /end: /.test(tour.out), clean = /errors: none/.test(tour.out), steps = num(tour.out, /step (\d+)/g).length; verdict("the tour, every step", ended && clean, `${steps} steps, ${ended ? "reached the end" : "did not reach the end"}, ${clean ? "no errors" : "errors, see tour.log"}`, tour); }
 if (styles) {

@@ -59,18 +59,26 @@
 .tb-timed .tb-day.tb-in .tb-wave { animation: tb-settle 1.5s linear both; }
 .tb-timed .tb-day.tb-in .tb-lines { animation: tb-laid 1.5s linear both; }
 
-/* The check reaching a day: light runs along its lines, left to right, and they stay a little brighter. */
-.tb-ground::after { content: ""; position: absolute; inset: 14px auto 0 0; width: 44%; opacity: 0; transform: translate3d(-105%, 0, 0); pointer-events: none;
-  background: linear-gradient(90deg, rgba(236, 254, 255, 0), rgba(236, 254, 255, 0.98) 70%, rgba(236, 254, 255, 0));
-  -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0 1px, transparent 1px var(--gap)); mask-image: repeating-linear-gradient(to bottom, #000 0 1px, transparent 1px var(--gap)); }
-.tb-ok .tb-ground::after { animation: tb-pass 1.2s var(--ease-out) both; }
+/* The check reaching a day: each line has its own light, and they run left to right one after another, top line
+   first, so each move is seen to answer. A move that does not match gets no light. A day in which every move
+   matched stays a little brighter. */
+.tb-ray { position: absolute; left: 0; top: calc(14px + var(--k) * var(--gap)); width: 44%; height: 1px; opacity: 0; transform: translate3d(-105%, 0, 0); pointer-events: none;
+  background: linear-gradient(90deg, rgba(236, 254, 255, 0), rgba(236, 254, 255, 0.98) 70%, rgba(236, 254, 255, 0)); }
+.tb-ray.tb-lit { animation: tb-pass 1.3s cubic-bezier(0.45, 0, 0.25, 1) both; animation-delay: calc(var(--k) * 90ms); }
 .tb-ok .tb-lines { background: repeating-linear-gradient(to bottom, rgba(206, 246, 255, 0.95) 0 1px, transparent 1px var(--gap)); }
-@keyframes tb-pass { 0% { opacity: 1; transform: translate3d(-105%, 0, 0); } 100% { opacity: 0; transform: translate3d(235%, 0, 0); } }
+/* A light comes up as it enters its line, holds while it runs the length of it, and goes as it leaves. (Faded from
+   the start, it was bright for a tenth of a second and ran most of the line unseen.) */
+@keyframes tb-pass {
+  0% { opacity: 0; transform: translate3d(-105%, 0, 0); }
+  14% { opacity: 1; }
+  72% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(235%, 0, 0); }
+}
 
-html[data-motion="off"] .tb-wave, html[data-motion="off"] .tb-lines, html[data-motion="off"] .tb-ground::after, html[data-motion="off"] .tb-state { animation: none !important; }
+html[data-motion="off"] .tb-wave, html[data-motion="off"] .tb-lines, html[data-motion="off"] .tb-ray, html[data-motion="off"] .tb-state { animation: none !important; }
 html[data-motion="off"] .tb-timed .tb-day .tb-lines { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  .tb-wave, .tb-lines, .tb-ground::after, .tb-state { animation: none !important; }
+  .tb-wave, .tb-lines, .tb-ray, .tb-state { animation: none !important; }
   .tb-timed .tb-day .tb-lines { opacity: 1; }
 }
 

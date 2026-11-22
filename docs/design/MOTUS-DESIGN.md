@@ -452,9 +452,12 @@ and the ground can be checked.
   every band is at rest.
 - The settle plays between two heights of the screen. On a phone it starts 14% up, because the tab bar covers the
   foot of the screen; the first version played there, where nobody could see it.
-- Check The Record sits above the list, so the answer can be watched coming down through the days: light runs along
-  each band's lines, the day says "Matches.", a note lands with sound on, and the lattice answers from the button
-  when every move matched. A day with a changed move stays dark, opens, and says which move and how.
+- Check The Record sits above the list, so the answer can be watched coming down through the days: each move that
+  matches gets its own light along its own line, top line first (one light per move since 2026-11-21), the day says
+  "Matches.", a note lands with sound on, and the lattice answers from the button when every move matched. A move
+  that does not match keeps its line dark; its day opens and says which move and how. Each light comes up as it
+  enters, holds bright for about 0.9 s while it runs the line, and goes as it leaves. (The first version faded from
+  the start and was bright for a tenth of a second.)
 - People and words come after the moves. Each is added only with the person's yes, by a public commit.
 
 ## The field arrives (2026-11-20)
@@ -463,6 +466,32 @@ The lattice no longer holds the page while its shaders compile (`src/mind/progra
 used at once; the field starts compiling, asks nothing, and when it is ready comes up over 0.9 s through the same
 opacity the pages already set. Nothing else about the field changed. If a program fails after the page is up, the
 still picture takes its place, as it does when WebGL is missing.
+
+## The first screen on a phone (2026-11-21)
+
+With Safari's bars showing, an iPhone gives a page about 393x659 and an iPhone SE about 375x548; those are the sizes
+to judge, not 390x844. A page that opens on the sea gives the water a band of its own above the words: a two-row
+grid, the band's least height `--sea-band` (160 to 320px, 132px on a screen up to 700px tall), the words after it on
+their own night. The sea is told the words stand at its foot (`side`), so it frames its horizon in the band whatever
+the band's shape.
+
+The first button stands clear of the tab bar (94px, with a fade 72px above it) or wholly below it, never cut.
+`sea-hero.tsx` measures it once the words are laid out, by layout and not by the transform they rise in with: if the
+bar would cut it, the band gives up the difference down to 110px, or grows so the button waits below the bar. It is
+measured again only when the words change size, so Safari's bars sliding never move anything. On an SE the Waves
+button sits in the fade and Learn's and the Manifest's wait below the bar; on an iPhone every first button shows,
+Learn's and the Manifest's inside the fade.
+A wide screen that is short (a large phone on its side) grows its stage instead of cutting the words.
+
+## Scenes that come back (2026-11-21)
+
+A browser may take a page's WebGL contexts away and give them back (an iPhone does it to a page left in the
+background). Each scene asks for its context back and is built again, with the pages' state carried over (the
+Seed's size, the vessels' fill). A context handed out already lost waits for its return. A browser that takes it
+again at once is asked once more, then the scene rests on its still form: the sea's one light, the lattice's still
+picture. With nothing back after five seconds in view, the lattice shows its still picture. A sea hands its context
+back when its page closes, because a browser keeps only so many and evicts the oldest, the lattice's, past that. The
+sea and the ripple fade in when their programs are ready.
 
 ## Rules
 
@@ -476,3 +505,5 @@ still picture takes its place, as it does when WebGL is missing.
 - The field draws at half rate at rest and pauses when hidden. Reduced motion and the
   pause control show one still frame. Without WebGL2 the page shows the supplied still.
 - The canvas is decorative and hidden from assistive technology. All content is HTML.
+- Judge a phone at Safari's real sizes, 393x659 and 375x548, in Chrome and in WebKit.
+- Every WebGL scene survives a lost context (`scripts/qa/contexts.mjs`).

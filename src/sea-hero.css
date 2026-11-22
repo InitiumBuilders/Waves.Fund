@@ -1,17 +1,24 @@
 @layer base {
 /* A page that opens on the sea. Mobile first: the stage is the first screen, the words stand at its foot on
    a dark floor; on a wide screen they stand at its left and the water runs out to the right. */
-.sea-hero { --head: 72px; position: relative; }
-.sea-hero-stage { position: relative; height: calc(100svh - var(--head)); overflow: hidden; }
-.sea-hero-scene { position: absolute; inset: 0; cursor: crosshair; touch-action: pan-y; }
+.sea-hero { --head: 72px; --sea-band: clamp(160px, 27svh, 320px); --sea-under: 140px; position: relative; }
+/* The stage is at least the first screen. On a phone it is two rows: the water's own band, then the words. The band
+   takes whatever height the words leave and never less than --sea-band, so on a short screen (an iPhone with
+   Safari's bars showing is about 659px tall) the stage runs a little past the first screen instead of the words
+   covering the water. The sea's box is the band plus --sea-under, which lies beneath the night under the words.
+   --sea-fit, when sea-hero.tsx sets it, replaces the band's least height so the first button is never cut by the
+   tab bar. */
+.sea-hero-stage { position: relative; min-height: calc(100svh - var(--head)); display: grid; grid-template-rows: minmax(var(--sea-fit, var(--sea-band)), 1fr) auto; overflow: hidden; }
+.sea-hero-scene { grid-area: 1 / 1; min-height: 0; margin-bottom: calc(-1 * var(--sea-under)); cursor: crosshair; touch-action: pan-y; }
 
-/* On a phone the words sit at the foot and the night under them is measured from the words themselves: it starts
+/* On a phone the words follow the band and the night under them is measured from the words themselves: it starts
    120px above the eyebrow, however long the title runs, so the water never shows through a line. */
 .sea-hero-copy {
-  position: absolute; inset: auto 0 0 0; z-index: 1; pointer-events: none;
+  grid-area: 2 / 1; position: relative; z-index: 1; pointer-events: none;
   display: flex; flex-direction: column; justify-content: flex-end;
-  /* The tab bar's fade reaches 72px above it; the words stay clear of it. */
-  padding: 40px var(--gutter) calc(150px + env(safe-area-inset-bottom));
+  /* The tab bar is 94px tall and its fade reaches 72px above it; when the stage is the first screen, the words
+     stay clear of both. */
+  padding: 0 var(--gutter) calc(166px + env(safe-area-inset-bottom));
 }
 .sea-hero-copy > * { pointer-events: auto; margin: 0; }
 .sea-hero-stage::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 90px; z-index: 1; pointer-events: none; background: linear-gradient(rgba(1, 5, 19, 0.7), rgba(1, 5, 19, 0)); }
@@ -33,16 +40,36 @@
 html[data-motion="off"] .sea-hero-copy > * { animation: none; }
 @media (prefers-reduced-motion: reduce) { .sea-hero-copy > * { animation: none !important; } }
 
+/* A short phone screen (an iPhone SE, or any iPhone with Safari's bars showing): a slimmer band and a tighter
+   rhythm, so more of the words reach the first screen. (899.98px: a width between 899 and 900, which a desktop at
+   125% gives, still counts as a phone.) */
+@media (max-height: 700px) and (max-width: 899.98px) {
+  .sea-hero { --sea-band: clamp(132px, 25svh, 320px); }
+  .sea-hero-copy .eyebrow { margin-bottom: 14px; }
+  .sea-hero-copy h1 { font-size: 40px; }
+  .sea-hero-copy .intro-description { margin-top: 16px; }
+  .sea-hero-copy .intro-actions { margin-top: 18px; }
+}
+
 /* The page after the sea starts close under it. */
 .sea-after { padding-top: 0; }
 .sea-after > :first-child { margin-top: clamp(36px, 7vw, 80px); }
 
 @media (min-width: 800px) { .sea-hero { --head: 88px; } }
 @media (min-width: 900px) {
-  .sea-hero-stage { height: min(calc(100svh - var(--head)), 900px); }
-  .sea-hero-copy { inset: 0; justify-content: center; max-width: 760px; padding: 40px 0 60px var(--gutter); }
+  /* A wide screen: one stage, the water across all of it, the words standing at its left. */
+  .sea-hero-stage { display: block; min-height: 0; height: min(calc(100svh - var(--head)), 900px); }
+  .sea-hero-scene { position: absolute; inset: 0; margin: 0; }
+  .sea-hero-copy { position: absolute; inset: 0; justify-content: center; max-width: 760px; padding: 40px 0 60px var(--gutter); }
   .sea-hero-stage::before { display: none; }
   .sea-hero-copy::before { display: block; top: 0; bottom: 0; left: 0; right: auto; width: 780px; height: auto; background: linear-gradient(90deg, rgba(1, 5, 19, 0.92) 0%, rgba(1, 5, 19, 0.82) 58%, rgba(1, 5, 19, 0)); }
   .sea-hero-copy::after { display: none; }
+}
+/* A wide screen that is short (a large phone on its side, a short window): the stage grows with its words instead
+   of cutting them off at its top and foot. */
+@media (min-width: 900px) and (max-height: 560px) {
+  .sea-hero-stage { height: auto; min-height: calc(100svh - var(--head)); }
+  .sea-hero-copy { position: relative; inset: auto; min-height: calc(100svh - var(--head)); padding: 28px 0 36px var(--gutter); }
+  .sea-hero-copy h1 { font-size: clamp(40px, 10svh, 72px); }
 }
 }

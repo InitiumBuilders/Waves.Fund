@@ -107,7 +107,13 @@ function surface(h: HTMLElement) {
   h.dataset.sf = "1";
   build(h);
   // Checked when its size settles or changes, and again as it comes into view, when its layout is certainly real.
-  new ResizeObserver(() => { const l = h.querySelector<HTMLElement>(":scope > sf-layer"); if (l && h.dataset.sf === "1") settle(h, l); }).observe(h);
+  // The check runs on the next frame: changing the heading while its resize is being reported makes the browser
+  // raise "ResizeObserver loop completed with undelivered notifications" (WebKit reports it as a page error).
+  let due = 0;
+  new ResizeObserver(() => {
+    cancelAnimationFrame(due);
+    due = requestAnimationFrame(() => { const l = h.querySelector<HTMLElement>(":scope > sf-layer"); if (l && h.dataset.sf === "1") settle(h, l); });
+  }).observe(h);
   io!.observe(h);
   // React may change the heading's words later (a count, a name). The copy follows, already in place.
   new MutationObserver((records) => {

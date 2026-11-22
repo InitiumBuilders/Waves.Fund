@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { HTMLAttributes, MutableRefObject, PointerEvent, ReactNode } from "react";
 import { useStateStore } from "../state";
 import { BEAT, clock as shared } from "../cadence";
+import { begin, finish, keeper, settled } from "../mind/programs";
 import type { RippleHandle, RippleModel, Source } from "./ripple";
 import { sound } from "../sound";
 import "./ripple.css";
@@ -21,6 +22,7 @@ precision highp float;
 uniform mat4 uVP;
 uniform vec3 uEye;
 uniform vec2 uPlane, uRes;
+uniform int uSide;   // where the words stand over the water: 0 the left, 1 the foot
 uniform float uDpr, uTime, uWave, uK, uW, uHeight, uDot, uLines, uDepth;
 uniform int uCount, uCols, uRows, uOff;   // uOff: a dev-only switch that removes one term (see Sea)
 uniform vec4 uA[${MAX}];   // x, y, amplitude, phase
@@ -105,7 +107,7 @@ void main() {
   float depth = P.y / uDepth;
   // Fades: the horizon, the near edge, the sides, the canvas edge, and quieter water under the words
   // (the left on a wide screen, the bottom on a tall one).
-  float words = uRes.x >= uRes.y ? smoothstep(-0.9, -0.1, ndc.x) : smoothstep(-1.0, -0.2, ndc.y);
+  float words = uSide == 0 ? smoothstep(-0.9, -0.1, ndc.x) : smoothstep(-1.0, -0.2, ndc.y);
   float fade = smoothstep(1.0, 0.7, depth) * smoothstep(0.0, 0.03, depth) * smoothstep(0.5, 0.4, abs(P.x) / uPlane.x)
              * smoothstep(1.0, 0.86, max(abs(ndc.x), abs(ndc.y))) * (0.12 + 0.88 * words);
   float lit = 0.14 + 0.95 * diff * diff;
@@ -208,8 +210,10 @@ const invert = (m: M4): M4 | null => {
 
 type Tap = { x: number; y: number; born: number };
 
-export function Sea({ model, className = "", handle, tappable = false, onLight, maxDpr = 1.25, still = 6, children, onPointerDown, ...rest }: {
+export function Sea({ model, className = "", handle, tappable = false, onLight, maxDpr = 1.25, still = 6, side = "auto", children, onPointerDown, ...rest }: {
   model: MutableRefObject<RippleModel>; className?: string; handle?: MutableRefObject<RippleHandle | null>; tappable?: boolean; maxDpr?: number; still?: number;
+  /** Where the page's words stand over the water, so it runs quieter there and the camera frames the rest. */
+  side?: "auto" | "left" | "bottom";
   /** A tap that lands on one of the model's lights is a choice: its index, and where on the screen. */
   onLight?: (index: number, at: { x: number; y: number }) => void;
   children?: ReactNode;
@@ -218,31 +222,47 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
   const canvas = useRef<HTMLCanvasElement>(null);
   const taps = useRef<Tap[]>([]);
   const clockRef = useRef<() => number>(() => 0);
+  const sideRef = useRef(side);
+  sideRef.current = side;
   const unproject = useRef<(x: number, y: number) => [number, number] | null>(() => null);
   const project = useRef<(x: number, y: number) => [number, number] | null>(() => null);
   const last = useRef<Source[]>([]);
   const { motion } = useStateStore();
+  // Raised when a lost WebGL context comes back, so the scene is built again on it.
+  const [gen, setGen] = useState(0);
+  const keep = useRef<ReturnType<typeof keeper> | null>(null);
+  keep.current ??= keeper();
 
   useEffect(() => {
     const c = canvas.current, b = box.current;
     if (!c || !b) return;
     const gl = c.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false });
     if (!gl) { b.dataset.still = "on"; return; }
-    const make = (type: number, src: string) => {
-      const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s);
-      if (import.meta.env.DEV && !gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
-      return s;
+    // A browser may take a page's context away (an iPhone does it to a page left in the background) and give it
+    // back later. Asking for it back (preventDefault) is what makes the browser return it, and keeper() says when
+    // to stop asking. Everything made with the old one is gone by then, so the scene is built again from the start.
+    let gone = gl.isContextLost(), raf = 0;
+    keep.current!.built();
+    const lost = (e: Event) => { if (keep.current!.ask()) e.preventDefault(); gone = true; cancelAnimationFrame(raf); raf = 0; b.dataset.still = "on"; delete b.dataset.ready; };
+    const back = () => { delete b.dataset.still; setGen((g) => g + 1); };
+    c.addEventListener("webglcontextlost", lost);
+    c.addEventListener("webglcontextrestored", back);
+    const unlisten = () => { c.removeEventListener("webglcontextlost", lost); c.removeEventListener("webglcontextrestored", back); };
+    if (gone) { b.dataset.still = "on"; return unlisten; }
+    // The programs compile without holding the page still (mind/programs.ts). Nothing is drawn until they are ready.
+    const sea = begin(gl, VS, FS), light = begin(gl, LIGHT_VS, LIGHT_FS), ground = begin(gl, GROUND_VS, GROUND_FS, ["aPos"]);
+    const all = [sea, light, ground];
+    let ready = false, failed = false;
+    const arrive = () => {
+      if (ready) return true;
+      if (failed || gl.isContextLost() || !settled(gl, all)) return false;
+      const why = finish(gl, all);
+      if (why) { failed = true; b.dataset.still = "on"; if (import.meta.env.DEV) console.error(why); return false; }
+      ready = true; b.dataset.ready = "on";
+      // Counted from now as well: where shaders compile slowly, getting ready takes seconds of its own.
+      keep.current!.built();
+      return true;
     };
-    const link = (vs: string, fs: string, attr?: string) => {
-      const p = gl.createProgram()!;
-      gl.attachShader(p, make(gl.VERTEX_SHADER, vs)); gl.attachShader(p, make(gl.FRAGMENT_SHADER, fs));
-      if (attr) gl.bindAttribLocation(p, 0, attr);
-      gl.linkProgram(p);
-      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { if (import.meta.env.DEV) console.error(gl.getProgramInfoLog(p)); return null; }
-      return p;
-    };
-    const sea = link(VS, FS), light = link(LIGHT_VS, LIGHT_FS), ground = link(GROUND_VS, GROUND_FS, "aPos");
-    if (!sea || !light || !ground) { b.dataset.still = "on"; return; }
     const vao = gl.createVertexArray()!;
     gl.bindVertexArray(vao);
     const buf = gl.createBuffer()!;
@@ -250,21 +270,23 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const emptyVao = gl.createVertexArray()!;
-    const U = (p: WebGLProgram, n: string) => gl.getUniformLocation(p, n);
     const A = new Float32Array(MAX * 4), B = new Float32Array(MAX * 4);
     // A box narrower than 1.6:1 gets water wider than itself, so it reads as a sea and not a strip.
-    let w = 1, h = 1, pw = 1, pd = 1, dpr = 1, raf = 0, visible = true, cols = 120, rows = 80, vp: M4 = perspective(1, 1, 1, 10), inv: M4 | null = null, eye = [0, 0, 0];
+    let w = 1, h = 1, pw = 1, pd = 1, dpr = 1, visible = true, cols = 120, rows = 80, vp: M4 = perspective(1, 1, 1, 10), inv: M4 | null = null, eye = [0, 0, 0];
     const t0 = performance.now();
     clockRef.current = () => (motion ? (performance.now() - t0) / 1000 : still);
     // Dev only: ?seaoff=N removes one term, to find where a colour comes from. 1 halo, 2 core, 3 reflection,
     // 4 ridge, 5 trough, 6 lines, 7 points, 8 ground, 9 specular.
     const off = import.meta.env.DEV ? Number(new URLSearchParams(location.search).get("seaoff") || 0) : 0;
+    // Words at the foot (a phone) or at the left (a wide page). Left to itself, the box's shape decides.
+    const foot = () => (sideRef.current === "auto" ? w < h : sideRef.current === "bottom");
     const camera = () => {
       // Just above the near edge, looking out toward the far edge, which sits a little below the top.
       pw = Math.max(w, Math.min(h * 1.6, w * 1.6)); pd = h * 1.8;
       eye = [0, -h * 0.25, h * 0.42];
-      // A tall box looks further down, so its horizon sits high and most of the box is water.
-      const view = lookAt(eye, [0, h * 0.7, w < h ? -h * 0.17 : 0], [0, 0, 1]);
+      // A tall box looks further down, so its horizon sits high and most of the box is water. So does any box
+      // whose words stand at its foot, whatever its shape (a short phone gives the sea a wide, low band).
+      const view = lookAt(eye, [0, h * 0.7, foot() ? -h * 0.17 : 0], [0, 0, 1]);
       const proj = perspective(0.95, w / h, h * 0.05, h * 4);
       vp = mul(proj, view); inv = invert(vp);
       cols = Math.round(Math.min(200, Math.max(90, pw / 8.5)));
@@ -287,6 +309,7 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
       return [(o[0] / o[3] + 1) * 0.5 * w, (1 - o[1] / o[3]) * 0.5 * h];
     };
     const draw = () => {
+      if (gone || !arrive()) return;
       const t = clockRef.current();
       const f = model.current(t, pw, h);
       const list = [...f.sources];
@@ -302,59 +325,73 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       // The pool of dark ground the sea lies in.
-      gl.useProgram(ground); gl.bindVertexArray(vao);
-      gl.uniform2f(U(ground, "uRes"), w, h); gl.uniform1f(U(ground, "uDpr"), dpr); gl.uniform1f(U(ground, "uGround"), off === 8 ? 0 : f.ground ?? 0.94);
+      gl.useProgram(ground.p); gl.bindVertexArray(vao);
+      gl.uniform2f(ground.u("uRes"), w, h); gl.uniform1f(ground.u("uDpr"), dpr); gl.uniform1f(ground.u("uGround"), off === 8 ? 0 : f.ground ?? 0.94);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       // The surface: lines, then dots.
-      gl.useProgram(sea); gl.bindVertexArray(emptyVao);
-      gl.uniformMatrix4fv(U(sea, "uVP"), false, vp); gl.uniform3f(U(sea, "uEye"), eye[0], eye[1], eye[2]);
-      gl.uniform2f(U(sea, "uPlane"), pw, h); gl.uniform2f(U(sea, "uRes"), w, h); gl.uniform1f(U(sea, "uDpr"), dpr);
-      gl.uniform1f(U(sea, "uTime"), t); gl.uniform1f(U(sea, "uWave"), wave);
-      gl.uniform1f(U(sea, "uK"), k); gl.uniform1f(U(sea, "uW"), k * f.speed);
-      gl.uniform1f(U(sea, "uHeight"), f.lambda * 0.2); gl.uniform1f(U(sea, "uDot"), 2.4); gl.uniform1f(U(sea, "uDepth"), pd);
-      gl.uniform1i(U(sea, "uCount"), n); gl.uniform1i(U(sea, "uCols"), cols); gl.uniform1i(U(sea, "uRows"), rows); gl.uniform1i(U(sea, "uOff"), off);
-      gl.uniform4fv(U(sea, "uA"), A); gl.uniform4fv(U(sea, "uB"), B);
-      gl.uniform4f(U(sea, "uFront"), ...(f.front || [0, 0, 0, 0] as [number, number, number, number]));
+      gl.useProgram(sea.p); gl.bindVertexArray(emptyVao);
+      gl.uniformMatrix4fv(sea.u("uVP"), false, vp); gl.uniform3f(sea.u("uEye"), eye[0], eye[1], eye[2]);
+      gl.uniform2f(sea.u("uPlane"), pw, h); gl.uniform2f(sea.u("uRes"), w, h); gl.uniform1f(sea.u("uDpr"), dpr);
+      gl.uniform1i(sea.u("uSide"), foot() ? 1 : 0);
+      gl.uniform1f(sea.u("uTime"), t); gl.uniform1f(sea.u("uWave"), wave);
+      gl.uniform1f(sea.u("uK"), k); gl.uniform1f(sea.u("uW"), k * f.speed);
+      gl.uniform1f(sea.u("uHeight"), f.lambda * 0.2); gl.uniform1f(sea.u("uDot"), 2.4); gl.uniform1f(sea.u("uDepth"), pd);
+      gl.uniform1i(sea.u("uCount"), n); gl.uniform1i(sea.u("uCols"), cols); gl.uniform1i(sea.u("uRows"), rows); gl.uniform1i(sea.u("uOff"), off);
+      gl.uniform4fv(sea.u("uA"), A); gl.uniform4fv(sea.u("uB"), B);
+      gl.uniform4f(sea.u("uFront"), ...(f.front || [0, 0, 0, 0] as [number, number, number, number]));
       // The rising wave keeps the shared clock, so it comes on the beat; a still frame shows it mid-rise.
       const roll = f.roll ? ((motion ? shared() : t) % f.roll[0]) / f.roll[0] : 0;
-      gl.uniform2f(U(sea, "uRoll"), roll, f.roll ? f.roll[1] : 0);
-      if (off !== 6) { gl.uniform1f(U(sea, "uLines"), 1); gl.drawArrays(gl.LINES, 0, cols * rows * 4); }
-      if (off !== 7) { gl.uniform1f(U(sea, "uLines"), 0); gl.drawArrays(gl.POINTS, 0, cols * rows); }
+      gl.uniform2f(sea.u("uRoll"), roll, f.roll ? f.roll[1] : 0);
+      if (off !== 6) { gl.uniform1f(sea.u("uLines"), 1); gl.drawArrays(gl.LINES, 0, cols * rows * 4); }
+      if (off !== 7) { gl.uniform1f(sea.u("uLines"), 0); gl.drawArrays(gl.POINTS, 0, cols * rows); }
       // The lights on the water: halo, then core.
       if (n) {
-        gl.useProgram(light);
-        gl.uniformMatrix4fv(U(light, "uVP"), false, vp); gl.uniform2f(U(light, "uPlane"), pw, h); gl.uniform1f(U(light, "uDpr"), dpr);
-        gl.uniform4fv(U(light, "uA"), A); gl.uniform4fv(U(light, "uB"), B);
-        if (off !== 1) { gl.uniform1f(U(light, "uHalo"), 1); gl.drawArrays(gl.POINTS, 0, n); }
-        if (off !== 2) { gl.uniform1f(U(light, "uHalo"), 0); gl.drawArrays(gl.POINTS, 0, n); }
+        gl.useProgram(light.p);
+        gl.uniformMatrix4fv(light.u("uVP"), false, vp); gl.uniform2f(light.u("uPlane"), pw, h); gl.uniform1f(light.u("uDpr"), dpr);
+        gl.uniform4fv(light.u("uA"), A); gl.uniform4fv(light.u("uB"), B);
+        if (off !== 1) { gl.uniform1f(light.u("uHalo"), 1); gl.drawArrays(gl.POINTS, 0, n); }
+        if (off !== 2) { gl.uniform1f(light.u("uHalo"), 0); gl.drawArrays(gl.POINTS, 0, n); }
       }
     };
     const resize = () => {
       const r = b.getBoundingClientRect();
       w = Math.max(1, r.width); h = Math.max(1, r.height);
       dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
-      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+      // Setting a canvas's size clears it, even to the size it already has, so it is set only when it changes.
+      const cw = Math.round(w * dpr), ch = Math.round(h * dpr);
+      if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
       camera(); draw();
     };
-    const loop = () => { draw(); raf = motion && visible && !document.hidden ? requestAnimationFrame(loop) : 0; };
-    const start = () => { if (!raf && motion && visible) raf = requestAnimationFrame(loop); };
+    // Frames run while the water moves, and until the programs are ready even when it stands still.
+    const wanted = () => (motion || (!ready && !failed)) && visible && !gone;
+    const loop = () => { draw(); raf = wanted() && !document.hidden ? requestAnimationFrame(loop) : 0; };
+    const start = () => { if (!raf && wanted()) raf = requestAnimationFrame(loop); };
     const ro = new ResizeObserver(resize); ro.observe(b);
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); }); io.observe(b);
     const onVis = () => { if (!document.hidden) start(); };
     document.addEventListener("visibilitychange", onVis);
-    const lost = (e: Event) => { e.preventDefault(); cancelAnimationFrame(raf); raf = 0; b.dataset.still = "on"; };
-    c.addEventListener("webglcontextlost", lost);
     resize(); start();
     if (handle) handle.current = { redraw: () => { if (!raf) draw(); else start(); } };
     if (import.meta.env.DEV) (window as Window & { __sea?: unknown }).__sea = { count: () => last.current.length, at: (i: number) => { const s = last.current[i]; return s ? project.current(s.x, s.y) : null; } };
     return () => {
       cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
-      document.removeEventListener("visibilitychange", onVis); c.removeEventListener("webglcontextlost", lost);
-      gl.deleteBuffer(buf); gl.deleteVertexArray(vao); gl.deleteVertexArray(emptyVao);
-      gl.deleteProgram(sea); gl.deleteProgram(light); gl.deleteProgram(ground);
+      document.removeEventListener("visibilitychange", onVis); unlisten();
+      // After a loss nothing made before it belongs to the context any more, so there is nothing to free.
+      if (!gone && !gl.isContextLost()) {
+        gl.deleteBuffer(buf); gl.deleteVertexArray(vao); gl.deleteVertexArray(emptyVao);
+        for (const x of all) { gl.deleteShader(x.v); gl.deleteShader(x.f); gl.deleteProgram(x.p); }
+      }
       if (handle) handle.current = null;
     };
-  }, [motion, model, handle, maxDpr, still]);
+  }, [motion, model, handle, maxDpr, still, gen]);
+
+  // When its page closes, a scene hands its context back at once instead of waiting for the garbage collector. A
+  // browser keeps only so many (16 in WebKit) and takes the oldest, the lattice's, when there are more. Not in
+  // development, where React mounts every component twice on purpose.
+  useEffect(() => {
+    const c = canvas.current;
+    return () => { if (!import.meta.env.DEV) c?.getContext("webgl2")?.getExtension("WEBGL_lose_context")?.loseContext(); };
+  }, []);
 
   const tap = (e: PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();

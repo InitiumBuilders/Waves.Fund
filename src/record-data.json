@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "342ae097ba362edbee83a81ede8e18511439b401",
+   "date": "2026-11-20",
+   "move": "Wave One has its own share card, and the release gate now measures a first visit"
+  },
+  {
    "sha": "f9f1b43499cd87128bb58f8aa94225732f79521e",
    "date": "2026-11-20",
    "move": "Wave One returns: its page, The TrustBase, and a first visit that no longer freezes"

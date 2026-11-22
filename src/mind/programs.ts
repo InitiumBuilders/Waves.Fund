@@ -31,3 +31,28 @@ export function finish(gl: WebGL2RenderingContext, programs: Program[]) {
   for (const x of programs) if (!gl.getProgramParameter(x.p, gl.LINK_STATUS)) return gl.getShaderInfoLog(x.v) || gl.getShaderInfoLog(x.f) || gl.getProgramInfoLog(x.p) || "link";
   return "";
 }
+
+/** A context the browser has taken away. Not a failure: the scene waits for the context to come back. */
+export class LostContext extends Error { constructor() { super("WebGL context lost"); } }
+
+/* Whether to ask for a lost context back.
+
+   A browser may take a page's WebGL context away and return it later. An iPhone does this to a page left in the
+   background: one loss, one return, and the scene is built again. A browser that cannot hold the context at all
+   takes it again as soon as the scene is rebuilt, and asking every time would rebuild for ever. So a scene counts
+   the losses that come within five seconds of a build, stamped again when the build is done or the scene is ready
+   (on a slow phone a rebuild alone can take five seconds), with the page in view all that time (a visitor who leaves
+   the tab twice in quick succession is not a browser that cannot keep a context). After two in a row it stops
+   asking and rests on its still form (the sea's one light, the lattice's still picture) until the page is opened
+   again. */
+let hiddenAt = -Infinity;
+if (typeof document !== "undefined") document.addEventListener("visibilitychange", () => { if (document.hidden) hiddenAt = performance.now(); });
+export function keeper() {
+  let built = 0, quick = 0;
+  return {
+    /** The scene was just built on its context. */
+    built() { built = performance.now(); },
+    /** The context was lost. True means ask for it back (preventDefault on the event). */
+    ask() { const now = performance.now(); quick = now - built < 5000 && hiddenAt < built && !document.hidden ? quick + 1 : 0; return quick < 2; },
+  };
+}
