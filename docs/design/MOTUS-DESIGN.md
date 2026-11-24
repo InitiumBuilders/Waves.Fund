@@ -497,6 +497,31 @@ taller one. The small-phone header (15px of padding, a 20px brand) is restated a
 rules had overridden the old one in `style.css`, and the brand touched its icons. Every page reflows at 320 wide
 (WCAG 1.4.10, `scripts/qa/reflow.mjs`).
 
+## Moving between pages (2026-11-24)
+
+A move between pages is one motion (`src/seamless.tsx`, View Transitions where the browser has them). The page you
+leave dissolves; the header holds still; the lattice behind everything never moves, it only answers the tap with a
+wave from the point touched. Three things carry over:
+
+- **The way.** The four practices sit side by side like their tabs (Learn, Guide, Give, Grow), so moving between them
+  the next page's words arrive from the side travelled toward. Into a practice's own page they rise, as before; back
+  out of one they come forward. The way is decided before the move and stamped on the arriving page's `<main>`, so it
+  never lags and the page you leave never replays.
+- **The light.** The light under the page you are on travels along the tab bar to the tab you chose.
+- **The sea.** Between two pages that open on the sea, the water you leave holds while the next page's sea gets ready,
+  then gives way to it. Only a sea on screen is carried; one scrolled out of view would fly in from where it was.
+  In WebKit that one move changes page plainly for now: Playwright's WebKit crashed the page on it whenever a view
+  transition ran (the live build did too, and never without the transition). A real iPhone has not been tried.
+
+With reduced motion, or the pause control on, a move is a plain change of page. `scripts/qa/moves.mjs` checks each
+kind of move in the gate.
+
+## A form answers as it is filled (2026-11-24)
+
+Each required part of a form lights beside its label once what is written there is complete (the browser's own
+check), and when the whole form is ready the send button's arrow steps forward once. Nothing to read, nothing to
+count. Optional parts have no light.
+
 ## Scenes that come back (2026-11-21)
 
 A browser may take a page's WebGL contexts away and give them back (an iPhone does it to a page left in the

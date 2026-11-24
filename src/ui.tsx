@@ -180,6 +180,7 @@ function GrowTab() {
     >
       <img className="nav-logo" src="/media/nav-waves.webp" alt="" />
       <span className="nav-label">{waves ? "Waves" : "Grow"}</span>
+      <i className="nav-light" aria-hidden="true" />
     </NavLink>
   );
 }
@@ -194,6 +195,7 @@ export function TabLinks() {
         >
           <img className="nav-logo" src={'/media/' + image} alt="" />
           <span className="nav-label">{label}</span>
+          <i className="nav-light" aria-hidden="true" />
         </NavLink>
       ))}
       <GrowTab />

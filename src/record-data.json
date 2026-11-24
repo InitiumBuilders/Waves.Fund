@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "861dc37aef9bb84e22a4115681428a98e8afa404",
+   "date": "2026-11-24",
+   "move": "On small phones the vision box and every title stand clear of the tab bar, and every page reflows at 320 wide"
+  },
+  {
    "sha": "888cacef3d831c2837d10bdfb672d51ef04958a8",
    "date": "2026-11-23",
    "move": "Older iPhones, back to iOS 15.4, get the phone layout and every page, and the build now checks for it"

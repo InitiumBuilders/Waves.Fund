@@ -82,6 +82,10 @@ const [screens, contexts, reflow] = await Promise.all([
 
 { const n = num(reflow.out, /pages with a fault: (\d+)/g); verdict("text reflows at 320 wide (WCAG 1.4.10)", n.length === 1 && n[0] === 0, n.length ? `${n[0]} pages with a fault` : "did not finish, see reflow.log", reflow); }
 
+// Moving between pages: each kind of move, its way, the tab light, the sea carried, the page at rest.
+const moves = await rig("moves", "moves.mjs", base);
+{ const ok = num(moves.out, /(\d+) passed, \d+ failed/g)[0], bad = num(moves.out, /\d+ passed, (\d+) failed/g)[0]; verdict("moving between pages", bad === 0 && ok > 0, bad !== undefined ? `${ok} passed, ${bad} failed` : "did not finish, see moves.log", moves); }
+
 // Each keeps its own place in the list, so a rig that is skipped cannot hand its place to the next one.
 const [axe, tour, styles] = await Promise.all([
   rig("axe", "axe.mjs", base),

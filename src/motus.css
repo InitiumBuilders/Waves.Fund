@@ -615,6 +615,61 @@ html[data-motion="off"] .waveguide-scene > canvas { transition: none; }
 ::view-transition-group(masthead), ::view-transition-group(tabbar) { animation-duration: 0.34s; }
 @keyframes seamless-leave { to { opacity: 0; } }
 
+/* The way of a move (src/seamless.tsx). The four practices sit side by side like their tabs: moving between them,
+   the words arrive from the side you travelled toward. Into a practice they rise, as before; back out of one they
+   come forward. Only the arriving page carries the way, on its own <main>, so the page you leave never replays. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) #content:is([data-way="right"], [data-way="left"]) { animation-name: way-page; }
+  html:not([data-motion="off"]) #content[data-way="right"] :is(.page-intro > *, .page-intro .intro-text > *, .sea-hero-copy > *, .gt-tank-copy > .eyebrow, .gt-tank-copy > h1):not(.mind-anchor) { animation-name: way-from-right; }
+  html:not([data-motion="off"]) #content[data-way="left"] :is(.page-intro > *, .page-intro .intro-text > *, .sea-hero-copy > *, .gt-tank-copy > .eyebrow, .gt-tank-copy > h1):not(.mind-anchor) { animation-name: way-from-left; }
+  html:not([data-motion="off"]) #content[data-way="out"] :is(.page-intro > *, .page-intro .intro-text > *, .sea-hero-copy > *, .gt-tank-copy > .eyebrow, .gt-tank-copy > h1):not(.mind-anchor) { animation-name: way-forward; }
+}
+/* Words arriving from the right start past the screen's edge; clipped there, they never widen the page (a phone
+   would zoom out, and Chrome aborts the move). Clip cuts nothing on screen and keeps sticky scenes working. */
+#content:is([data-way="right"], [data-way="left"]) { overflow-x: clip; }
+@keyframes way-page { from { opacity: 0; } to { opacity: 1; } }
+@keyframes way-from-right { from { opacity: 0; transform: translate3d(44px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes way-from-left { from { opacity: 0; transform: translate3d(-44px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes way-forward { from { opacity: 0; transform: scale(0.965); } to { opacity: 1; transform: none; } }
+
+/* The light under the page you are on travels to the tab you choose (it was the dot drawn after the active tab). */
+.nav-light { position: absolute; bottom: -9px; left: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background: #5ddfff; box-shadow: 0 0 12px 3px #2aafffa0; opacity: 0; pointer-events: none; }
+.nav-item.active .nav-light { opacity: 1; view-transition-name: tab-light; animation: beat-dot 1.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
+.nav-item.active::after { content: none; }
+.desktop-nav .nav-light { display: none; }
+html[data-motion="off"] .nav-item.active .nav-light { animation: none; }
+::view-transition-group(tab-light) { animation-duration: 0.6s; animation-timing-function: cubic-bezier(0.3, 0, 0.1, 1); }
+::view-transition-old(tab-light) { display: none; }
+::view-transition-new(tab-light) { animation: none; }
+
+/* The sea carries over: the water you leave holds while the next page's sea gets ready, then gives way to it. */
+html[data-sea-carry] .sea-hero-stage > .sea-hero-scene { view-transition-name: sea; }
+::view-transition-group(sea) { animation-duration: 0.7s; animation-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1); }
+::view-transition-old(sea) { animation: sea-hold 0.9s linear both; }
+::view-transition-new(sea) { animation: none; }
+::view-transition-old(sea):only-child { animation: seamless-leave 0.34s cubic-bezier(0.4, 0, 0.9, 0.6) both; }
+@keyframes sea-hold { 0%, 60% { opacity: 1; } to { opacity: 0; } }
+
+/* ---------- A form answers as it is filled (2026-11-24) ---------- */
+/* Each required part lights beside its label once what is written there is complete (the browser's own check), and
+   when the whole form is ready the send button's arrow steps forward once. Nothing to read and nothing to count:
+   the light is the answer. Optional parts have none. */
+.application-form label:has(> :is(input, textarea, select):required) { position: relative; }
+.application-form label:has(> :is(input, textarea, select):required)::before {
+  content: ""; position: absolute; left: -13px; top: 0.78em; width: 5px; height: 5px; border-radius: 50%;
+  background: #5ddfff; box-shadow: 0 0 10px 2px rgba(42, 175, 255, 0.6); opacity: 0.16; transform: scale(0.6);
+  transition: opacity 0.5s var(--ease-out), transform 0.7s var(--ease-out); pointer-events: none;
+}
+.application-form label:has(> :is(input, textarea, select):required:valid)::before { opacity: 1; transform: none; }
+.application-form:valid button[type="submit"] svg { animation: form-ready 0.9s var(--ease-out) 1; }
+@keyframes form-ready { 0% { transform: none; } 35% { transform: translate3d(7px, 0, 0); } 100% { transform: none; } }
+html[data-motion="off"] .application-form label::before { transition: none; }
+html[data-motion="off"] .application-form:valid button[type="submit"] svg { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .application-form label::before { transition: none; }
+  .application-form:valid button[type="submit"] svg { animation: none; }
+}
+
 /* ---------- Arrival on scroll (src/cadence.ts) ---------- */
 /* Driven by the scroll position, so it rewinds exactly when you scroll back. Cards in one row follow each
    other by 40px of scroll. */

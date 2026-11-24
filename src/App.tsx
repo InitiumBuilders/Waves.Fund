@@ -31,7 +31,7 @@ import { Current } from "./mind/Current";
 import { Vessel } from "./vessel";
 import { useStateStore } from "./state";
 import { FlowNavigation } from "./flow";
-import { go, Seamless } from "./seamless";
+import { go, PageMain, Seamless } from "./seamless";
 import { TourLauncher } from "./tour-launch";
 import { SeaHero } from "./sea-hero";
 import { sound } from "./sound";
@@ -438,7 +438,7 @@ function AppContent() {
         className={"app-shell " + (pathname === "/" ? "route-home" : pathname === "/grow" ? "route-grow" : pathname === "/waves" || pathname === "/projects" ? "route-waves route-reading" : "route-reading")}
       >
         <Header />
-        <MemberBoundary><main id="content" key={pathname}>
+        <MemberBoundary><PageMain key={pathname}>
           <Suspense fallback={<div className="narrow-page route-loading" role="status">Opening your Wave…</div>}><Routes>
             <Route path="/" element={<Home />} />
             <Route path="/now-lets-begin" element={<Suspense fallback={<div className="narrow-page" role="status">Opening the Wave Praxis…</div>}><Begin /></Suspense>} />
@@ -493,7 +493,7 @@ function AppContent() {
             {MindLab && <Route path="/mind-lab" element={<MindLab />} />}
             <Route path="*" element={<NotFound />} />
           </Routes></Suspense>
-        </main></MemberBoundary>
+        </PageMain></MemberBoundary>
         <Footer />
         <BottomNav />
         <Status />
