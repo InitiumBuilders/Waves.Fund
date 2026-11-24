@@ -1,9 +1,11 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
+import { FLOOR, floor } from "./scripts/floor.mjs";
 export default defineConfig(({ command, mode }) => ({
   define: { ...(command === "serve" ? { 'import.meta.env.VITE_WORKSPACE_ENABLED': '"true"' } : {}), 'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': JSON.stringify(loadEnv(mode, process.cwd(), '').VITE_CLERK_PUBLISHABLE_KEY || loadEnv(mode, process.cwd(), '').NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.VITE_CLERK_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '') },
   plugins: [
     react(),
+    floor(),
     ...(command === "serve"
       ? [
           {
@@ -59,6 +61,7 @@ export default defineConfig(({ command, mode }) => ({
         ]
       : []),
   ],
-  build: { assetsInlineLimit: 0 },
+  // Built for Safari 15.4 and later, the version the site already needed (scripts/floor.mjs).
+  build: { assetsInlineLimit: 0, target: FLOOR },
 }));
 

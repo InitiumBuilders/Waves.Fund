@@ -499,6 +499,16 @@ back when its page closes, because a browser keeps only so many and evicts the o
 sea, the ripple and the Guide's waveguide fade in when their programs are ready (the waveguide joined them the same
 evening).
 
+## The oldest phone (2026-11-23)
+
+The site is built for Safari 15.4 and later (iOS 15.4, March 2022). The iPhone 6s, the 7 and the first SE stop at iOS
+15.8. Until 2026-11-23 the build targeted Safari 16.4 without anyone choosing it: on iOS 15.4 to 16.3 none of the
+phone-size rules applied (the minifier wrote them in a form those versions skip), and Now, Let's Begin and the Guide
+Library did not open. The build now refuses output Safari 15.4 cannot read (`scripts/floor.mjs`). Where those versions
+cannot draw a motion, it is left out: the circuit's pulse needs `offset-path` (Safari 16), so there the next card
+lights without it; scroll-driven reveals already wait behind `@supports`. A newer CSS value with a fallback goes in an
+`@supports` block, because the minifier drops a repeated property line as overridden.
+
 ## Rules
 
 - No particle swarms. Dots never fly in to form a shape (August, 2026-09-23).
@@ -513,3 +523,5 @@ evening).
 - The canvas is decorative and hidden from assistive technology. All content is HTML.
 - Judge a phone at Safari's real sizes, 393x659 and 375x548, in Chrome and in WebKit.
 - Every WebGL scene survives a lost context (`scripts/qa/contexts.mjs`).
+- Built for Safari 15.4 and later (`scripts/floor.mjs`). A feature newer than that keeps its fallback in an
+  `@supports` block, never in a repeated line, which the minifier drops.

@@ -85,7 +85,8 @@ export function Circuit({ children, className = "" }: { children: ReactNode; cla
       if (!lit[i]) { pending.add(i); return; }
       sent[i] = true;
       const t = traces[i];
-      if (still() || typeof HTMLElement.prototype.animate !== "function") { lightCard(i + 1, false); return; }
+      // Safari before 16 has no offset-path: the pulse would sit still in a corner, so the next card lights at once.
+      if (still() || typeof HTMLElement.prototype.animate !== "function" || !CSS.supports("offset-path", "path('M0 0L1 1')")) { lightCard(i + 1, false); return; }
       const fire = () => {
         if (document.hidden) { lightCard(i + 1, false); return; }
         const p = document.createElement("span");

@@ -14,6 +14,9 @@ when a session ends, so they live here now. Each one drives a real browser throu
 - In Git Bash, prefix runs that take routes with `MSYS_NO_PATHCONV=1`, or `/learn` becomes a Windows path.
 - A dev server for the rigs that need dev-only hooks (`window.__engine`, `window.__sea`, stand-in people):
   `npx vite --port 5197 --strictPort --host 127.0.0.1`, in the background, and stop it afterwards.
+- A built folder for any rig, with no server left running: `node scripts/qa/serve.mjs [--dir dist] -- node
+  scripts/qa/gate.mjs {base}`. It serves the folder on 127.0.0.1 for that one run (`{base}` becomes its address),
+  refuses paths outside the folder, answers /api with 404 like `vite preview`, and stops when the rig ends.
 
 ## The gate
 
@@ -38,7 +41,8 @@ and on Wave One's TrustBase, and one deploy is enough. (Before, the Record lagge
 Nothing below starts without August's word for that build.
 
 1. `npx tsc --noEmit -p tsconfig.json` and `npx vite build`; the gate and the checks for what changed, on the local
-   build. Read the screenshots before calling them proof. Commit.
+   build. Read the screenshots before calling them proof. Commit. The build itself refuses output that Safari 15.4
+   cannot read (`scripts/floor.mjs`, since 2026-11-23); `node scripts/floor.mjs <folder>` checks files built elsewhere.
 2. Public copy: `node scripts/publish-public.mjs`, `node scripts/check-secrets.mjs .open-source .env.local
    .env.workspace.production`, then commit and push inside `.open-source` as InitiumBuilders. The first line of that
    commit is shown on the site as the move, so write it as one plain sentence.
@@ -57,7 +61,8 @@ Log long runs to a file and grep it. A crash piped through `tail` prints only th
 | Rig | What it checks |
 | --- | --- |
 | `gate.mjs <base> [--build] [--styles f] [--quick]` | The release gate: runs the rigs below that a release must pass |
-| `smoke2.mjs <base>` | Every route at two sizes: console errors and page errors |
+| `serve.mjs [--dir d] -- <rig> {base}` | Serves a built folder on 127.0.0.1 for one rig run, then stops |
+| `smoke2.mjs <base> [--webkit]` | Every route at two sizes: console errors and page errors; `--webkit` runs it in WebKit |
 | `overflow.mjs <base> [routes]` | Pages that grow sideways on a phone, and the element at the right edge |
 | `styles.mjs snap <base> <f>` / `styles.mjs diff <a> <b>` | Every element's computed style on every page, and what changed between two builds |
 | `whywin.mjs <old> <new> <groups.json>` | For each style change, the rules that set it in both builds, in cascade order, with their layer |

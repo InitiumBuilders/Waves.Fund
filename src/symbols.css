@@ -40,8 +40,10 @@
 /* An echo: out along the rail, flipped by the fixed end, and home again. */
 .sym-pulse { transform-origin: 0 50%; animation: sym-echo 3s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
 /* The pulse layer is the full width of the symbol and travels most of it, so the symbol clips it; otherwise a phone
-   page grows sideways. The margin keeps the pulse's tail visible at the fixed end. */
-.sym-echo { overflow: clip; overflow-clip-margin: 16px; }
+   page grows sideways. The margin keeps the pulse's tail visible at the fixed end. Safari before 16 has no clip, so
+   it gets hidden (the tail is cut at the edge there); the minifier would drop a plain fallback line. */
+.sym-echo { overflow: hidden; }
+@supports (overflow: clip) { .sym-echo { overflow: clip; overflow-clip-margin: 16px; } }
 @keyframes sym-echo {
   0% { transform: translate3d(3.75%, 0, 0) scaleY(1); }
   46% { transform: translate3d(88.125%, 0, 0) scaleY(1); }

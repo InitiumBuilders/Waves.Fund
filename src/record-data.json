@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "54a337c1da9aaa2981fca103b81b9664e4f07e21",
+   "date": "2026-11-22",
+   "move": "The Waves page keeps its first line while the project feed loads, and the first screens are now checked in WebKit"
+  },
+  {
    "sha": "dfb35ea609db7849af490cbc95779d8e8a5dd5b1",
    "date": "2026-11-21",
    "move": "The Guide's waveguide comes back after a phone pauses it, and no page's first button sits under the tab bar"
