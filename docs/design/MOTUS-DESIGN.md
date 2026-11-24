@@ -485,8 +485,17 @@ A wide screen that is short (a large phone on its side) grows its stage instead 
 
 The same rule holds on every page (since the evening of 2026-11-21): the first row of buttons in a page's intro, and
 the film page's row, move wholly below the bar when it would cut their first button (`src/bar.ts`). The film page
-also tightens its rhythm on short screens so its button clears the bar on an iPhone. Judge at 375x548, 393x659 and
-360x640.
+also tightens its rhythm on short screens so its button clears the bar on an iPhone. Judge at 375x548, 393x659,
+360x640 and 320x460.
+
+320x460 (since 2026-11-24) is the first iPhone SE with Safari's bars, and Display Zoom on the SE and the minis. The
+title ends above the tab bar there too, and so does the first field: on an SE the home's vision box used to run 32px
+under the bar. A short phone held upright (up to 600px tall) gives the home's identity a little less height, the
+mark and the name smaller, so the box clears the bar; at 320 wide the vision stage is smaller and shows two lines of
+the vision. At 320 wide the sea titles are 34px over a 110px band and page titles 32px on a short screen, 37px on a
+taller one. The small-phone header (15px of padding, a 20px brand) is restated at the end of `motus.css`: later
+rules had overridden the old one in `style.css`, and the brand touched its icons. Every page reflows at 320 wide
+(WCAG 1.4.10, `scripts/qa/reflow.mjs`).
 
 ## Scenes that come back (2026-11-21)
 

@@ -5,6 +5,7 @@ import { useStateStore } from "./state";
 import { Echo, Pair, Resonance, Travel } from "./symbols";
 import { StringScene } from "./teachback-string";
 import { BEAT } from "./cadence";
+import { useBelowTheBar } from "./bar";
 import "./teachback.css";
 
 /* The Teachback: a core page of the Wave Guides. His lines are the mantra, "Give Together. Teach Together.
@@ -32,6 +33,9 @@ const COMMIT = [
 ];
 
 export default function Teachback() {
+  // On a short phone the first row of buttons moves wholly below the tab bar rather than sitting half under it.
+  const row = useRef<HTMLDivElement>(null);
+  useBelowTheBar(row);
   return (
     <div className="teachback-page document-page">
       <Link to="/guide" className="guide-back"><ArrowLeft size={16} />Wave Guides</Link>
@@ -40,7 +44,7 @@ export default function Teachback() {
           <p className="eyebrow">WAVE GUIDES · THE TEACHBACK</p>
           <h1>The <span>Teachback</span></h1>
           <div className="intro-description"><p>Give Together. Teach Together. Organize a teachback.</p></div>
-          <div className="button-row intro-actions">
+          <div className="button-row intro-actions" ref={row}>
             <Link className="glow-button" to="/give/opportunities/new?kind=teachback">Organize A Teachback<ArrowRight size={18} /></Link>
             <Link className="text-button" to="/give/guide">Find Your Give Guide<ArrowRight size={17} /></Link>
           </div>

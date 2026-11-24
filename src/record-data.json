@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "888cacef3d831c2837d10bdfb672d51ef04958a8",
+   "date": "2026-11-23",
+   "move": "Older iPhones, back to iOS 15.4, get the phone layout and every page, and the build now checks for it"
+  },
+  {
    "sha": "54a337c1da9aaa2981fca103b81b9664e4f07e21",
    "date": "2026-11-22",
    "move": "The Waves page keeps its first line while the project feed loads, and the first screens are now checked in WebKit"

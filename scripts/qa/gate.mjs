@@ -70,14 +70,17 @@ let centreN = num(centre.out, /off-centre paragraphs: (\d+)/g);
 if (!flag("--quick") && centreN.some((x) => x > 0)) { const again = await rig("centre2", "centercheck.mjs", base); centreN = num(again.out, /off-centre paragraphs: (\d+)/g); }
 verdict("centred lines stay centred", centreN.length === 2 && centreN.every((x) => x === 0), centreN.length === 2 ? `off-centre: ${centreN.join(" / ")}` : "did not finish, see centre.log", centre);
 
-// The first screen at the heights real phones give, and scenes that draw again after the browser takes their WebGL
-// contexts away and gives them back (an iPhone does that to a page left in the background).
-const [screens, contexts] = await Promise.all([
+// The first screen at the heights real phones give, scenes that draw again after the browser takes their WebGL
+// contexts away and gives them back (an iPhone does that to a page left in the background), and reflow at 320 wide.
+const [screens, contexts, reflow] = await Promise.all([
   rig("firstscreen", "firstscreen.mjs", base),
   rig("contexts", "contexts.mjs", base),
+  rig("reflow", "reflow.mjs", base),
 ]);
 { const n = num(screens.out, /first screens with a fault: (\d+)/g); verdict("first screens on a real phone", n.length === 1 && n[0] === 0, n.length ? `${n[0]} with a fault` : "did not finish, see firstscreen.log", screens); }
 { const ok = num(contexts.out, /(\d+) passed, \d+ failed/g)[0], bad = num(contexts.out, /\d+ passed, (\d+) failed/g)[0]; verdict("scenes return after a lost context", bad === 0 && ok > 0, bad !== undefined ? `${ok} passed, ${bad} failed` : "did not finish, see contexts.log", contexts); }
+
+{ const n = num(reflow.out, /pages with a fault: (\d+)/g); verdict("text reflows at 320 wide (WCAG 1.4.10)", n.length === 1 && n[0] === 0, n.length ? `${n[0]} pages with a fault` : "did not finish, see reflow.log", reflow); }
 
 // Each keeps its own place in the list, so a rig that is skipped cannot hand its place to the next one.
 const [axe, tour, styles] = await Promise.all([

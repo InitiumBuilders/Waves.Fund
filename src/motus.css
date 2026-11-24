@@ -711,4 +711,36 @@ html[data-motion="off"] .nav-item.active::after { animation: none; }
 .begin-table { border-color: rgba(112, 191, 255, 0.18); }
 .wave-example-image-link { border: 0; box-shadow: 0 0 0 1px rgba(120, 220, 255, 0.14), 0 30px 80px rgba(0, 0, 0, 0.45); }
 .glow-button.wave-one-pass { border: 0; background: none; box-shadow: none; }
+
+/* ---------- Small and short phones (2026-11-24) ---------- */
+/* The first iPhone SE, and Display Zoom on the SE and the minis, give a page 320 wide; with Safari's bars showing,
+   about 460 tall. Measured there: the header's brand touched its icons (the small-phone rules in style.css are
+   overridden by later rules, so they are restated here), the sea titles and the Library's ran under the tab bar,
+   and the home's vision box sat mostly under it. On an iPhone SE (375x548) the vision box ran 32px under the bar. */
+@media (max-width: 359.98px) {
+  .app-header { padding-inline: 15px; }
+  .brand { font-size: 20px; gap: 4px; }
+  .page-intro h1 { font-size: 37px; }
+}
+/* A short phone held upright: the home's identity gives up a little height so the vision box clears the tab bar. */
+@media (max-width: 799.98px) and (max-height: 600px) and (orientation: portrait) {
+  .identity-mark.wave-mark { height: 50px; width: 89px; }
+  .identity-name { font-size: 44px; }
+  .identity-mantra { margin-top: 6px; }
+  .immersive-home .vision-workspace { margin-top: 14px; }
+  .energy-stage { margin-top: 4px; }
+}
+@media (max-width: 359.98px) and (max-height: 600px) and (orientation: portrait) {
+  .identity-mark.wave-mark { height: 34px; width: 61px; }
+  .identity-name { font-size: 35px; }
+  .immersive-home .vision-workspace { margin-top: 10px; }
+  .vision-heading h1 { font-size: 24px; }
+  .immersive-home .vision-heading p { margin-top: 6px; }
+  .energy-stage { width: 214px; margin-inline: auto; margin-top: 2px; }
+  /* Two lines of the vision show in the smaller box; the type stays at 16px, below which iOS zooms in on a tap. */
+  .energy-stage .vision-input textarea { padding: 9px 13px 17px; line-height: 1.4; }
+  .sea-hero { --sea-band: 110px; }
+  .sea-hero-copy h1 { font-size: 34px; }
+  .page-intro h1 { font-size: 32px; }
+}
 }

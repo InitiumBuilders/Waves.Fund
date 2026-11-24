@@ -1,11 +1,13 @@
 // The first screen on a real phone. With Safari's bars showing an iPhone gives a page about 659px of height, and an
-// iPhone SE about 548px; a rig that only opens 390x844 never sees that. A common Android phone gives 360x640. For
-// each main page at the three sizes:
+// iPhone SE about 548px; a rig that only opens 390x844 never sees that. A common Android phone gives 360x640, and the
+// first iPhone SE (or Display Zoom on the SE and the minis) 320x460. For each main page at the four sizes:
 //   - the title starts clear of the header, and nothing runs past the side of the screen;
 //   - on a page that opens on the sea, at least 40px of water shows above the point where the night under the words
 //     reaches half its strength (the night fades in over the 120px above the eyebrow, so that point is 60px above it);
 //   - the first thing to press (the first link or button in the page's first row of actions) stands either clear of
-//     the tab bar or wholly below it, never cut by it. On every page since 2026-11-21 (before, sea pages only).
+//     the tab bar or wholly below it, never cut by it. On every page since 2026-11-21 (before, sea pages only);
+//   - the title ends above the tab bar, and the bar does not cut the first field (the home's vision box). Since
+//     2026-11-24, when the vision box was found 32px under the bar on an iPhone SE.
 //   node scripts/qa/firstscreen.mjs <base> [routes] [--shots <folder>] [--webkit]
 // --webkit measures in WebKit, the engine of every iPhone browser (Safari can run a page's scripts before its styles
 // apply, so a fit that measures layout is worth seeing there too).
@@ -23,7 +25,8 @@ if (!base) { console.error("usage: node scripts/qa/firstscreen.mjs <base> [route
 const routes = (plain[1] || "/,/learn,/guide,/give,/grow,/waves,/waves/waves-fund,/apply,/manifest,/film,/now-lets-begin,/guide/apply,/guide/library,/guide/partners,/guide/team,/guide/teachback,/privacy,/contribute").split(",");
 const shots = args.includes("--shots") ? args[args.indexOf("--shots") + 1] : null;
 if (shots) mkdirSync(shots, { recursive: true });
-const SIZES = [[375, 548, "iPhone SE"], [393, 659, "iPhone"], [360, 640, "Android"]];
+// 320x460: the first iPhone SE with Safari's bars, and Display Zoom on the SE and the minis (added 2026-11-24).
+const SIZES = [[375, 548, "iPhone SE"], [393, 659, "iPhone"], [360, 640, "Android"], [320, 460, "first SE"]];
 // The least water a sea page shows above the night's half-strength point.
 const WATER = 40;
 
@@ -41,6 +44,15 @@ for (const [w, h, name] of SIZES) {
     await p.goto(base + route, { waitUntil: "load", timeout: 90000 * (webkit ? 2 : 1) });
     await p.waitForSelector("main h1", { timeout: 30000 * (webkit ? 3 : 1) }).catch(() => {});
     await p.waitForTimeout(webkit ? 5000 : 2500);
+    // Then wait until the page holds still: words that rise into place (the Give page's first chapter eases up 26px
+    // over 0.9s once it turns on) are measured where they stand, not where they pass. Ceiling 6s.
+    let still = "", ends = Date.now() + 6000;
+    while (Date.now() < ends) {
+      const now = await p.evaluate(() => [...document.querySelectorAll("main h1, main a, main button, main textarea, .bottom-nav")].slice(0, 12).map((e) => { const r = e.getBoundingClientRect(); return `${Math.round(r.top)},${Math.round(r.bottom)}`; }).join(";"));
+      if (now === still) break;
+      still = now;
+      await p.waitForTimeout(400);
+    }
     const m = await p.evaluate(() => {
       const top = (e) => (e ? Math.round(e.getBoundingClientRect().top + scrollY) : null);
       const h1 = [...document.querySelectorAll("main h1")].find((e) => e.getBoundingClientRect().height > 0);
@@ -59,6 +71,9 @@ for (const [w, h, name] of SIZES) {
         press: press ? press.textContent.trim().slice(0, 30) : null,
         barCut: !!(bar && bar.height && pr && pr.top + scrollY < bar.top - 1 && pr.bottom + scrollY > bar.top + 1),
         into: bar && pr ? Math.round(pr.bottom + scrollY - bar.top) : 0,
+        // The title ends above the tab bar, and the first field (the home's vision box) is not cut by it.
+        titleUnder: bar && bar.height && h1 ? Math.round(h1.getBoundingClientRect().bottom - bar.top) : 0,
+        field: (() => { const f = [...document.querySelectorAll("main textarea, main input:not([type=hidden])")].find((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !e.closest(".form-trap"); }); if (!f || !bar || !bar.height) return 0; const r = f.getBoundingClientRect(); return r.top < bar.top - 1 && r.bottom > bar.top + 1 ? Math.round(r.bottom - bar.top) : 0; })(),
       };
     });
     const found = [];
@@ -68,6 +83,8 @@ for (const [w, h, name] of SIZES) {
     if (m.cut) found.push(`${m.cut} lines run past the side of the screen`);
     if (m.water !== null) { seas++; if (m.water < WATER) found.push(`${m.water}px of water above the night's half-strength point (at least ${WATER})`); }
     if (m.barCut) found.push(`the tab bar cuts "${m.press}" (${m.into}px of it under the bar)`);
+    if (m.titleUnder > 1) found.push(`the title runs ${m.titleUnder}px under the tab bar`);
+    if (m.field) found.push(`the tab bar cuts the first field (${m.field}px of it under the bar)`);
     seen++;
     if (found.length) { faults++; console.log(`${name} ${w}x${h} ${route}: ${found.join("; ")}`); }
     if (shots) await p.screenshot({ path: join(shots, `${name.replace(/ /g, "-").toLowerCase()}${route.replace(/\//g, "_") || "_"}.png`) });
