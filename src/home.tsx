@@ -1,11 +1,45 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { WaveMark } from './ui';
 import { useStateStore } from './state';
 import { mindGrow, mindWave } from './mind/WaveMind';
+import { cutByTheBar } from './bar';
 const INTRO_TEXT='Start Building Your Wave Right Here, Right Now. Set It Into Motion.';
 type IntroPhase='waiting'|'typing'|'flow'|'idle';
+/* On a phone the tab bar, and the fade it paints above itself, cover the foot of the first screen, and Surge must end
+   clear of the fade or stand wholly below the bar (src/bar.ts). Where it would stand in the fade (an iPhone with
+   Safari's bars showing, 393x659, had it half under the bar), the stage gives up width until Surge clears it; its height
+   follows the art's 960:696, so the box and the channel keep their shape. Never narrower than LEAST: on a phone too
+   short even then (an iPhone SE), Surge stays wholly below the bar with the vision box in view. Measured by layout
+   before the first paint, and again only when something above the stage changes size, never on resize. */
+const LEAST=214;
+function useSurgeClear(stage:RefObject<HTMLFormElement|null>){
+  useLayoutEffect(()=>{
+    const s=stage.current;
+    if(!s)return;
+    const fit=()=>{
+      s.style.removeProperty('width');s.style.removeProperty('margin-inline');delete s.dataset.narrow;
+      const surge=s.querySelector<HTMLElement>('.surge-button');
+      const cut=cutByTheBar(surge);
+      if(!cut||!surge)return;
+      // Surge stands at a fixed share of the stage's height, so narrowing the stage by d lifts its foot by d times this.
+      const lift=(surge.offsetTop+surge.offsetHeight)/s.offsetWidth;
+      const width=Math.max(LEAST,Math.floor(s.offsetWidth-cut.up/lift));
+      if(width>=s.offsetWidth)return;
+      s.style.width=width+'px';s.style.marginInline='auto';
+      // A narrower box keeps three lines of the vision in view.
+      if(width<320)s.dataset.narrow='';
+    };
+    fit();
+    const ro=new ResizeObserver(fit);
+    const workspace=s.parentElement;
+    for(let e=workspace?.previousElementSibling;e;e=e.previousElementSibling)ro.observe(e);
+    for(let e=s.previousElementSibling;e;e=e.previousElementSibling)ro.observe(e);
+    document.fonts?.ready.then(fit);
+    return()=>ro.disconnect();
+  },[stage]);
+}
 export function Home() {
   const {state,setState,motion}=useStateStore();
   const navigate=useNavigate();
@@ -13,6 +47,8 @@ export function Home() {
   const [introPhase,setIntroPhase]=useState<IntroPhase>(motion?'waiting':'idle');
   const [introText,setIntroText]=useState('');
   const video=useRef<HTMLVideoElement>(null);
+  const stage=useRef<HTMLFormElement>(null);
+  useSurgeClear(stage);
   const nucleus=useRef<HTMLVideoElement>(null);
   const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const introTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -103,7 +139,7 @@ export function Home() {
     </div>
     <div className="vision-workspace">
       <div className="vision-heading"><h1>What’s Your <span>Vision?</span></h1><p>What Are You Rising Towards?</p></div>
-      <form className={'energy-stage '+(focus||introPhase==='typing'?'engaged ':'')+(introPhase==='typing'?'intro-typing ':'')+(playing?'transferring':'')} onSubmit={surge}>
+      <form ref={stage} className={'energy-stage '+(focus||introPhase==='typing'?'engaged ':'')+(introPhase==='typing'?'intro-typing ':'')+(playing?'transferring':'')} onSubmit={surge}>
         <video className="surge-transfer" ref={video} src="/media/surge-transfer.mp4" preload="auto" muted playsInline aria-hidden="true" onPlaying={()=>{if(transferMode.current)setPlaying(true)}} onEnded={transferEnded} onError={()=>{if(transferMode.current==='intro')finishIntro()}}/>
         <div className="vision-input">
           <label htmlFor="vision" className="sr-only">What’s Your Vision?</label>

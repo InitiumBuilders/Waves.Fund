@@ -4,8 +4,10 @@
 //   - the title starts clear of the header, and nothing runs past the side of the screen;
 //   - on a page that opens on the sea, at least 40px of water shows above the point where the night under the words
 //     reaches half its strength (the night fades in over the 120px above the eyebrow, so that point is 60px above it);
-//   - the first thing to press (the first link or button in the page's first row of actions) stands either clear of
-//     the tab bar or wholly below it, never cut by it. On every page since 2026-11-21 (before, sea pages only);
+//   - the first thing to press (the first link or button in the page's first row of actions; on the home, Surge)
+//     ends 40px above the tab bar, clear of the fade the bar paints above itself, or stands wholly below the bar.
+//     On every page since 2026-11-21 (before, sea pages only); the fade and Surge since 2026-11-24, when Surge was
+//     found half under the bar at 393x659 and first buttons on Learn and Give stood in the fade;
 //   - the title ends above the tab bar, and the bar does not cut the first field (the home's vision box). Since
 //     2026-11-24, when the vision box was found 32px under the bar on an iPhone SE.
 //   node scripts/qa/firstscreen.mjs <base> [routes] [--shots <folder>] [--webkit]
@@ -27,6 +29,8 @@ const shots = args.includes("--shots") ? args[args.indexOf("--shots") + 1] : nul
 if (shots) mkdirSync(shots, { recursive: true });
 // 320x460: the first iPhone SE with Safari's bars, and Display Zoom on the SE and the minis (added 2026-11-24).
 const SIZES = [[375, 548, "iPhone SE"], [393, 659, "iPhone"], [360, 640, "Android"], [320, 460, "first SE"]];
+// How far above the bar a first button must end to stand clear of its fade (src/bar.ts CLEAR, added 2026-11-24).
+const CLEAR = 40;
 // The least water a sea page shows above the night's half-strength point.
 const WATER = 40;
 
@@ -53,12 +57,12 @@ for (const [w, h, name] of SIZES) {
       still = now;
       await p.waitForTimeout(400);
     }
-    const m = await p.evaluate(() => {
+    const m = await p.evaluate((CLEAR) => {
       const top = (e) => (e ? Math.round(e.getBoundingClientRect().top + scrollY) : null);
       const h1 = [...document.querySelectorAll("main h1")].find((e) => e.getBoundingClientRect().height > 0);
       const stage = document.querySelector(".sea-hero-stage");
       const bar = document.querySelector(".bottom-nav")?.getBoundingClientRect();
-      const press = [...document.querySelectorAll(stage ? ".sea-hero .intro-actions a, .sea-hero .intro-actions button" : "main .intro-actions a, main .intro-actions button, main .fm-actions a, main .fm-actions button, main a.glow-button, main button.glow-button")]
+      const press = [...document.querySelectorAll(stage ? ".sea-hero .intro-actions a, .sea-hero .intro-actions button" : "main .surge-button, main .intro-actions a, main .intro-actions button, main .fm-actions a, main .fm-actions button, main a.glow-button, main button.glow-button")]
         .find((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; });
       const pr = press?.getBoundingClientRect();
       return {
@@ -67,22 +71,23 @@ for (const [w, h, name] of SIZES) {
         over: document.documentElement.scrollWidth - innerWidth,
         cut: [...document.querySelectorAll("main h1, main h2, main p")].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.top < innerHeight && (r.left < -1 || r.right > innerWidth + 1); }).length,
         water: stage ? top(stage.querySelector(".sea-hero-copy .eyebrow")) - 60 - top(stage) : null,
-        // With the page at its top: does the bar cut the first button? (1px either way is layout rounding.)
+        // With the page at its top: is the first button in the bar's fade, or under the bar? It must end CLEAR px above
+        // the bar (src/bar.ts) or start wholly below it. (1px either way is layout rounding.)
         press: press ? press.textContent.trim().slice(0, 30) : null,
-        barCut: !!(bar && bar.height && pr && pr.top + scrollY < bar.top - 1 && pr.bottom + scrollY > bar.top + 1),
-        into: bar && pr ? Math.round(pr.bottom + scrollY - bar.top) : 0,
+        barCut: !!(bar && bar.height && pr && pr.top + scrollY < bar.top - 1 && pr.bottom + scrollY > bar.top - CLEAR + 1),
+        into: bar && pr ? Math.round(pr.bottom + scrollY - (bar.top - CLEAR)) : 0,
         // The title ends above the tab bar, and the first field (the home's vision box) is not cut by it.
         titleUnder: bar && bar.height && h1 ? Math.round(h1.getBoundingClientRect().bottom - bar.top) : 0,
         field: (() => { const f = [...document.querySelectorAll("main textarea, main input:not([type=hidden])")].find((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && !e.closest(".form-trap"); }); if (!f || !bar || !bar.height) return 0; const r = f.getBoundingClientRect(); return r.top < bar.top - 1 && r.bottom > bar.top + 1 ? Math.round(r.bottom - bar.top) : 0; })(),
       };
-    });
+    }, CLEAR);
     const found = [];
     if (m.h1 === null) found.push("no title on the page");
     else if (m.head - m.h1 > 1) found.push(`the title begins ${m.head - m.h1}px under the header`);
     if (m.over > 0) found.push(`the page is ${m.over}px wider than the screen`);
     if (m.cut) found.push(`${m.cut} lines run past the side of the screen`);
     if (m.water !== null) { seas++; if (m.water < WATER) found.push(`${m.water}px of water above the night's half-strength point (at least ${WATER})`); }
-    if (m.barCut) found.push(`the tab bar cuts "${m.press}" (${m.into}px of it under the bar)`);
+    if (m.barCut) found.push(`"${m.press}" stands in the tab bar's fade or under the bar (${m.into}px of it past the line ${CLEAR}px above the bar)`);
     if (m.titleUnder > 1) found.push(`the title runs ${m.titleUnder}px under the tab bar`);
     if (m.field) found.push(`the tab bar cuts the first field (${m.field}px of it under the bar)`);
     seen++;

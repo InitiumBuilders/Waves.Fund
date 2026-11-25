@@ -6,6 +6,7 @@
 // into a practice they rise (motus-rise); back out they come forward (way-forward). The light under the tabs travels
 // when the tab changes. Between two pages that open on the sea, the water holds (sea-hold), unless the page you left
 // was scrolled past its sea. With reduced motion there is no transition at all. Added 2026-11-24.
+// A "back:" move clicks the link, waits, then presses the browser's back: the move home has the way reversed.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 const args = process.argv.slice(2);
@@ -20,7 +21,7 @@ const shots = args.includes("--shots") ? args[args.indexOf("--shots") + 1] : nul
 if (shots) mkdirSync(shots, { recursive: true });
 
 // [name, start page, link to click, the arriving words' animation, the light travels (null: the tab does not change,
-// so it is not judged), the sea holds, scroll first]
+// so it is not judged), the sea holds, scroll first, a wide screen (the header's tabs)]
 const MOVES = [
   ["Learn to Guide, by tab", "/learn", ".bottom-nav a[href='/guide']", "way-from-right", true, false],
   ["Guide to Learn, by tab", "/guide", ".bottom-nav a[href='/learn']", "way-from-left", true, false],
@@ -30,14 +31,22 @@ const MOVES = [
   ["Learn to the Manifest, sea to sea", "/learn", "main a[href='/manifest']", "motus-rise", null, true],
   // Scrolled past the sea, the link is one the rig places in view: the site's own click handler still runs.
   ["Learn to the Manifest, scrolled past the sea", "/learn", "a#rig-link", "motus-rise", null, false, true],
+  ["Back from Guide to Learn", "/learn", "back:.bottom-nav a[href='/guide']", "way-from-left", true, false],
+  ["Back out of the Library to Guide", "/guide", "back:main a[href='/guide/library']", "way-forward", null, false],
+  ["Learn to Guide on a wide screen, by the header's tab", "/learn", ".desktop-nav a[href='/guide']", "way-from-right", true, false, false, true],
 ];
 
-const b = webkit ? await pw.webkit.launch() : await pw.chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] });
+// In WebKit each move gets a fresh browser: Playwright's WebKit crashed the eighth page of one long run (2026-11-24),
+// on a move that had passed earlier in the same run and passed again in a browser of its own.
+const launch = () => (webkit ? pw.webkit.launch() : pw.chromium.launch({ channel: "chrome", headless: true, args: ["--use-angle=d3d11", "--ignore-gpu-blocklist", "--enable-gpu"] }));
+let b = await launch();
 let pass = 0, fail = 0;
 const check = (ok, what) => { if (ok) pass++; else fail++; console.log(`${ok ? "pass" : "FAIL"}  ${what}`); };
 
-async function open(reduced) {
-  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: webkit ? undefined : true, hasTouch: true, reducedMotion: reduced ? "reduce" : "no-preference" });
+async function open(reduced, wide) {
+  const ctx = await b.newContext(wide
+    ? { viewport: { width: 1440, height: 900 }, reducedMotion: reduced ? "reduce" : "no-preference" }
+    : { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: webkit ? undefined : true, hasTouch: true, reducedMotion: reduced ? "reduce" : "no-preference" });
   await ctx.route("**/*", (r) => (r.request().method() === "GET" ? r.continue() : r.abort()));
   await ctx.route("**/api/community*", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ projects: [], guides: 1 }) }));
   await ctx.addInitScript(() => {
@@ -60,8 +69,10 @@ async function open(reduced) {
   return ctx;
 }
 
-for (const [name, start, link, arrive, light, sea, scrolled] of MOVES) {
-  const ctx = await open(false);
+for (const [name, start, chosen, arrive, light, sea, scrolled, wide] of MOVES) {
+  const back = chosen.startsWith("back:"), link = back ? chosen.slice(5) : chosen;
+  if (webkit) { await b.close(); b = await launch(); }
+  const ctx = await open(false, wide);
   const p = await ctx.newPage();
   const errors = [];
   p.on("pageerror", (e) => errors.push(String(e).slice(0, 120)));
@@ -77,9 +88,16 @@ for (const [name, start, link, arrive, light, sea, scrolled] of MOVES) {
   const target = await p.$(link);
   if (!target) { check(false, `${name}: no link "${link}" on ${start}`); await ctx.close(); continue; }
   if (!scrolled) { await target.scrollIntoViewIfNeeded().catch(() => {}); await p.evaluate(() => scrollTo(0, 0)).catch(() => {}); }
-  const to = await target.evaluate((a) => new URL(a.href).pathname);
-  await p.evaluate(() => window.__watch());
-  await target.click({ noWaitAfter: true });
+  const via = await target.evaluate((a) => new URL(a.href).pathname), to = back ? start : via;
+  if (back) {
+    // Out by the link, then home by the browser's own back, watched from the press.
+    await target.click({ noWaitAfter: true });
+    await p.waitForTimeout(2600);
+    await p.evaluate(() => { window.__seen = new Set(); window.__watch(); history.back(); });
+  } else {
+    await p.evaluate(() => window.__watch());
+    await target.click({ noWaitAfter: true });
+  }
   if (shots) { let t = 0; for (const ms of [90, 200, 320, 460, 700]) { await p.waitForTimeout(ms - t); t = ms; await p.screenshot({ path: join(shots, `${name.replace(/\W+/g, "-").toLowerCase()}-${ms}.png`) }); } }
   await p.waitForTimeout(2600);
   const r = await p.evaluate(() => {
@@ -96,8 +114,9 @@ for (const [name, start, link, arrive, light, sea, scrolled] of MOVES) {
   const has = (s) => r.seen.some((x) => x.startsWith(s));
   check(r.path === to, `${name}: arrives at ${to} (at ${r.path})`);
   // In WebKit a move from one sea page to another changes page plainly (it crashed with a transition, src/seamless.tsx).
+  // A back is judged by the move it makes: from the page the link opened, home.
   const SEA = (x) => x === "/learn" || x === "/manifest" || x === "/waves" || x.startsWith("/waves/");
-  if (webkit && SEA(start) && SEA(to)) {
+  if (webkit && SEA(back ? via : start) && SEA(to)) {
     check(!r.seen.some((x) => x.includes("::view-transition")), `${name}: in WebKit, a plain change of page (no transition)`);
     check(r.rest && !r.carry, `${name}: the page settles (title at rest, no carry flag left)`);
     check(!errors.length, `${name}: nothing thrown or logged${errors.length ? ": " + errors.join(" | ") : ""}`);

@@ -30,6 +30,12 @@
 .gt-tank-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 22px; }
 /* On a phone the first screen keeps one press; the Give Guide link is the next thing on the page. */
 @media (max-width: 899px) { .gt-tank-actions .text-button { display: none; } }
+/* At the top of the page the stage starts under the header (72px on a phone), so its foot is that much below the
+   screen's, and the 172px kept for the button left it 6px above the tab bar, inside the bar's fade (found 2026-11-24).
+   The words keep the header's height more room below them; on a short phone they start higher to make room. Where even
+   that is not enough, src/give.tsx moves the button wholly below the bar. */
+@media (max-width: 899px) { .gt-tank-copy { padding-bottom: calc(244px + env(safe-area-inset-bottom)); } }
+@media (max-width: 899px) and (max-height: 600px) { .gt-tank-copy { padding-top: 40px; } }
 .gt-chapter-dots { position: absolute; right: 14px; top: 50%; z-index: 2; display: grid; gap: 12px; transform: translateY(-50%); }
 .gt-chapter-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(150, 190, 255, 0.35); transition: transform 0.5s var(--ease-out), background 0.5s; }
 .gt-chapter-dots i.past { background: rgba(94, 233, 255, 0.55); }

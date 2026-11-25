@@ -76,7 +76,7 @@ for (const vp of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
   const { ctx, p, errs, writes } = await open(vp, PAGE);
   await p.waitForSelector("#trustbase", { timeout: 30000 });
   ok((await p.locator("main h1").innerText()).trim() === "Waves.Fund", `${vp.width}: the title is Waves.Fund`);
-  ok((await p.title()) === "Waves.Fund — Wave One", `${vp.width}: the tab is named Wave One`, await p.title());
+  ok((await p.title()) === "Waves.Fund · Wave One", `${vp.width}: the tab is named Wave One`, await p.title());
   const eyebrows = (await p.locator(".pw-chapter > .eyebrow").allInnerTexts()).map((t) => t.trim());
   ok(["THE STORY", "THE NEXT MOVE", "THE TRUSTBASE"].every((e) => eyebrows.includes(e)), `${vp.width}: the three parts are named`, eyebrows.join(", "));
   ok((await p.locator(".tb-day").count()) === days.length, `${vp.width}: one row for each of the ${days.length} days`, await p.locator(".tb-day").count());

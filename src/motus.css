@@ -636,7 +636,9 @@ html[data-motion="off"] .waveguide-scene > canvas { transition: none; }
 .nav-light { position: absolute; bottom: -9px; left: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background: #5ddfff; box-shadow: 0 0 12px 3px #2aafffa0; opacity: 0; pointer-events: none; }
 .nav-item.active .nav-light { opacity: 1; view-transition-name: tab-light; animation: beat-dot 1.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
 .nav-item.active::after { content: none; }
-.desktop-nav .nav-light { display: none; }
+/* On a wide screen the light sits where the header's dot did (until 2026-11-24 evening it was hidden there, and the
+   active header tab showed nothing). It travels between the header's tabs the same way. */
+.desktop-nav .nav-light { bottom: -3px; }
 html[data-motion="off"] .nav-item.active .nav-light { animation: none; }
 ::view-transition-group(tab-light) { animation-duration: 0.6s; animation-timing-function: cubic-bezier(0.3, 0, 0.1, 1); }
 ::view-transition-old(tab-light) { display: none; }
@@ -777,14 +779,20 @@ html[data-motion="off"] .nav-item.active::after { animation: none; }
   .brand { font-size: 20px; gap: 4px; }
   .page-intro h1 { font-size: 37px; }
 }
-/* A short phone held upright: the home's identity gives up a little height so the vision box clears the tab bar. */
-@media (max-width: 799.98px) and (max-height: 600px) and (orientation: portrait) {
+/* A phone held upright with Safari's bars showing: the home's identity gives up a little height so the vision box
+   clears the tab bar (on an iPhone SE), and so Surge clears the bar's fade with the stage narrowed as little as it can
+   be (src/home.tsx useSurgeClear). Up to 600px tall from 2026-11-24; up to 760px since that evening, when Surge was
+   found half under the bar at 393x659. */
+@media (max-width: 799.98px) and (max-height: 760px) and (orientation: portrait) {
   .identity-mark.wave-mark { height: 50px; width: 89px; }
   .identity-name { font-size: 44px; }
   .identity-mantra { margin-top: 6px; }
   .immersive-home .vision-workspace { margin-top: 14px; }
   .energy-stage { margin-top: 4px; }
 }
+/* A stage narrowed to clear the fade keeps three lines of the vision in its box; the type stays at 16px, below which
+   iOS zooms in on a tap. */
+.energy-stage[data-narrow] .vision-input textarea { padding: 9px 13px 17px; line-height: 1.4; }
 @media (max-width: 359.98px) and (max-height: 600px) and (orientation: portrait) {
   .identity-mark.wave-mark { height: 34px; width: 61px; }
   .identity-name { font-size: 35px; }

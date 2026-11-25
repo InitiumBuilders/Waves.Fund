@@ -48,7 +48,8 @@ export function Application({
       !project ? "" : take ? incoming!.story : draft?.story && draft.story.startsWith(state.vision) ? draft.story : state.vision || draft?.story || "",
     ),
     [budget, setBudget] = useState(""),
-    [category, setCategory] = useState("Aquatic Food Systems"),
+    // No focus until one is chosen: a default filed every application that skipped it under the first choice.
+    [category, setCategory] = useState(""),
     [milestone, setMilestone] = useState(take ? incoming!.move : draft?.move || ""),
     [availability, setAvailability] = useState(""),
     [consent, setConsent] = useState(false),
@@ -274,11 +275,12 @@ export function Application({
             <p id="wave-model-help" className="fine-print">A starting point for your own Wave. Your Guide will shape it with you, and it can change as your mission grows.</p>
             <div className="form-pair">
               <label>
-                Focus
+                Focus (Optional)
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                 >
+                  <option value="" disabled hidden></option>
                   <option>Aquatic Food Systems</option>
                   <option>Education & Learning</option>
                   <option>Community Opportunity</option>

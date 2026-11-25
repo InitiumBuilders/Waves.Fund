@@ -5,6 +5,7 @@ import { ArrowRight, ArrowUpRight, BadgeCheck, Lock, MapPin, ShieldCheck, UserCh
 import { DONATE, External } from "./ui";
 import { StandingString, WaveList } from "./symbols";
 import { useStateStore } from "./state";
+import { useBelowTheBar } from "./bar";
 import type { RippleHandle } from "./together/ripple";
 import "./together/give-landing.css";
 
@@ -120,6 +121,8 @@ function Chapters({ actions }: { actions: ReactNode }) {
   const section = useRef<HTMLElement>(null);
   const progress = useRef(0);
   const handle = useRef<RippleHandle | null>(null);
+  const actionsRow = useRef<HTMLDivElement>(null);
+  useBelowTheBar(actionsRow);
   const [chapter, setChapter] = useState(0);
   const { motion } = useStateStore();
   useEffect(() => {
@@ -154,7 +157,7 @@ function Chapters({ actions }: { actions: ReactNode }) {
               </li>
             ))}
           </ol>
-          <div className="gt-tank-actions">{actions}</div>
+          <div ref={actionsRow} className="gt-tank-actions">{actions}</div>
         </div>
         <div className="gt-chapter-dots" aria-hidden="true">{CHAPTERS.map((c, i) => <i key={c.line} className={i === chapter ? "on" : i < chapter ? "past" : ""} />)}</div>
       </div>

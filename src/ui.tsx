@@ -132,6 +132,7 @@ function GrowTab() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
   const release = useRef<ReturnType<typeof setTimeout> | null>(null);
   const opened = useRef(false);
   const [holding, setHolding] = useState(false);
@@ -139,11 +140,13 @@ function GrowTab() {
   const waves = pathname === "/waves" || pathname === "/projects";
   const cancel = () => {
     if (timer.current) clearTimeout(timer.current);
-    timer.current = null;
+    if (hold.current) clearTimeout(hold.current);
+    timer.current = hold.current = null;
     setHolding(false);
   };
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
+    if (hold.current) clearTimeout(hold.current);
     if (release.current) clearTimeout(release.current);
   }, []);
   return (
@@ -156,7 +159,9 @@ function GrowTab() {
         if (event.button !== 0 || waves) return;
         const tab = event.currentTarget;
         opened.current = false;
-        setHolding(true);
+        // A tap is not a hold: the tab shows it is held only after 150ms of press. Marked at once, the click of a quick
+        // tap could arrive while the tab still read as held, and the page then changed without its motion.
+        hold.current = setTimeout(() => setHolding(true), 150);
         timer.current = setTimeout(() => {
           opened.current = true;
           setHolding(false);

@@ -130,4 +130,7 @@ html:has(.begin-page), body:has(.begin-page) { overflow-x:clip; }
 html[data-motion="off"] .begin-page *,html[data-motion="off"] .begin-page *::before { animation:none!important; transition:none!important; }
 @media(prefers-reduced-motion:reduce) { .begin-page *, .begin-page *::before { animation:none!important; transition:none!important; } }
 @media print { .begin-page { max-width:none; color:#000!important; }.begin-jump,.begin-contents,.begin-anatomy,.begin-bridge { display:none; }.begin-reading-layout { display:block; }.begin-page * { color:#000!important; text-shadow:none!important; box-shadow:none!important; }.begin-essay,.begin-preface,.begin-engagements article,.begin-pass { background:none; }.begin-table { overflow:visible; }.begin-table table { min-width:0; }.begin-chapter { break-inside:auto; }.begin-chapter-chevron,.begin-open-all { display:none; }.begin-markdown h2,.begin-markdown h3 { break-after:avoid; } }
+/* A phone 601 to 700px tall (an Android phone at 360x640, an iPhone with Safari's bars): the button rises clear of
+   the tab bar's fade. At 360x640 it stood 12px into it (2026-11-24); shorter phones keep it wholly below the bar. */
+@media (max-width: 799px) and (min-height: 601px) and (max-height: 700px) { .begin-lead { margin-top: 12px; } .begin-actions { margin-top: 16px; } }
 }

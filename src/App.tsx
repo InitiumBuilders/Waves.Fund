@@ -107,7 +107,7 @@ function ScreenPosition() {
     const last = pathname.split("/").filter(Boolean).pop()?.replaceAll("-", " ") || "";
     const within = pathname.startsWith("/give/with/") ? "Your Give Guide" : pathname.startsWith("/give/wave/") ? "Shared Wave" : pathname.startsWith("/give/") ? "Give Together" : "";
     const title = TITLES[pathname] || within || (last ? last[0].toUpperCase() + last.slice(1) : TITLES["/"]);
-    document.title = `Waves.Fund — ${title}`;
+    document.title = `Waves.Fund · ${title}`;
   }, [pathname]);
   return null;
 }

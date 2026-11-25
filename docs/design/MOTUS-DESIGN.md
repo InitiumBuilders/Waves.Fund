@@ -475,12 +475,17 @@ grid, the band's least height `--sea-band` (160 to 320px, 132px on a screen up t
 their own night. The sea is told the words stand at its foot (`side`), so it frames its horizon in the band whatever
 the band's shape.
 
-The first button stands clear of the tab bar (94px, with a fade 72px above it) or wholly below it, never cut.
+The first button stands clear of the tab bar or wholly below it, never cut. The bar is 94px tall and darkens the 72px
+above it, 90% dark where the bar begins, so "clear" means ending 40px above the bar (`CLEAR` in `src/bar.ts`, since
+2026-11-24): a button inside the fade looks switched off. Before that evening the fit measured to the bar's own top,
+and the first buttons on Learn and Give stood in the fade on an iPhone.
 `sea-hero.tsx` measures it once the words are laid out, by layout and not by the transform they rise in with: if the
 bar would cut it, the band gives up the difference down to 110px, or grows so the button waits below the bar. It is
-measured again only when the words change size, so Safari's bars sliding never move anything. On an SE the Waves
-button sits in the fade and Learn's and the Manifest's wait below the bar; on an iPhone every first button shows,
-Learn's and the Manifest's inside the fade.
+measured again only when the words change size, so Safari's bars sliding never move anything. Where each first
+button stands since 2026-11-24 (the fade rule): on an iPhone with the bars (393x659) every first button shows clear
+of the fade, Surge included; on an Android phone (360x640) Learn's and the Guide's wait below the bar; on an SE
+(375x548) Surge, Learn's and the Guide's wait below it and Give's shows; at 320x460 the home's, Learn's, Give's and
+the Guide's wait below it.
 A wide screen that is short (a large phone on its side) grows its stage instead of cutting the words.
 
 The same rule holds on every page (since the evening of 2026-11-21): the first row of buttons in a page's intro, and
@@ -490,9 +495,11 @@ also tightens its rhythm on short screens so its button clears the bar on an iPh
 
 320x460 (since 2026-11-24) is the first iPhone SE with Safari's bars, and Display Zoom on the SE and the minis. The
 title ends above the tab bar there too, and so does the first field: on an SE the home's vision box used to run 32px
-under the bar. A short phone held upright (up to 600px tall) gives the home's identity a little less height, the
-mark and the name smaller, so the box clears the bar; at 320 wide the vision stage is smaller and shows two lines of
-the vision. At 320 wide the sea titles are 34px over a 110px band and page titles 32px on a short screen, 37px on a
+under the bar. A phone held upright with Safari's bars showing (up to 760px tall) gives the home's identity a little
+less height, the mark and the name smaller, so the box clears the bar; at 320 wide the vision stage is smaller and
+shows two lines of the vision. Surge is the home's first button: where it would stand in the bar's fade (half under
+the bar at 393x659 until 2026-11-24), the stage gives up width until it clears, its height following the art's
+960:696, never below 214px (`useSurgeClear` in `src/home.tsx`); on an iPhone SE Surge waits wholly below the bar. At 320 wide the sea titles are 34px over a 110px band and page titles 32px on a short screen, 37px on a
 taller one. The small-phone header (15px of padding, a 20px brand) is restated at the end of `motus.css`: later
 rules had overridden the old one in `style.css`, and the brand touched its icons. Every page reflows at 320 wide
 (WCAG 1.4.10, `scripts/qa/reflow.mjs`).
@@ -513,8 +520,14 @@ wave from the point touched. Three things carry over:
   In WebKit that one move changes page plainly for now: Playwright's WebKit crashed the page on it whenever a view
   transition ran (the live build did too, and never without the transition). A real iPhone has not been tried.
 
+The browser's own back and forward move the same way, by where they go (since 2026-11-24): back from the Guide to
+Learn arrives from the left, back out of the Library comes forward. `seamless.tsx` hears the back before the router
+does, lets the page being left be captured, then hands the router the move inside the transition. In WebKit a back or
+forward into a sea page stays a plain change for now: Playwright's WebKit crashed the page on a back from the Guide to
+Learn with the transition, twice in a run with several scenes before it (never when run alone).
+
 With reduced motion, or the pause control on, a move is a plain change of page. `scripts/qa/moves.mjs` checks each
-kind of move in the gate.
+kind of move in the gate, the browser's back included.
 
 ## A form answers as it is filled (2026-11-24)
 
