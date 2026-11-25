@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "92191895e5027465e9fff0965a50167950a80eee",
+   "date": "2026-11-25",
+   "move": "Inside a Wave the Waves tab stays lit and leads back out to the sea, and a mouse over a Wave's light shows a hand"
+  },
+  {
    "sha": "4bc15db3d6de65305432a06801149cb260a2f703",
    "date": "2026-11-25",
    "move": "A tap on a Wave's light dives into it, and going back rises out to the sea of Waves"

@@ -13,3 +13,4 @@ public-repo
 dist-old/
 dist-new/
 scripts/qa/.a11y/
+.claude

@@ -5,6 +5,7 @@ import { ArrowRight, ArrowUpRight, Check, Share2, ShieldCheck } from "lucide-rea
 import { ButtonLink } from "./ui";
 import { SeaHero } from "./sea-hero";
 import { takeZoom } from "./zoom";
+import { toggleDay } from "./day-zoom";
 import { BEAT, still as stillMotion } from "./cadence";
 import { sound } from "./sound";
 import { mindWave } from "./mind/WaveMind";
@@ -202,7 +203,8 @@ function TrustBase({ wave }: { wave: FoundingWave }) {
                 <div className="tb-one"><div className="tb-head">{head}</div><p className="tb-first">{link(d.moves[0], 0)}</p></div>
               ) : (
                 <details open={bad > 0 || undefined}>
-                  <summary><span className="tb-head">{head}</span><span className="tb-first">{d.moves[0].move}</span></summary>
+                  {/* A day opens into its moves and closes back into the day as a zoom (src/day-zoom.ts). */}
+                  <summary onClick={(e) => { e.preventDefault(); toggleDay(e.currentTarget.parentElement as HTMLDetailsElement); }}><span className="tb-head">{head}</span><span className="tb-first">{d.moves[0].move}</span></summary>
                   <ol className="tb-moves">{d.moves.map((m, k) => <li key={m.sha}>{link(m, k)}</li>)}</ol>
                 </details>
               )}

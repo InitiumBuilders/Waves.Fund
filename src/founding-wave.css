@@ -20,6 +20,8 @@
 .tb-day summary::-webkit-details-marker { display: none; }
 .tb-day summary::after { content: ""; position: absolute; right: 8px; top: 5px; width: 8px; height: 8px; border-right: 1.5px solid #8fdcff; border-bottom: 1.5px solid #8fdcff; transform: rotate(45deg); transition: transform 0.3s var(--ease); }
 .tb-day details[open] > summary::after { transform: translateY(4px) rotate(225deg); }
+/* Closing (src/day-zoom.ts), the day stays open until its moves are back in their lines; the arrow turns at once. */
+.tb-day details.tb-closing > summary::after { transform: rotate(45deg); }
 .tb-day summary:focus-visible { outline: 2px solid #b8f6ff; outline-offset: 6px; }
 .tb-head { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
 .tb-head time { font-size: 13px; font-weight: 640; letter-spacing: 0.1em; text-transform: uppercase; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -28,7 +30,9 @@
 .tb-one .tb-state { margin-right: 36px; }
 .tb-day .tb-first { margin: 0; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; overflow-wrap: anywhere; }
 .tb-day details[open] > summary .tb-first { display: none; }
-.tb-moves { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 14px; }
+/* The moves keep the column of the summary's first line (it leaves room for the arrow), so the first move keeps its
+   shape as the day opens and closes (src/day-zoom.ts). */
+.tb-moves { list-style: none; margin: 10px 0 0; padding: 0 36px 0 0; display: grid; gap: 14px; }
 .tb-moves li { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; overflow-wrap: anywhere; }
 .tb-first a, .tb-moves a { text-decoration: none; }
 .tb-first a:hover, .tb-first a:focus-visible, .tb-moves a:hover, .tb-moves a:focus-visible { text-decoration: underline; text-underline-offset: 4px; }

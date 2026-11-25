@@ -86,6 +86,10 @@ const [screens, contexts, reflow] = await Promise.all([
 const moves = await rig("moves", "moves.mjs", base);
 { const ok = num(moves.out, /(\d+) passed, \d+ failed/g)[0], bad = num(moves.out, /\d+ passed, (\d+) failed/g)[0]; verdict("moving between pages", bad === 0 && ok > 0, bad !== undefined ? `${ok} passed, ${bad} failed` : "did not finish, see moves.log", moves); }
 
+// A day in the TrustBase opening into its moves and closing back into the day (src/day-zoom.ts).
+const dayzoom = await rig("dayzoom", "dayzoom.mjs", base);
+{ const ok = num(dayzoom.out, /(\d+) passed, \d+ failed/g)[0], bad = num(dayzoom.out, /\d+ passed, (\d+) failed/g)[0]; verdict("a day opens into its moves and back", bad === 0 && ok > 0, bad !== undefined ? `${ok} passed, ${bad} failed` : "did not finish, see dayzoom.log", dayzoom); }
+
 // Each keeps its own place in the list, so a rig that is skipped cannot hand its place to the next one.
 const [axe, tour, styles] = await Promise.all([
   rig("axe", "axe.mjs", base),
