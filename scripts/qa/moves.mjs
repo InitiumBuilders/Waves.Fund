@@ -1,7 +1,8 @@
 // Moving between pages (src/seamless.tsx): each move is one view transition with the way it should have. For each move
 // the real link or tab is clicked, so the site's own handler runs; during the transition the rig records which
 // animations run, and once it ends it checks the page has settled (the words at rest, no flag left behind).
-//   node scripts/qa/moves.mjs <base> [--shots <folder>] [--webkit]
+//   node scripts/qa/moves.mjs <base> [--shots <folder>] [--webkit] [--only <part of a move's name>]
+// Each move's name is printed as it starts, so a browser that crashes names the move it crashed in.
 // Expected: between the four practices the words arrive from the side travelled toward (way-from-right or -left);
 // into a practice they rise (motus-rise); back out they come forward (way-forward). The light under the tabs travels
 // when the tab changes. Between two pages that open on the sea, the water holds (sea-hold), unless the page you left
@@ -17,8 +18,9 @@ const webkit = args.includes("--webkit");
 const pw = await import(webkit
   ? process.env.PLAYWRIGHT_WEBKIT || "file:///C:/Users/Initi/iphone-duos-sold/node_modules/playwright-core/index.mjs"
   : process.env.PLAYWRIGHT_CORE || "file:///C:/Users/Initi/semble-up-citizens/node_modules/playwright-core/index.mjs");
-const base = args.find((a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--shots");
-if (!base) { console.error("usage: node scripts/qa/moves.mjs <base> [--shots <folder>]"); process.exit(2); }
+const base = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--shots" && args[i - 1] !== "--only");
+if (!base) { console.error("usage: node scripts/qa/moves.mjs <base> [--shots <folder>] [--webkit] [--only <name part>]"); process.exit(2); }
+const only = args.includes("--only") ? args[args.indexOf("--only") + 1] : null;
 const shots = args.includes("--shots") ? args[args.indexOf("--shots") + 1] : null;
 if (shots) mkdirSync(shots, { recursive: true });
 
@@ -76,6 +78,8 @@ async function open(reduced, wide) {
 }
 
 for (const [name, start, chosen, arrive, light, sea, scrolled, wide] of MOVES) {
+  if (only && !name.includes(only)) continue;
+  console.log(`move: ${name}`);
   const back = chosen.startsWith("back:"), link = back ? chosen.slice(5) : chosen;
   const tapLight = link.startsWith("light:") ? { i: Number(link.split(":")[1]), to: link.split(":")[2] } : null;
   if (webkit) { await b.close(); b = await launch(); }

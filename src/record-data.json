@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "5128b97db15f54a67d9b6557aa99e45ab7d987f1",
+   "date": "2026-11-25",
+   "move": "The public feed lists the store at most once every 30 seconds"
+  },
+  {
    "sha": "6ac708e1ff62b05667b897d9b471825a6530be8d",
    "date": "2026-11-25",
    "move": "Text sent through the forms can no longer hide characters that reorder what a reader sees"
