@@ -1,5 +1,6 @@
 import { put, get, list, del } from "@vercel/blob";
 import { notify } from "./_notify.js";
+import { visible } from "./_text.js";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 const key = () => process.env.WAVES_ADMIN_KEY;
 const dataKey = () => process.env.WAVES_DATA_KEY;
@@ -12,7 +13,7 @@ const same = (a, b) =>
   timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const fail = (status, message) => Object.assign(new Error(message), { status });
 const text = (v, max = 500) =>
-  typeof v === "string" ? v.trim().slice(0, max) : "";
+  typeof v === "string" ? visible(v).trim().slice(0, max) : "";
 const waveTypes = new Set(["growth", "funding", "innovation", "story", "hype", "maker", "work", "brave"]);
 async function read(path) {
   const file = await get(path, { access: "private", useCache: false });

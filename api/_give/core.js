@@ -12,6 +12,7 @@
 
 import { neon } from "@neondatabase/serverless";
 import { createHmac, randomUUID } from "node:crypto";
+import { visible } from "../_text.js";
 
 export const fault = (status, message) => Object.assign(new Error(message), { status });
 
@@ -22,7 +23,7 @@ export const WAYS = ["one", "team", "own"];
 export const KINDS = ["volunteer", "teachback", "event"];
 const REASONS = ["unsafe", "harassment", "spam", "fake", "underage", "other"];
 
-const clean = (v, max) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "");
+const clean = (v, max) => (typeof v === "string" ? visible(v).replace(/\s+/g, " ").trim().slice(0, max) : "");
 const prose = (v, max) => (typeof v === "string" ? v.replace(/\r\n?/g, "\n").replace(/\n{3,}/g, "\n\n").trim().slice(0, max) : "");
 const pick = (v, allowed) => (Array.isArray(v) ? [...new Set(v.filter((x) => allowed.includes(x)))] : []);
 const tags = (v, n = 12, max = 32) => (Array.isArray(v) ? [...new Set(v.map((x) => clean(x, max).toLowerCase()).filter(Boolean))].slice(0, n) : []);

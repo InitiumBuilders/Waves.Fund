@@ -1,7 +1,8 @@
 import { createHash, createHmac, randomBytes, randomUUID } from 'node:crypto';
+import { visible } from '../_text.js';
 
 export const fault = (status, message) => Object.assign(new Error(message), { status });
-const clean = (value, max = 2000) => typeof value === 'string' ? value.trim().slice(0, max) : '';
+const clean = (value, max = 2000) => typeof value === 'string' ? visible(value).trim().slice(0, max) : '';
 const email = value => clean(value, 254).toLowerCase();
 const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const uuid = value => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || '');
