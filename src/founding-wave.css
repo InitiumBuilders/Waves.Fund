@@ -62,6 +62,9 @@
 .tb-timed .tb-day:not(.tb-in) .tb-lines { opacity: 0; }
 .tb-timed .tb-day.tb-in .tb-wave { animation: tb-settle 1.5s linear both; }
 .tb-timed .tb-day.tb-in .tb-lines { animation: tb-laid 1.5s linear both; }
+/* A ground already laid when a day opens or closes stays laid (src/day-zoom.ts): pushed down the page by the zoom, a
+   scroll-driven ground would play its wave again from the first frame. A wave that was kept becomes ground. */
+.tb-ground.tb-kept .tb-wave, .tb-ground.tb-kept .tb-lines { animation: none; }
 
 /* The check reaching a day: each line has its own light, and they run left to right one after another, top line
    first, so each move is seen to answer. A move that does not match gets no light. A day in which every move

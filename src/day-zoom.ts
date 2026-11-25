@@ -39,6 +39,12 @@ export function toggleDay(d: HTMLDetailsElement) {
   const day = d.closest(".tb-day");
   const ground = day?.querySelector<HTMLElement>(".tb-ground");
   if (still() || !day || !ground || typeof d.animate !== "function") { d.open = opening; return; }
+  // Every ground already laid stays laid while the page moves (founding-wave.css, .tb-kept): a scroll-driven ground
+  // pushed down by the zoom would otherwise play its wave again from the first frame.
+  for (const g of document.querySelectorAll<HTMLElement>(".tb-ground:not(.tb-kept)")) {
+    const laid = g.querySelector<HTMLElement>(".tb-lines");
+    if (laid && getComputedStyle(laid).opacity === "1") g.classList.add("tb-kept");
+  }
   const first = d.querySelector<HTMLElement>("summary .tb-first");
   const lines = ground.querySelector<HTMLElement>(".tb-lines");
   const gap = parseFloat(getComputedStyle(ground).getPropertyValue("--gap")) || 5;
