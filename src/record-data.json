@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "232977e98770667410e3750b689284f517db2dbe",
+   "date": "2026-11-25",
+   "move": "Opening a day in the TrustBase leaves the ground below it at rest"
+  },
+  {
    "sha": "bd56ece87b9ded9c55c7715776be6d3131fed23e",
    "date": "2026-11-25",
    "move": "Diving into a Wave no longer stops at the page change, and its words rise once the camera has pulled back"

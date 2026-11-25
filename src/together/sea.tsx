@@ -292,6 +292,11 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
     // 0 is its own view, 1 is close on the light at poseAt. A flight moves pose over time; nothing else moves the camera.
     let eyeD = [0, 0, 0], aimD = [0, 0, 0], pose = 0, poseAt: [number, number] | null = null, mark = true;
     let fly: { at: [number, number]; k0: number; k1: number; t0: number; ms: number; done?: () => void } | null = null;
+    // A page changed with the sea carried across (seamless.tsx) shows the water it came from over itself for 0.54 s
+    // (sea-hold in motus.css). Opened by a zoom, the camera stays close on its light until then, so the two close
+    // views meet and the pull-back starts as the old water gives way; until 2026-11-25 it ran unseen under it.
+    const CARRY_HOLD = 540;
+    let holdUntil = 0;
     const zoomed = arriveRef.current !== undefined;
     let arriving = motion && zoomed ? arriveRef.current! : -1;
     arriveRef.current = undefined;
@@ -350,10 +355,11 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
       // A page opened by a zoom starts close on its light and pulls back to its own view.
       if (arriving >= 0) {
         const s = f.sources[arriving];
-        if (s) { poseAt = [s.x, s.y]; pose = 1; fly = { at: poseAt, k0: 1, k1: 0, t0: performance.now(), ms: 1400 }; } else arrived();
+        if (s) { poseAt = [s.x, s.y]; pose = 1; fly = { at: poseAt, k0: 1, k1: 0, t0: performance.now(), ms: 1400 }; holdUntil = performance.now() + CARRY_HOLD; } else arrived();
         arriving = -1;
       }
       if (fly) {
+        if (fly.k1 < fly.k0 && performance.now() < holdUntil && document.documentElement.hasAttribute("data-sea-carry")) fly.t0 = performance.now();
         const u = Math.min(1, (performance.now() - fly.t0) / fly.ms);
         // Going in it gathers speed toward the light; coming out it is fast at first and settles, as if surfacing.
         const e = fly.k1 > fly.k0 ? u * u * (1.6 - 0.6 * u) : 1 - Math.pow(1 - u, 4);
