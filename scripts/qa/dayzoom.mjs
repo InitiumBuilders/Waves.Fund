@@ -77,7 +77,9 @@ for (const view of Object.keys(VIEWS)) {
     check(r.opened, `${name}: it opens fully`);
     check(near(r.o.r0h, r.b.fh), `${name}: the first move keeps its shape (${r.b.fh.toFixed(1)} and ${r.o.r0h.toFixed(1)} tall)`);
     check(near(r.c0.row0, r.o.row0) && near(r.c0.ground, r.o.ground) && near(r.c0.next, r.o.next), `${name}: nothing moves as it closes`);
-    check(r.closed && !r.a.mark && near(r.a.first, r.b.first) && near(r.a.ground, r.b.ground) && near(r.a.next, r.b.next) && r.a.sy === r.b.sy, `${name}: it closes back to where it began`);
+    const back = r.closed && !r.a.mark && near(r.a.first, r.b.first) && near(r.a.ground, r.b.ground) && near(r.a.next, r.b.next) && r.a.sy === r.b.sy;
+    const f = (x) => x.toFixed(1);
+    check(back, `${name}: it closes back to where it began${back ? "" : ` (closed ${r.closed}, mark left ${r.a.mark}, first ${f(r.b.first)} to ${f(r.a.first)}, ground ${f(r.b.ground)} to ${f(r.a.ground)}, next ${f(r.b.next)} to ${f(r.a.next)}, scroll ${r.b.sy} to ${r.a.sy})`}`);
   }
   // Enter on a day opens it and closes it again.
   const keys = await (async () => {

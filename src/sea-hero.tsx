@@ -72,11 +72,20 @@ export function SeaHero({ eyebrow, title, children, actions, model, handle, onLi
   const wide = useWide();
   const hero = useRef<HTMLElement>(null);
   useClearOfTheBar(hero);
+  // Opened by a zoom, the words wait until the camera has pulled back (the sea says when), then rise over clear water.
+  // Until 2026-11-25 they rose at once and the close sea's dots ran through them for half a second. They never wait
+  // longer than 2.6 s, whatever happens to the sea.
+  const [holding, setHolding] = useState(arriveAt !== undefined);
+  useEffect(() => {
+    if (!holding) return;
+    const t = window.setTimeout(() => setHolding(false), 2600);
+    return () => clearTimeout(t);
+  }, [holding]);
   return (
-    <header ref={hero} className={`sea-hero ${diving ? "sea-diving " : ""}${className}`}>
+    <header ref={hero} className={`sea-hero ${diving ? "sea-diving " : ""}${holding ? "sea-arriving " : ""}${className}`}>
       <div className="sea-hero-stage" data-window>
         <Suspense fallback={<div className="ripple sea-hero-scene" aria-hidden="true" />}>
-          <Sea model={model} handle={handle} tappable onLight={onLight} className="sea-hero-scene" maxDpr={1.25} still={still} side={wide ? "left" : "bottom"} arriveAt={arriveAt} aria-hidden="true" />
+          <Sea model={model} handle={handle} tappable onLight={onLight} className="sea-hero-scene" maxDpr={1.25} still={still} side={wide ? "left" : "bottom"} arriveAt={arriveAt} onArrived={() => setHolding(false)} aria-hidden="true" />
         </Suspense>
         <div className="sea-hero-copy">
           <p className="eyebrow">{eyebrow}</p>

@@ -215,6 +215,8 @@ function Projects() {
           if (diving) return;
           // Down into the Wave's light first; its page then opens close on its own light and pulls back.
           if (p?.slug && sea.current?.flyTo && !still()) {
+            // The Wave's page loads while the camera flies, in case the quiet warm-up (src/seamless.tsx) has not yet.
+            void import("./founding-wave");
             setDiving(true);
             sound("page");
             // The page changes when the camera arrives, or after 1.4s whatever happens (a hidden tab draws no frames).

@@ -121,10 +121,12 @@ export function Seamless() {
   useEffect(() => startCadence(), []);
   useEffect(() => { shown = pathname; }, [pathname]);
 
-  // The pages behind the Guide tab, the Teachback, the Praxis and the sea load quietly once this page is idle, so
-  // moving to them is instant. (The Give app is left to load on demand: it brings the sign-in library.)
+  // The pages behind the Guide tab, the Teachback, the Praxis, the sea and a Wave's own page load quietly once this
+  // page is idle, so moving to them is instant; a Wave's page is where the zoom from the Waves sea lands, and loaded on
+  // demand it held the screen still for a third of a second between the dive and the arrival. (The Give app is left
+  // to load on demand: it brings the sign-in library.)
   useEffect(() => {
-    const warm = () => { void import("./guide-library"); void import("./teachback"); void import("./begin"); void import("./together/sea"); };
+    const warm = () => { void import("./guide-library"); void import("./teachback"); void import("./begin"); void import("./together/sea"); void import("./founding-wave"); };
     const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
     if (idle) idle(warm, { timeout: 5000 }); else setTimeout(warm, 3000);
   }, []);

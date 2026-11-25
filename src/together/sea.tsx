@@ -213,10 +213,13 @@ const invert = (m: M4): M4 | null => {
 
 type Tap = { x: number; y: number; born: number };
 
-export function Sea({ model, className = "", handle, tappable = false, onLight, maxDpr = 1.25, still = 6, side = "auto", arriveAt, children, onPointerDown, ...rest }: {
+export function Sea({ model, className = "", handle, tappable = false, onLight, maxDpr = 1.25, still = 6, side = "auto", arriveAt, onArrived, children, onPointerDown, ...rest }: {
   model: MutableRefObject<RippleModel>; className?: string; handle?: MutableRefObject<RippleHandle | null>; tappable?: boolean; maxDpr?: number; still?: number;
   /** Opened by a zoom (src/zoom.ts): the light (its index in the frame) the camera starts close on, before pulling back. */
   arriveAt?: number;
+  /** Told once the camera opened by a zoom has pulled back far enough for the page's words to rise clear of the
+      water, or at once when there is no zoom to show (motion off, no WebGL, a context lost, a light not there). */
+  onArrived?: () => void;
   /** Where the page's words stand over the water, so it runs quieter there and the camera frames the rest. */
   side?: "auto" | "left" | "bottom";
   /** A tap that lands on one of the model's lights is a choice: its index, and where on the screen. */
@@ -239,23 +242,28 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
   keep.current ??= keeper();
   // Read once: a scene built again after a lost context does not zoom a second time.
   const arriveRef = useRef(arriveAt);
+  const arrivedRef = useRef(onArrived);
+  arrivedRef.current = onArrived;
 
   useEffect(() => {
     const c = canvas.current, b = box.current;
     if (!c || !b) return;
+    // The page's words wait for a zoom's arrival; whatever stops it lets them rise at once (told once per build).
+    let told = false;
+    const arrived = () => { if (!told) { told = true; arrivedRef.current?.(); } };
     const gl = c.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: false });
-    if (!gl) { b.dataset.still = "on"; return; }
+    if (!gl) { b.dataset.still = "on"; arrived(); return; }
     // A browser may take a page's context away (an iPhone does it to a page left in the background) and give it
     // back later. Asking for it back (preventDefault) is what makes the browser return it, and keeper() says when
     // to stop asking. Everything made with the old one is gone by then, so the scene is built again from the start.
     let gone = gl.isContextLost(), raf = 0;
     keep.current!.built();
-    const lost = (e: Event) => { if (keep.current!.ask()) e.preventDefault(); gone = true; cancelAnimationFrame(raf); raf = 0; b.dataset.still = "on"; delete b.dataset.ready; };
+    const lost = (e: Event) => { if (keep.current!.ask()) e.preventDefault(); gone = true; cancelAnimationFrame(raf); raf = 0; b.dataset.still = "on"; delete b.dataset.ready; arrived(); };
     const back = () => { delete b.dataset.still; setGen((g) => g + 1); };
     c.addEventListener("webglcontextlost", lost);
     c.addEventListener("webglcontextrestored", back);
     const unlisten = () => { c.removeEventListener("webglcontextlost", lost); c.removeEventListener("webglcontextrestored", back); };
-    if (gone) { b.dataset.still = "on"; return unlisten; }
+    if (gone) { b.dataset.still = "on"; arrived(); return unlisten; }
     // The programs compile without holding the page still (mind/programs.ts). Nothing is drawn until they are ready.
     const sea = begin(gl, VS, FS), light = begin(gl, LIGHT_VS, LIGHT_FS), ground = begin(gl, GROUND_VS, GROUND_FS, ["aPos"]);
     const all = [sea, light, ground];
@@ -264,7 +272,7 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
       if (ready) return true;
       if (failed || gl.isContextLost() || !settled(gl, all)) return false;
       const why = finish(gl, all);
-      if (why) { failed = true; b.dataset.still = "on"; if (import.meta.env.DEV) console.error(why); return false; }
+      if (why) { failed = true; b.dataset.still = "on"; arrived(); if (import.meta.env.DEV) console.error(why); return false; }
       ready = true; b.dataset.ready = "on";
       // Counted from now as well: where shaders compile slowly, getting ready takes seconds of its own.
       keep.current!.built();
@@ -284,8 +292,10 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
     // 0 is its own view, 1 is close on the light at poseAt. A flight moves pose over time; nothing else moves the camera.
     let eyeD = [0, 0, 0], aimD = [0, 0, 0], pose = 0, poseAt: [number, number] | null = null, mark = true;
     let fly: { at: [number, number]; k0: number; k1: number; t0: number; ms: number; done?: () => void } | null = null;
-    let arriving = motion && arriveRef.current !== undefined ? arriveRef.current : -1;
+    const zoomed = arriveRef.current !== undefined;
+    let arriving = motion && zoomed ? arriveRef.current! : -1;
     arriveRef.current = undefined;
+    if (!zoomed || arriving < 0) arrived();
     const t0 = performance.now();
     clockRef.current = () => (motion ? (performance.now() - t0) / 1000 : still);
     // Dev only: ?seaoff=N removes one term, to find where a colour comes from. 1 halo, 2 core, 3 reflection,
@@ -340,7 +350,7 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
       // A page opened by a zoom starts close on its light and pulls back to its own view.
       if (arriving >= 0) {
         const s = f.sources[arriving];
-        if (s) { poseAt = [s.x, s.y]; pose = 1; fly = { at: poseAt, k0: 1, k1: 0, t0: performance.now(), ms: 1400 }; }
+        if (s) { poseAt = [s.x, s.y]; pose = 1; fly = { at: poseAt, k0: 1, k1: 0, t0: performance.now(), ms: 1400 }; } else arrived();
         arriving = -1;
       }
       if (fly) {
@@ -348,6 +358,8 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
         // Going in it gathers speed toward the light; coming out it is fast at first and settles, as if surfacing.
         const e = fly.k1 > fly.k0 ? u * u * (1.6 - 0.6 * u) : 1 - Math.pow(1 - u, 4);
         pose = fly.k0 + (fly.k1 - fly.k0) * e; poseAt = fly.at; aim();
+        // Pulled back to within a twelfth of its own view: the water near the words is clear, so they may rise.
+        if (fly.k1 < fly.k0 && pose < 0.08) arrived();
         if (u >= 1) { const done = fly.done; fly = null; if (pose === 0) mark = true; done?.(); }
       }
       const list = [...f.sources];
