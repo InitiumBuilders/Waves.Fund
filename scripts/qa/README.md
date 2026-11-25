@@ -39,7 +39,8 @@ number, measure the live site in the same minute; if that is slow too, it is the
 
 Since 2026-11-20 the public copy goes first, so the build that goes live already lists its own move on the Record
 and on Wave One's TrustBase, and one deploy is enough. (Before, the Record lagged a push and needed a second deploy.)
-Nothing below starts without August's word for that build.
+Since 2026-11-25 August's standing word covers every release, so it runs through to the promote without waiting
+for him. Every check still holds the promote until it passes.
 
 1. `npx tsc --noEmit -p tsconfig.json` and `npx vite build`; the gate and the checks for what changed, on the local
    build. Read the screenshots before calling them proof. Commit. The build itself refuses output that Safari 15.4

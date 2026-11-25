@@ -445,18 +445,23 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
     return () => { if (!import.meta.env.DEV) c?.getContext("webgl2")?.getExtension("WEBGL_lose_context")?.loseContext(); };
   }, []);
 
+  // The light under a point on the sea (a finger gets more room than a mouse): its index, or -1 for open water.
+  const lightNear = (sx: number, sy: number, touch: boolean) => {
+    let hit = -1, best = touch ? 40 : 28;
+    last.current.forEach((s, i) => {
+      if (s.a < 0.05) return;
+      const q = project.current(s.x, s.y);
+      const d = q ? Math.hypot(q[0] - sx, q[1] - sy) : Infinity;
+      if (d < best) { best = d; hit = i; }
+    });
+    return hit;
+  };
   const tap = (e: PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const sx = e.clientX - r.left, sy = e.clientY - r.top;
     // A tap on a light is a choice; anywhere else it is a ripple.
     if (onLight) {
-      let hit = -1, best = e.pointerType === "touch" ? 40 : 28;
-      last.current.forEach((s, i) => {
-        if (s.a < 0.05) return;
-        const q = project.current(s.x, s.y);
-        const d = q ? Math.hypot(q[0] - sx, q[1] - sy) : Infinity;
-        if (d < best) { best = d; hit = i; }
-      });
+      const hit = lightNear(sx, sy, e.pointerType === "touch");
       if (hit >= 0) { sound("light", hit); onLight(hit, { x: e.clientX, y: e.clientY }); return; }
     }
     if (!tappable || !motion) return;
@@ -466,8 +471,15 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
     sound("tap", Math.round((sx / r.width) * 100));
     if (taps.current.length > 4) taps.current.shift();
   };
+  // With a mouse, a light that can be chosen shows a hand; the open water keeps its crosshair.
+  const hover = (e: PointerEvent<HTMLDivElement>) => {
+    if (!onLight || e.pointerType !== "mouse") return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const over = lightNear(e.clientX - r.left, e.clientY - r.top, false) >= 0;
+    if (over !== (e.currentTarget.style.cursor === "pointer")) e.currentTarget.style.cursor = over ? "pointer" : "";
+  };
   return (
-    <div ref={box} className={`ripple sea ${className}`} data-quiet onPointerDown={(e) => { tap(e); onPointerDown?.(e); }} {...rest}>
+    <div ref={box} className={`ripple sea ${className}`} data-quiet onPointerDown={(e) => { tap(e); onPointerDown?.(e); }} onPointerMove={hover} {...rest}>
       <canvas ref={canvas} aria-hidden="true" />
       {children}
     </div>

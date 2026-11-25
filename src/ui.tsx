@@ -17,6 +17,7 @@ import { startTour } from "./tour-launch";
 import { SoundButton } from "./sound";
 import { MindAnchor, mindWave } from "./mind/WaveMind";
 import { useBelowTheBar } from "./bar";
+import { waveSlug } from "./zoom";
 import type { FieldMode } from "./mind/modes";
 export const CONTACT = "August@Outlier.Systems";
 export const DONATE =
@@ -137,7 +138,9 @@ function GrowTab() {
   const opened = useRef(false);
   const [holding, setHolding] = useState(false);
   const [opening, setOpening] = useState(false);
-  const waves = pathname === "/waves" || pathname === "/projects";
+  // A Wave's own page is inside Waves: you dive into it from the Waves sea and rise back out to it (src/zoom.ts), so
+  // the tab keeps its name and its light there, and leads back out to the sea.
+  const waves = pathname === "/waves" || pathname === "/projects" || waveSlug(pathname) !== null;
   const cancel = () => {
     if (timer.current) clearTimeout(timer.current);
     if (hold.current) clearTimeout(hold.current);

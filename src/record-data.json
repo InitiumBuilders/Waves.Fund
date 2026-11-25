@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "4bc15db3d6de65305432a06801149cb260a2f703",
+   "date": "2026-11-25",
+   "move": "A tap on a Wave's light dives into it, and going back rises out to the sea of Waves"
+  },
+  {
    "sha": "60fb2283a82ffa2a408b2054189b43df29012bcd",
    "date": "2026-11-24",
    "move": "Surge and the first buttons stand clear of the tab bar, back and forward move like a tap, and wide screens show the active tab"

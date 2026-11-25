@@ -76,6 +76,8 @@ export async function limit(req, action, maximum = 60) {
 }
 export function respondError(res, error) {
   const status = Number.isInteger(error.status) ? error.status : 503;
-  if (status >= 500) console.error('Workspace request unavailable:', error.name || 'Error');
+  /* A refusal raised on purpose with fault() carries its own status (the workspace switched off answers 503) and is
+     the answer, not a failure. Only an error nobody expected, which has no status, is written to the error log. */
+  if (!Number.isInteger(error.status)) console.error('Workspace request unavailable:', error.name || 'Error');
   return res.status(status).json({ error: status >= 500 ? message : error.message });
 }
