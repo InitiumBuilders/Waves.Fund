@@ -41,6 +41,13 @@ if (flag("--build")) {
   if (r.code !== 0) { report(); process.exit(1); }
 }
 
+// The server's own pieces, checked without a browser or a store (api/_text.js, api/_feed.js, api/_limit.js).
+for (const [file, name] of [["text", "the forms keep only visible text"], ["feed", "the public feed lists at most every 30 s"], ["limit", "the hourly limit spares the store"]]) {
+  const r = await run(`unit-${file}`, process.execPath, [join(root, "scripts", `${file}.test.mjs`)], root);
+  const n = num(r.out, /(\d+) checks passed/g)[0];
+  verdict(name, r.code === 0 && n > 0, r.code === 0 && n > 0 ? `${n} checks pass` : `failed, see unit-${file}.log`, r);
+}
+
 // A first visit, alone, before the other rigs load the machine: a brand-new browser profile, so nothing is kept from
 // an earlier visit. The page must not be held still. (Until 2026-11-20 the field's shaders froze every page for 4 to
 // 6 s on a first visit, and no check here could see it, because a machine that has visited once keeps them.)

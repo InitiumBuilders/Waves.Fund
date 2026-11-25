@@ -1,6 +1,8 @@
 import { put, get, list, del } from "@vercel/blob";
 import { notify } from "./_notify.js";
 import { visible } from "./_text.js";
+import { makeFeed } from "./_feed.js";
+import { makeLimit } from "./_limit.js";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 const key = () => process.env.WAVES_ADMIN_KEY;
 const dataKey = () => process.env.WAVES_DATA_KEY;
@@ -39,6 +41,8 @@ async function files(prefix) {
   } while (cursor);
   return all;
 }
+// The public feed, listed at most once per 30 seconds per instance (api/_feed.js); writes below clear it.
+const publicFeed = makeFeed({ files, read: (path) => read(path) });
 function cookie(req, name) {
   const match = (req.headers.cookie || "")
     .split("; ")
@@ -64,24 +68,16 @@ function setCookie(res, name, value, seconds) {
     `${name}=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${seconds}`,
   );
 }
+// Each sender's hourly slots (api/_limit.js): create-only files in the store, with the slots this instance knows are
+// taken skipped.
+const take = makeLimit({ write, fail });
 async function limit(req, action, max) {
   const ip = String(
     req.headers["x-vercel-forwarded-for"] ||
       req.headers["x-forwarded-for"] ||
       "unknown",
   ).split(",")[0];
-  const bucket = hash(`${ip}:${action}:${Math.floor(Date.now() / 3600000)}`);
-  for (let n = 0; n < max; n++) {
-    try {
-      await write(`limits/${bucket}/${n}.json`, {
-        expires: Date.now() + 3600000,
-      });
-      return;
-    } catch (e) {
-      if (!/already exists/i.test(e.message)) throw e;
-    }
-  }
-  throw fail(429, "Please try again in an hour.");
+  return take(hash(`${ip}:${action}:${Math.floor(Date.now() / 3600000)}`), max);
 }
 function originOK(req) {
   const origin = req.headers.origin;
@@ -116,36 +112,27 @@ export default async function handler(req, res) {
       );
     const action = String(req.query.action || "public");
     if (req.method === "GET" && action === "public") {
-      const rows = await Promise.all(
-        (await files("published/")).map((f) => read(f.pathname)),
-      );
+      const feed = await publicFeed.get();
       const voter = verify(cookie(req, "waves_learner"));
-      const projects = await Promise.all(
-        rows.filter(Boolean).map(async (p) => {
-          const votes = await files(`votes/${p.id}/`);
-          // When the latest signals arrived, to the hour, so the Waves page can replay them on the sea. Signals are
-          // anonymous; the hour is all that is shared.
-          const pulses = votes
-            .map((v) => { const d = new Date(v.uploadedAt); d.setUTCMinutes(0, 0, 0); return d.getTime(); })
-            .filter(Number.isFinite)
-            .sort((a, b) => a - b)
-            .slice(-11)
-            .map((ms) => new Date(ms).toISOString());
-          return {
-            ...p,
-            signals: votes.length,
-            pulses,
-            supported:
-              !!voter &&
-              votes.some((v) =>
-                v.pathname.endsWith("/" + hash(voter) + ".json"),
-              ),
-          };
-        }),
-      );
-      return res
-        .status(200)
-        .json({ projects, guides: (await files("guides/")).length });
+      const mine = voter ? "/" + hash(voter) + ".json" : null;
+      const projects = feed.rows.map((p, i) => {
+        const votes = feed.votes[i];
+        // When the latest signals arrived, to the hour, so the Waves page can replay them on the sea. Signals are
+        // anonymous; the hour is all that is shared.
+        const pulses = votes
+          .map((v) => { const d = new Date(v.uploadedAt); d.setUTCMinutes(0, 0, 0); return d.getTime(); })
+          .filter(Number.isFinite)
+          .sort((a, b) => a - b)
+          .slice(-11)
+          .map((ms) => new Date(ms).toISOString());
+        return {
+          ...p,
+          signals: votes.length,
+          pulses,
+          supported: !!mine && votes.some((v) => v.pathname.endsWith(mine)),
+        };
+      });
+      return res.status(200).json({ projects, guides: feed.guides });
     }
     if (req.method === "GET" && action === "admin") {
       if (!admin(req)) throw fail(401, "Sign in to review applications.");
@@ -279,6 +266,7 @@ export default async function handler(req, res) {
         ...(await files(`votes/${b.id}/`)).map((f) => f.pathname),
       ];
       await del(paths);
+      publicFeed.clear();
       return res.json({ ok: true });
     }
     if (action === "review") {
@@ -320,6 +308,7 @@ export default async function handler(req, res) {
       if (a.status === "Guide Accepted")
         await write(`guides/${a.id}.json`, { id: a.id }, true);
       else await del(`guides/${a.id}.json`);
+      publicFeed.clear();
       return res.json({ ok: true });
     }
     if (action === "vote") {
@@ -337,6 +326,7 @@ export default async function handler(req, res) {
       const path = `votes/${b.id}/${hash(voter)}.json`;
       if (b.withdraw === true) {
         await del(path);
+        publicFeed.clear();
         return res.json({ supported: false });
       }
       try {
@@ -344,6 +334,7 @@ export default async function handler(req, res) {
       } catch (e) {
         if (!/already exists/i.test(e.message)) throw e;
       }
+      publicFeed.clear();
       return res.json({ supported: true });
     }
     throw fail(404, "Not found.");

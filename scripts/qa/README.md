@@ -20,9 +20,11 @@ when a session ends, so they live here now. Each one drives a real browser throu
 
 ## The gate
 
-`node scripts/qa/gate.mjs <url>` runs the checks a release must pass and gives one verdict: a first visit in a
+`node scripts/qa/gate.mjs <url>` runs the checks a release must pass and gives one verdict: the server's own pieces
+without a browser (the forms' text cleaning, the public feed's 30 s cache and the hourly limit: `scripts/text.test.mjs`,
+`feed.test.mjs`, `limit.test.mjs`, since 2026-11-25), a first visit in a
 brand-new browser profile is not held still (worst pause under 1.5 s, on the home page and on a page that opens on
-the sea; it runs first and alone, because the other rigs load the machine), console and page errors on every route
+the sea; it is the first browser rig and runs alone, because the other rigs load the machine), console and page errors on every route
 at both sizes, no page wider than a phone, centred lines still centred (a second pass before failing), the first
 screen at the heights real phones give, scenes that draw again after the browser takes their WebGL contexts away,
 text that reflows at 320 wide (WCAG 1.4.10, since 2026-11-24), moving between pages (since 2026-11-24), accessibility (axe-core, WCAG 2.2 AA), and a walk

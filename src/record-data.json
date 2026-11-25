@@ -2,6 +2,11 @@
  "repo": "https://github.com/InitiumBuilders/Waves.Fund",
  "moves": [
   {
+   "sha": "6ac708e1ff62b05667b897d9b471825a6530be8d",
+   "date": "2026-11-25",
+   "move": "Text sent through the forms can no longer hide characters that reorder what a reader sees"
+  },
+  {
    "sha": "acee53d4b37771e797b3675ab0ea45d0f969abbb",
    "date": "2026-11-25",
    "move": "On a wide screen the dive lands close on the Wave's light before it rises out of it"
