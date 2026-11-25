@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Check, Share2, ShieldCheck } from "lucide-react";
 import { ButtonLink } from "./ui";
 import { SeaHero } from "./sea-hero";
+import { takeZoom } from "./zoom";
 import { BEAT, still as stillMotion } from "./cadence";
 import { sound } from "./sound";
 import { mindWave } from "./mind/WaveMind";
@@ -46,6 +47,7 @@ function FoundingWavePage({ wave }: { wave: FoundingWave }) {
   const current = useRef<PublicWaveRecord | null>(null);
   if (!current.current) current.current = asPublicWave(wave);
   const model = useRef<RippleModel>(waveSea(current));
+  const [arriveAt] = useState(() => (takeZoom(`/waves/${wave.slug}`) ? 0 : undefined));
   // Arriving at a part of the page (the Wave One card links to #trustbase): the page is lazy, so go there once it stands.
   useEffect(() => {
     const id = window.location.hash.slice(1);
@@ -65,6 +67,7 @@ function FoundingWavePage({ wave }: { wave: FoundingWave }) {
       <SeaHero
         eyebrow={wave.number}
         model={model}
+        arriveAt={arriveAt}
         title={wave.title}
         actions={<>
           <a className="glow-button" href="#next-move">Offer Your Help <ArrowRight size={18} /></a>

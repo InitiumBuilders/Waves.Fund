@@ -24,6 +24,7 @@ uniform vec3 uEye;
 uniform vec2 uPlane, uRes;
 uniform int uSide;   // where the words stand over the water: 0 the left, 1 the foot
 uniform float uDpr, uTime, uWave, uK, uW, uHeight, uDot, uLines, uDepth;
+uniform float uZoom;   // how far the camera has gone down into a light (0..1)
 uniform int uCount, uCols, uRows, uOff;   // uOff: a dev-only switch that removes one term (see Sea)
 uniform vec4 uA[${MAX}];   // x, y, amplitude, phase
 uniform vec4 uB[${MAX}];   // born, hue, size, reach
@@ -108,6 +109,7 @@ void main() {
   // Fades: the horizon, the near edge, the sides, the canvas edge, and quieter water under the words
   // (the left on a wide screen, the bottom on a tall one).
   float words = uSide == 0 ? smoothstep(-0.9, -0.1, ndc.x) : smoothstep(-1.0, -0.2, ndc.y);
+  words = mix(words, 1.0, uZoom);   // down at a light the words have gone, so the water is full everywhere
   float fade = smoothstep(1.0, 0.7, depth) * smoothstep(0.0, 0.03, depth) * smoothstep(0.5, 0.4, abs(P.x) / uPlane.x)
              * smoothstep(1.0, 0.86, max(abs(ndc.x), abs(ndc.y))) * (0.12 + 0.88 * words);
   float lit = 0.14 + 0.95 * diff * diff;
@@ -139,7 +141,7 @@ const LIGHT_VS = `#version 300 es
 precision highp float;
 uniform mat4 uVP;
 uniform vec2 uPlane;
-uniform float uDpr, uHalo;
+uniform float uDpr, uHalo, uZoom;
 uniform vec4 uA[${MAX}];
 uniform vec4 uB[${MAX}];
 out vec3 vCol; out float vA;
@@ -149,9 +151,10 @@ void main() {
   vec3 P = vec3(s.x - uPlane.x * 0.5, uPlane.y - s.y, 2.0);
   vec4 clip = uVP * vec4(P, 1.0);
   gl_Position = clip;
-  float scale = clamp(uPlane.y * 0.75 / max(clip.w, 1.0), 0.35, 2.2);
+  // Close to a light it grows past its usual size: that is the light you are going into.
+  float scale = clamp(uPlane.y * 0.75 / max(clip.w, 1.0), 0.35, mix(2.2, 7.0, uZoom));
   gl_PointSize = (uHalo > 0.5 ? 18.0 : 9.0) * b.z * uDpr * scale;
-  vA = min(s.z * 1.6, 1.0) * (uHalo > 0.5 ? 0.3 : 1.0);
+  vA = min(s.z * 1.6, 1.0) * (uHalo > 0.5 ? 0.3 + 0.35 * uZoom : 1.0);
   vCol = uHalo > 0.5 ? mix(CYAN, VIOLET, b.y * 0.5) : WHITE;
 }`;
 const LIGHT_FS = `#version 300 es
@@ -210,8 +213,10 @@ const invert = (m: M4): M4 | null => {
 
 type Tap = { x: number; y: number; born: number };
 
-export function Sea({ model, className = "", handle, tappable = false, onLight, maxDpr = 1.25, still = 6, side = "auto", children, onPointerDown, ...rest }: {
+export function Sea({ model, className = "", handle, tappable = false, onLight, maxDpr = 1.25, still = 6, side = "auto", arriveAt, children, onPointerDown, ...rest }: {
   model: MutableRefObject<RippleModel>; className?: string; handle?: MutableRefObject<RippleHandle | null>; tappable?: boolean; maxDpr?: number; still?: number;
+  /** Opened by a zoom (src/zoom.ts): the light (its index in the frame) the camera starts close on, before pulling back. */
+  arriveAt?: number;
   /** Where the page's words stand over the water, so it runs quieter there and the camera frames the rest. */
   side?: "auto" | "left" | "bottom";
   /** A tap that lands on one of the model's lights is a choice: its index, and where on the screen. */
@@ -232,6 +237,8 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
   const [gen, setGen] = useState(0);
   const keep = useRef<ReturnType<typeof keeper> | null>(null);
   keep.current ??= keeper();
+  // Read once: a scene built again after a lost context does not zoom a second time.
+  const arriveRef = useRef(arriveAt);
 
   useEffect(() => {
     const c = canvas.current, b = box.current;
@@ -273,6 +280,12 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
     const A = new Float32Array(MAX * 4), B = new Float32Array(MAX * 4);
     // A box narrower than 1.6:1 gets water wider than itself, so it reads as a sea and not a strip.
     let w = 1, h = 1, pw = 1, pd = 1, dpr = 1, visible = true, cols = 120, rows = 80, vp: M4 = perspective(1, 1, 1, 10), inv: M4 | null = null, eye = [0, 0, 0];
+    // The camera's own place (eyeD looking at aimD) and, during a zoom, how far it has gone down toward a light: pose
+    // 0 is its own view, 1 is close on the light at poseAt. A flight moves pose over time; nothing else moves the camera.
+    let eyeD = [0, 0, 0], aimD = [0, 0, 0], pose = 0, poseAt: [number, number] | null = null, mark = true;
+    let fly: { at: [number, number]; k0: number; k1: number; t0: number; ms: number; done?: () => void } | null = null;
+    let arriving = motion && arriveRef.current !== undefined ? arriveRef.current : -1;
+    arriveRef.current = undefined;
     const t0 = performance.now();
     clockRef.current = () => (motion ? (performance.now() - t0) / 1000 : still);
     // Dev only: ?seaoff=N removes one term, to find where a colour comes from. 1 halo, 2 core, 3 reflection,
@@ -280,15 +293,27 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
     const off = import.meta.env.DEV ? Number(new URLSearchParams(location.search).get("seaoff") || 0) : 0;
     // Words at the foot (a phone) or at the left (a wide page). Left to itself, the box's shape decides.
     const foot = () => (sideRef.current === "auto" ? w < h : sideRef.current === "bottom");
+    const aim = () => {
+      let e = eyeD, tg = aimD;
+      if (pose > 0 && poseAt) {
+        // Down toward the light: just behind it and a little above the water, looking past it toward the horizon.
+        const L = [poseAt[0] - pw * 0.5, h - poseAt[1], 0];
+        const eF = [L[0], L[1] - h * 0.3, h * 0.12], tF = [L[0], L[1] + h * 0.22, 0];
+        e = eyeD.map((v, i) => v + (eF[i] - v) * pose); tg = aimD.map((v, i) => v + (tF[i] - v) * pose);
+      }
+      eye = e;
+      const proj = perspective(0.95, w / h, h * (0.05 - 0.035 * pose), h * 4);
+      vp = mul(proj, lookAt(e, tg, [0, 0, 1])); inv = invert(vp);
+    };
     const camera = () => {
       // Just above the near edge, looking out toward the far edge, which sits a little below the top.
       pw = Math.max(w, Math.min(h * 1.6, w * 1.6)); pd = h * 1.8;
-      eye = [0, -h * 0.25, h * 0.42];
+      eyeD = [0, -h * 0.25, h * 0.42];
       // A tall box looks further down, so its horizon sits high and most of the box is water. So does any box
       // whose words stand at its foot, whatever its shape (a short phone gives the sea a wide, low band).
-      const view = lookAt(eye, [0, h * 0.7, foot() ? -h * 0.17 : 0], [0, 0, 1]);
-      const proj = perspective(0.95, w / h, h * 0.05, h * 4);
-      vp = mul(proj, view); inv = invert(vp);
+      aimD = [0, h * 0.7, foot() ? -h * 0.17 : 0];
+      aim();
+      mark = true;
       cols = Math.round(Math.min(200, Math.max(90, pw / 8.5)));
       rows = Math.round(Math.min(190, Math.max(80, pd / 7)));
     };
@@ -312,6 +337,19 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
       if (gone || !arrive()) return;
       const t = clockRef.current();
       const f = model.current(t, pw, h);
+      // A page opened by a zoom starts close on its light and pulls back to its own view.
+      if (arriving >= 0) {
+        const s = f.sources[arriving];
+        if (s) { poseAt = [s.x, s.y]; pose = 1; fly = { at: poseAt, k0: 1, k1: 0, t0: performance.now(), ms: 1400 }; }
+        arriving = -1;
+      }
+      if (fly) {
+        const u = Math.min(1, (performance.now() - fly.t0) / fly.ms);
+        // Going in it gathers speed toward the light; coming out it is fast at first and settles, as if surfacing.
+        const e = fly.k1 > fly.k0 ? u * u * (1.6 - 0.6 * u) : 1 - Math.pow(1 - u, 4);
+        pose = fly.k0 + (fly.k1 - fly.k0) * e; poseAt = fly.at; aim();
+        if (u >= 1) { const done = fly.done; fly = null; if (pose === 0) mark = true; done?.(); }
+      }
       const list = [...f.sources];
       last.current = f.sources;
       taps.current = taps.current.filter((x) => t - x.born < 4);
@@ -332,7 +370,7 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
       gl.useProgram(sea.p); gl.bindVertexArray(emptyVao);
       gl.uniformMatrix4fv(sea.u("uVP"), false, vp); gl.uniform3f(sea.u("uEye"), eye[0], eye[1], eye[2]);
       gl.uniform2f(sea.u("uPlane"), pw, h); gl.uniform2f(sea.u("uRes"), w, h); gl.uniform1f(sea.u("uDpr"), dpr);
-      gl.uniform1i(sea.u("uSide"), foot() ? 1 : 0);
+      gl.uniform1i(sea.u("uSide"), foot() ? 1 : 0); gl.uniform1f(sea.u("uZoom"), pose);
       gl.uniform1f(sea.u("uTime"), t); gl.uniform1f(sea.u("uWave"), wave);
       gl.uniform1f(sea.u("uK"), k); gl.uniform1f(sea.u("uW"), k * f.speed);
       gl.uniform1f(sea.u("uHeight"), f.lambda * 0.2); gl.uniform1f(sea.u("uDot"), 2.4); gl.uniform1f(sea.u("uDepth"), pd);
@@ -347,10 +385,15 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
       // The lights on the water: halo, then core.
       if (n) {
         gl.useProgram(light.p);
-        gl.uniformMatrix4fv(light.u("uVP"), false, vp); gl.uniform2f(light.u("uPlane"), pw, h); gl.uniform1f(light.u("uDpr"), dpr);
+        gl.uniformMatrix4fv(light.u("uVP"), false, vp); gl.uniform2f(light.u("uPlane"), pw, h); gl.uniform1f(light.u("uDpr"), dpr); gl.uniform1f(light.u("uZoom"), pose);
         gl.uniform4fv(light.u("uA"), A); gl.uniform4fv(light.u("uB"), B);
         if (off !== 1) { gl.uniform1f(light.u("uHalo"), 1); gl.drawArrays(gl.POINTS, 0, n); }
         if (off !== 2) { gl.uniform1f(light.u("uHalo"), 0); gl.drawArrays(gl.POINTS, 0, n); }
+      }
+      // Where the lights stand on the screen, for the checks (scripts/qa/moves.mjs taps them like a finger).
+      if (mark && pose === 0 && f.sources.length) {
+        mark = false;
+        b.dataset.lights = f.sources.slice(0, 6).map((s) => { const q = project.current(s.x, s.y); return q ? `${Math.round(q[0])},${Math.round(q[1])}` : "-"; }).join(" ");
       }
     };
     const resize = () => {
@@ -371,7 +414,16 @@ export function Sea({ model, className = "", handle, tappable = false, onLight, 
     const onVis = () => { if (!document.hidden) start(); };
     document.addEventListener("visibilitychange", onVis);
     resize(); start();
-    if (handle) handle.current = { redraw: () => { if (!raf) draw(); else start(); } };
+    if (handle) handle.current = {
+      redraw: () => { if (!raf) draw(); else start(); },
+      // Down into a light, then held there for the page that takes over. With motion off there is no flight.
+      flyTo: (i, ms = 760) => new Promise<void>((done) => {
+        const s = last.current[i];
+        if (!s || !motion || gone || !ready) { done(); return; }
+        fly = { at: [s.x, s.y], k0: pose, k1: 1, t0: performance.now(), ms, done };
+        start();
+      }),
+    };
     if (import.meta.env.DEV) (window as Window & { __sea?: unknown }).__sea = { count: () => last.current.length, at: (i: number) => { const s = last.current[i]; return s ? project.current(s.x, s.y) : null; } };
     return () => {
       cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();

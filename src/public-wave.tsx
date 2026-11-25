@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowRight, Download, Share2, Check, RefreshCw, ShieldCheck } from "lucide-react";
 import { ButtonLink, WaveMark } from "./ui";
 import { SeaHero } from "./sea-hero";
+import { takeZoom } from "./zoom";
 import { BEAT, still as stillMotion } from "./cadence";
 import { sound } from "./sound";
 import { safeWebLink, saveFile, waveRequest } from "./workspace-client";
@@ -51,6 +52,7 @@ export function PublicWave({ fallback }: { fallback?: ReactNode } = {}) {
   const current = useRef<PublicWaveRecord | null>(null);
   current.current = wave;
   const model = useRef<RippleModel>(waveSea(current));
+  const [arriveAt] = useState(() => (takeZoom(`/waves/${slug}`) ? 0 : undefined));
   useEffect(() => { let active = true; setLoading(true); setWave(null); setError(""); waveRequest<{wave:PublicWaveRecord}>("", undefined, slug).then(r => { if(active) setWave(r.wave); }).catch(e => { if(active) setError(e.message); }).finally(() => { if(active) setLoading(false); }); return () => { active = false; }; }, [slug]);
   const share = async () => { const url = `${window.location.origin}/waves/${slug}`; try { if (navigator.share) await navigator.share({title:wave?.title,url}); else { await navigator.clipboard.writeText(url); setShared(true); } } catch { setShared(false); } };
   if (loading) return <div className="workspace-page workspace-loading" role="status">Opening this Wave…</div>;
@@ -62,6 +64,7 @@ export function PublicWave({ fallback }: { fallback?: ReactNode } = {}) {
     <SeaHero
       eyebrow={wave.template && wave.template !== "custom" ? `${wave.template.toUpperCase()} WAVE` : "A WAVE ON WAVES.FUND"}
       model={model}
+      arriveAt={arriveAt}
       title={wave.title}
       actions={<>{open && <a className="glow-button" href="#offer-help">Offer Your Help <ArrowRight size={18} /></a>}<button type="button" className="text-button" onClick={share}>{shared ? <Check size={17}/> : <Share2 size={17}/>}{shared ? "Link Copied" : "Share This Wave"}</button></>}
     >

@@ -32,14 +32,15 @@ import { Vessel } from "./vessel";
 import { useStateStore } from "./state";
 import { FlowNavigation } from "./flow";
 import { go, PageMain, Seamless } from "./seamless";
+import { expectZoom, takeZoom } from "./zoom";
 import { TourLauncher } from "./tour-launch";
 import { SeaHero } from "./sea-hero";
 import { sound } from "./sound";
 import { waveRequest } from "./workspace-client";
 import type { PublicWave } from "./workspace-types";
-import { BEAT } from "./cadence";
+import { BEAT, still } from "./cadence";
 import { hash } from "./together/ripple";
-import type { RippleModel, Source } from "./together/ripple";
+import type { RippleHandle, RippleModel, Source } from "./together/ripple";
 import { api, CommunityProvider, getReceipts, useCommunity } from "./community";
 import { readDraft } from "./your-wave";
 import { TheRecord } from "./record";
@@ -197,14 +198,28 @@ function Projects() {
     return d.title.trim() || d.story.trim() || state.vision.trim() ? { title: d.title, sent: false } : null;
   })();
   const model = useRef<RippleModel>(wavesModel(list, mine));
+  // The zoom between the map and a Wave (src/zoom.ts): coming back from a Wave, the sea opens close on its light.
+  const sea = useRef<RippleHandle | null>(null);
+  const [diving, setDiving] = useState(false);
+  const [arriveAt] = useState(() => { const z = takeZoom("/waves"); const i = z?.slug ? filtered.findIndex((p) => p.slug === z.slug) : -1; return i >= 0 ? i : undefined; });
   return (
     <div className="waves-page">
       <SeaHero
         eyebrow="COMMUNITY REVIEW"
         model={model}
+        handle={sea}
+        arriveAt={arriveAt}
+        diving={diving}
         onLight={(i, at) => {
           const p = list.current[i];
-          if (p?.slug) go(navigate, `/waves/${p.slug}`, at);
+          if (diving) return;
+          // Down into the Wave's light first; its page then opens close on its own light and pulls back.
+          if (p?.slug && sea.current?.flyTo && !still()) {
+            setDiving(true);
+            sound("page");
+            // The page changes when the camera arrives, or after 1.4s whatever happens (a hidden tab draws no frames).
+            Promise.race([sea.current.flyTo(i, 760), new Promise((r) => setTimeout(r, 1400))]).then(() => { expectZoom(`/waves/${p.slug}`); go(navigate, `/waves/${p.slug}`, at); });
+          } else if (p?.slug) go(navigate, `/waves/${p.slug}`, at);
           else if (p) { setSelected(p); mindWave(at, 1); } else go(navigate, mine.current?.sent ? "/grow" : "/apply", at);
         }}
         title={

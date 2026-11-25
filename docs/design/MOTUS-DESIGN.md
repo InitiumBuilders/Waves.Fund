@@ -529,6 +529,20 @@ Learn with the transition, twice in a run with several scenes before it (never w
 With reduced motion, or the pause control on, a move is a plain change of page. `scripts/qa/moves.mjs` checks each
 kind of move in the gate, the browser's back included.
 
+## Zooming between the map and a Wave (2026-11-25)
+
+The Waves sea is the fund's map: each Wave is a light on it. A tap on a Wave's light sends the camera down into it
+(0.76s, gathering speed) while the page's words step aside, so for a moment there is only the water and the light.
+The Wave's own page then opens close on its own light and pulls back (1.4s, settling), and its words rise around it.
+Coming back out, by the browser's back, a tab or a link, is the reverse: the map opens close on that Wave's light and
+pulls back until the light takes its place among the others. The last frame of the dive and the first of the arrival
+are both close on a light, so the change of page happens inside the light.
+
+It is the sea's own camera (`flyTo` and `arriveAt` in `src/together/sea.tsx`), handed from page to page by
+`src/zoom.ts`, and needs no view transition: in WebKit, where a move between two seas changes page plainly, the
+dive and the pull-back still run. With reduced motion or the pause control on there is no flight and the page changes
+at once. A hidden tab draws no frames, so the page changes after 1.4s whatever the camera is doing.
+
 ## A form answers as it is filled (2026-11-24)
 
 Each required part of a form lights beside its label once what is written there is complete (the browser's own

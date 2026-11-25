@@ -72,4 +72,7 @@ html[data-motion="off"] .sea-hero-copy > * { animation: none; }
   .sea-hero-copy { position: relative; inset: auto; min-height: calc(100svh - var(--head)); padding: 28px 0 36px var(--gutter); }
   .sea-hero-copy h1 { font-size: clamp(40px, 10svh, 72px); }
 }
+/* The camera going down into a Wave's light (src/zoom.ts): the words step aside, so for a moment it is only the
+   water and the light. */
+.sea-hero.sea-diving .sea-hero-copy { opacity: 0; transform: translate3d(0, 14px, 0); pointer-events: none; transition: opacity 0.42s var(--ease), transform 0.6s var(--ease-out); }
 }

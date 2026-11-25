@@ -54,7 +54,7 @@ function useClearOfTheBar(hero: RefObject<HTMLElement | null>) {
    On a phone the water keeps a band of its own above the words (sea-hero.css), and the sea is told the words are
    at its foot, so it frames itself in that band whatever the band's shape. With Safari's bars showing, an iPhone's
    first screen is about 659px tall; before 2026-11-21 the words covered nearly all of the water at that height. */
-export function SeaHero({ eyebrow, title, children, actions, model, handle, onLight, still = 4.5, className = "" }: {
+export function SeaHero({ eyebrow, title, children, actions, model, handle, onLight, still = 4.5, className = "", arriveAt, diving = false }: {
   eyebrow: string;
   title: ReactNode;
   children?: ReactNode;
@@ -64,15 +64,19 @@ export function SeaHero({ eyebrow, title, children, actions, model, handle, onLi
   onLight?: (index: number, at: { x: number; y: number }) => void;
   still?: number;
   className?: string;
+  /** Opened by a zoom: the light the camera starts close on (src/zoom.ts). */
+  arriveAt?: number;
+  /** The camera is going down into a light: the words step aside so it is only water and the light. */
+  diving?: boolean;
 }) {
   const wide = useWide();
   const hero = useRef<HTMLElement>(null);
   useClearOfTheBar(hero);
   return (
-    <header ref={hero} className={`sea-hero ${className}`}>
+    <header ref={hero} className={`sea-hero ${diving ? "sea-diving " : ""}${className}`}>
       <div className="sea-hero-stage" data-window>
         <Suspense fallback={<div className="ripple sea-hero-scene" aria-hidden="true" />}>
-          <Sea model={model} handle={handle} tappable onLight={onLight} className="sea-hero-scene" maxDpr={1.25} still={still} side={wide ? "left" : "bottom"} aria-hidden="true" />
+          <Sea model={model} handle={handle} tappable onLight={onLight} className="sea-hero-scene" maxDpr={1.25} still={still} side={wide ? "left" : "bottom"} arriveAt={arriveAt} aria-hidden="true" />
         </Suspense>
         <div className="sea-hero-copy">
           <p className="eyebrow">{eyebrow}</p>

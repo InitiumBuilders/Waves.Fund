@@ -5,6 +5,7 @@ import type { NavigateFunction } from "react-router-dom";
 import { arriveOnScroll, startCadence, still, waveOnArrival } from "./cadence";
 import { mindWave } from "./mind/WaveMind";
 import { sound } from "./sound";
+import { expectZoom, waveSlug } from "./zoom";
 
 type Transitioning = Document & { startViewTransition?: (update: () => Promise<void>) => { finished?: Promise<void>; ready?: Promise<void> } | undefined };
 
@@ -27,6 +28,9 @@ const appleEngine = () => navigator.vendor.startsWith("Apple");
 // One test build turns the guard off (VITE_WEBKIT_SEA_GUARD=off), so the move can be tried on a real iPhone.
 const guarded = import.meta.env.VITE_WEBKIT_SEA_GUARD !== "off";
 const plainInWebKit = (from: string, to: string) => guarded && appleEngine() && SEA(from) && SEA(to);
+
+// Out of a Wave to the map: the map opens close on that Wave's light and pulls back (src/zoom.ts).
+const zoomOut = (from: string, to: string) => { const slug = waveSlug(from); if (slug && (to === "/waves" || to === "/projects")) expectZoom("/waves", slug); };
 
 // The way of the move in progress, read once by the page it opens.
 let arriving: { to: string; way: string } | null = null;
@@ -80,6 +84,7 @@ export function go(navigate: NavigateFunction, to: string, point?: { x: number; 
   if (point) mindWave(point, 0.9);
   sound("page");
   const path = to.split(/[?#]/)[0];
+  if (!still()) zoomOut(location.pathname, path);
   if (typeof doc.startViewTransition !== "function" || still() || plainInWebKit(location.pathname, path)) { navigate(to); return; }
   moveWith(() => navigate(to), path, wayBetween(location.pathname, to), !to.includes("#"));
 }
@@ -94,6 +99,7 @@ if (typeof window !== "undefined") {
     if (handing) return;
     const doc = document as Transitioning;
     const from = shown, to = location.pathname;
+    if (!still()) zoomOut(from, to);
     if (to === from || typeof doc.startViewTransition !== "function" || still() || plainInWebKit(from, to)) return;
     e.stopImmediatePropagation();
     sound("page");

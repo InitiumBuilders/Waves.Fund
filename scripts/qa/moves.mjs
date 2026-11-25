@@ -7,6 +7,8 @@
 // when the tab changes. Between two pages that open on the sea, the water holds (sea-hold), unless the page you left
 // was scrolled past its sea. With reduced motion there is no transition at all. Added 2026-11-24.
 // A "back:" move clicks the link, waits, then presses the browser's back: the move home has the way reversed.
+// A "light:N:/path" move taps light N on the sea like a finger (where the sea says its lights stand, data-lights):
+// the camera dives into it first (src/zoom.ts), then the page changes.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 const args = process.argv.slice(2);
@@ -34,6 +36,7 @@ const MOVES = [
   ["Back from Guide to Learn", "/learn", "back:.bottom-nav a[href='/guide']", "way-from-left", true, false],
   ["Back out of the Library to Guide", "/guide", "back:main a[href='/guide/library']", "way-forward", null, false],
   ["Learn to Guide on a wide screen, by the header's tab", "/learn", ".desktop-nav a[href='/guide']", "way-from-right", true, false, false, true],
+  ["Into Wave One from its light on the Waves sea", "/waves", "light:0:/waves/waves-fund", "motus-rise", null, true],
 ];
 
 // In WebKit each move gets a fresh browser: Playwright's WebKit crashed the eighth page of one long run (2026-11-24),
@@ -53,6 +56,9 @@ async function open(reduced, wide) {
     try { localStorage.setItem("waves-tour-offered", "1"); } catch { /* storage may be off */ }
     // Every animation seen from the click on: name and what it runs on (a view-transition part or an element).
     window.__seen = new Set();
+    // Whether the sea's words stepped aside for a dive into a light, at any moment from here on.
+    window.__dived = false;
+    new MutationObserver(() => { if (document.querySelector(".sea-diving")) window.__dived = true; }).observe(document, { subtree: true, attributes: true, attributeFilter: ["class"] });
     window.__watch = () => {
       const t0 = performance.now();
       const tick = () => {
@@ -71,6 +77,7 @@ async function open(reduced, wide) {
 
 for (const [name, start, chosen, arrive, light, sea, scrolled, wide] of MOVES) {
   const back = chosen.startsWith("back:"), link = back ? chosen.slice(5) : chosen;
+  const tapLight = link.startsWith("light:") ? { i: Number(link.split(":")[1]), to: link.split(":")[2] } : null;
   if (webkit) { await b.close(); b = await launch(); }
   const ctx = await open(false, wide);
   const p = await ctx.newPage();
@@ -85,11 +92,22 @@ for (const [name, start, chosen, arrive, light, sea, scrolled, wide] of MOVES) {
     await p.waitForTimeout(600);
     await p.evaluate(() => { const a = document.createElement("a"); a.id = "rig-link"; a.href = "/manifest"; a.textContent = "The Manifest"; a.style.cssText = "position:fixed;top:140px;left:24px;z-index:99;padding:12px;background:#000;color:#fff"; document.body.appendChild(a); });
   }
-  const target = await p.$(link);
-  if (!target) { check(false, `${name}: no link "${link}" on ${start}`); await ctx.close(); continue; }
-  if (!scrolled) { await target.scrollIntoViewIfNeeded().catch(() => {}); await p.evaluate(() => scrollTo(0, 0)).catch(() => {}); }
-  const via = await target.evaluate((a) => new URL(a.href).pathname), to = back ? start : via;
-  if (back) {
+  if (tapLight) {
+    // The sea writes where its lights stand once it is ready; tap that point as a finger would.
+    await p.waitForFunction(() => document.querySelector(".sea-hero-scene")?.dataset.lights, null, { timeout: 20000 }).catch(() => {});
+    const pt = await p.evaluate((i) => { const s = document.querySelector(".sea-hero-scene"); const r = s?.getBoundingClientRect(); const at = (s?.dataset.lights || "").split(" ")[i]; if (!r || !at || at === "-") return null; const [x, y] = at.split(",").map(Number); return { x: r.left + x, y: r.top + y }; }, tapLight.i);
+    if (!pt) { check(false, `${name}: the sea never said where its lights stand`); await ctx.close(); continue; }
+    await p.evaluate(() => window.__watch());
+    if (wide) await p.mouse.click(pt.x, pt.y); else await p.touchscreen.tap(pt.x, pt.y);
+    await p.waitForTimeout(3400);
+  }
+  const target = tapLight ? null : await p.$(link);
+  if (!target && !tapLight) { check(false, `${name}: no link "${link}" on ${start}`); await ctx.close(); continue; }
+  if (!scrolled && target) { await target.scrollIntoViewIfNeeded().catch(() => {}); await p.evaluate(() => scrollTo(0, 0)).catch(() => {}); }
+  const via = tapLight ? tapLight.to : await target.evaluate((a) => new URL(a.href).pathname), to = back ? start : via;
+  if (tapLight) {
+    // Tapped above; the move has already been watched.
+  } else if (back) {
     // Out by the link, then home by the browser's own back, watched from the press.
     await target.click({ noWaitAfter: true });
     await p.waitForTimeout(2600);
@@ -100,6 +118,7 @@ for (const [name, start, chosen, arrive, light, sea, scrolled, wide] of MOVES) {
   }
   if (shots) { let t = 0; for (const ms of [90, 200, 320, 460, 700]) { await p.waitForTimeout(ms - t); t = ms; await p.screenshot({ path: join(shots, `${name.replace(/\W+/g, "-").toLowerCase()}-${ms}.png`) }); } }
   await p.waitForTimeout(2600);
+  if (tapLight) check(await p.evaluate(() => window.__dived), `${name}: the camera dives into the light first (the words step aside)`);
   const r = await p.evaluate(() => {
     const h1 = [...document.querySelectorAll("main h1")].find((e) => e.offsetHeight);
     const cs = h1 ? getComputedStyle(h1) : null;

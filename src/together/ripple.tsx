@@ -29,7 +29,11 @@ export type RippleFrame = {
   roll?: [number, number];  // the sea only: a wave that rises from the horizon and comes to you; its period in seconds, its height 0..1
 };
 export type RippleModel = (t: number, w: number, h: number) => RippleFrame;
-export type RippleHandle = { redraw: () => void };
+export type RippleHandle = {
+  redraw: () => void;
+  /** The sea only: sends the camera down into one of the lights (its index in the frame), then holds there. */
+  flyTo?: (index: number, ms?: number) => Promise<void>;
+};
 
 const MAX = 12;
 const VS = `#version 300 es
